@@ -1,5 +1,5 @@
 import type { Store } from "pinia"
-import type { AnyObject } from "~/types"
+import type { AnyObject } from "../../../types"
 
 
 /**

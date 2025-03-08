@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     lib: {
-      entry: resolve(__dirname, 'lib/main.js'),
+      entry: resolve(__dirname, 'src/lib/main.js'),
       name: 'Epps',
       fileName: 'epps',
     },

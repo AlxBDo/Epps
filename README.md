@@ -1,4 +1,4 @@
-# ![epps](./src/assets/pinia-extends-store-75.png) Plugin `epps`
+# ![Epps!](./src/assets/pinia-extends-store-75.png) Plugin `Epps`
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@
 
 ## Introduction
 
-The `Epps` plugin is designed to extend the functionality of Pinia stores by adding persistence and extension capabilities. It allows you to create more robust and flexible stores while simplifying state and action management.
+`Epps!` plugin is designed to extend the functionality of Pinia stores by adding persistence and extension capabilities. It allows you to create more robust and flexible stores while simplifying state and action management.
 
 ## Advantages
 

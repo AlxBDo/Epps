@@ -14,10 +14,7 @@ export const useListStore = (id: string | number) => defineStore(`list-${id}`, {
             [useItemStore(`list-item-${id}`), useCollectionStore(`list-${id}-items`)]
         ),
         guest: [],
-        usersRole: [],
         owner: undefined,
-        selectedItems: [],
-        type: undefined,
-        unselectedItems: []
+        type: undefined
     }),
 })
