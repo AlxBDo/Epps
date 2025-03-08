@@ -14,14 +14,14 @@
 
 ## Introduction
 
-The `epps` plugin is designed to extend the functionality of Pinia stores by adding persistence and extension capabilities. It allows you to create more robust and flexible stores while simplifying state and action management.
+The `Epps` plugin is designed to extend the functionality of Pinia stores by adding persistence and extension capabilities. It allows you to create more robust and flexible stores while simplifying state and action management.
 
 ## Advantages
 
 - Extensibility: Facilitates adding new features to existing stores.
 - Data Persistence: Retains store state between user sessions.
 
-By using the epps plugin, you can create more powerful and flexible Pinia stores while simplifying state and action management in your Vue.js application.
+By using the Epps plugin, you can create more powerful and flexible Pinia stores while simplifying state and action management in your Vue.js application.
 
 ## Features
 
