@@ -1,0 +1,29 @@
+{
+  "name": "epps",
+  "files": ["dist"],
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/epps.umd.cjs",
+  "module": "./dist/epps.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/epps.js",
+      "require": "./dist/epps.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "pinia": "^3.0.1",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.1.1"
+  }
+}
