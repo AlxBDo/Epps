@@ -7,17 +7,17 @@ import { rewriteResetStore } from "./pinia/augmentPinia/augmentStore"
 import type { AllowedKeyPath } from "../types/storage"
 import type { PiniaPluginContext } from "pinia"
 import type { PersistedStore } from "../types/store"
-import { log } from "../utils/log"
+import { log, logError } from "../utils/log"
 
 
-interface EppsConstructorProps {
+export interface EppsConstructorProps {
     dbName: string
     dbKeyPath?: AllowedKeyPath
     cryptKey?: string
     cryptIv?: string
 }
 
-export default class Epps {
+export class Epps {
     private _db: Persister
     private _crypt?: Crypt
 
@@ -35,11 +35,15 @@ export default class Epps {
     }
 
     plugin(context: PiniaPluginContext) {
-        const { store } = context
+        try {
+            const { store } = context
 
-        rewriteResetStore(context, Object.assign({}, store.$state))
-        extendsStore(context)
-        persistStorePlugin(context, this)
+            rewriteResetStore(context, Object.assign({}, store.$state))
+            extendsStore(context)
+            persistStorePlugin(context, this)
+        } catch (e) {
+            logError('plugin()', [e, context])
+        }
     }
 }
 

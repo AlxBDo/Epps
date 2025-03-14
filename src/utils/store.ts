@@ -1,6 +1,7 @@
+import { defineStore } from "pinia"
 import type { Item } from "../models/item"
 import type { AnyObject } from "../types"
-import type { PersistedState } from "../types/store"
+import type { DefineEppsStore, PersistedState } from "../types/store"
 
 
 export const itemState: Item = {
@@ -21,6 +22,10 @@ export const persistedState = (
     persistedPropertiesToEncrypt
 })
 
+
+export function defineEppsStore<Sto, Sta>(id: string, storeDefinition: () => AnyObject): DefineEppsStore<Sto, Sta> {
+    return defineStore(id, storeDefinition)
+}
 
 export function getStoreName(store: AnyObject): string {
     return store.hasOwnProperty('getStoreName') ? store.getStoreName() : store.$id

@@ -5,6 +5,7 @@ import { augmentStore } from "../persistStore/augmentStore";
 import { isOptionApi } from "../augmentPinia/augmentStore";
 import type { PersistedState, PersistedStore, ExtendedStore } from "../../../types/store";
 import { computed } from "vue";
+import { log } from "../../../utils/log";
 
 
 const logStyleOptions = { bgColor: 'green', icon: '☁️' }
@@ -104,22 +105,20 @@ function extendsStateToComputed(storeToExtend: AnyObject, extendedStore: AnyObje
  * @param {PiniaPluginContext} context 
  */
 export function extendsStore({ store }: PiniaPluginContext): void {
-    if (store.$state.hasOwnProperty('parentsStores')) {
-        const storeToExtend: Store[] = store.$state.parentsStores
+    if (store.$state && store.$state.hasOwnProperty('parentsStores')) {
+        const storeToExtend: Store[] = store.$state?.parentsStores?.value ?? store.$state?.parentsStores
 
         if (!storeToExtend || !storeToExtend.length) { return }
 
         storeToExtend.forEach((ste: Store) => {
-            if (store.$state.hasOwnProperty('persist')) {
-                store.$state.parentsStores.forEach((parentStore: Store) => {
-                    if (!parentStore.$state.hasOwnProperty('persist')) {
-                        persistChildStore({ store: parentStore } as PiniaPluginContext, store.$state)
-                    }
-                })
-            }
+            if (ste?.$state) {
+                if (store.$state.hasOwnProperty('persist') && ste.$state.hasOwnProperty('persist')) {
+                    persistChildStore({ store: ste } as PiniaPluginContext, store.$state)
+                }
 
-            duplicateStore(ste, store)
-            extendsStateToComputed(ste, store)
+                duplicateStore(ste, store)
+                extendsStateToComputed(ste, store)
+            }
         })
 
         store.$state.isExtended = true

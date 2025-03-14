@@ -8,12 +8,21 @@ export type AugmentStore<T> = Store & T
 
 export type AugmentOptionApiStore<TStore, TState> = Store & TStore & TState & OptionApiStore<TState> & PiniaCustomProperties & PiniaCustomStateProperties & _StoreWithGetters<TState>
 
+type CustomStore = Store & PiniaCustomProperties
+
 type OptionApiStore<TState> = {
     $patch: (item: Partial<TState>) => void
     $reset: () => void
     $state: TState
     $subscribe: (callback: SubscriptionCallback<TState>) => void
 }
+
+type PartialStore<TStore, TState> = Partial<TStore> & Partial<TState>
+
+
+/**
+ * - -- | Collection Store | -- -
+ */
 
 export interface CollectionState<T> {
     items: T[];
@@ -49,10 +58,27 @@ export interface PersistedStore {
     watch: () => void
 }
 
+type PartialPersistedStore<TStore, TState> = Partial<TStore>
+    & Partial<TState>
+    & Partial<PersistedState>
+    & Partial<PersistedStore>
+
 
 /**
  * - -- | Extends Store | -- -
  */
+
+export type DefineEppsStore<TStore, TState> = (args?: any) => PartialPersistedStore<TStore, TState> & CustomStore
+
+export type DefineEppsStoreOptionApi<TStore, TState> = (args?: any) => PartialPersistedStore<TStore, TState>
+    & CustomStore
+    & Partial<OptionApiStore<TState>>
+
+export type DefineExtendedStore<TStore, TState> = (args?: any) => PartialStore<TStore, TState> & CustomStore
+
+export type DefineExtendedStoreOptionApi<TStore, TState> = (args?: any) => PartialStore<TStore, TState>
+    & CustomStore
+    & OptionApiStore<TState>
 
 export interface ExtendedState extends PersistOptions {
     actionsToExtends?: string[] | Ref<string[] | undefined>
@@ -63,8 +89,6 @@ export interface ExtendedState extends PersistOptions {
 
 export type ExtendState<T, I> = T & I & ExtendedState
 
-export type DefineExtendedStore<TStore, TState> = (args?: any) => Store & TStore & TState & PiniaCustomProperties
+export type ExtendedStore<TStore, TState> = TStore & TState & CustomStore
 
-export type DefineExtendedStoreOptionApi<TStore, TState> = (args?: any) => Store & TStore & TState & PiniaCustomProperties & OptionApiStore<TState>
-
-export type ExtendedStore<TStore, TState> = Store & TStore & TState & PiniaCustomProperties
+export type EppsStore<TStore, TState> = ExtendedStore<TStore, TState> & PersistedState & PersistedStore

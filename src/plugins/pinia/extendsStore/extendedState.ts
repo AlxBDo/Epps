@@ -4,7 +4,7 @@ import type { Store } from "pinia";
 import { ref, Ref } from "vue";
 
 
-interface ExtendedStateOptions {
+export interface ExtendedStateOptions {
     actionsToExtends?: string[]
     isExtended?: boolean
     isOptionApi?: boolean

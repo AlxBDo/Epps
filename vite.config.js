@@ -14,10 +14,11 @@ export default defineConfig({
       fileName: 'epps',
     },
     rollupOptions: {
-      external: ['vue', 'crypto-js'],
+      external: ['vue', 'pinia'],
       output: {
         globals: {
           vue: 'Vue',
+          pinia: 'Pinia'
         },
       },
     },

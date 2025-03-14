@@ -14,7 +14,7 @@ export function log(message: string, args?: any | any[], styleOptions?: IStyleOp
     const logStyle = styleOptions ? style(styleOptions.bgColor, styleOptions.color) : style('#ffec73', 'green')
     const icon = styleOptions?.icon ?? '🍍⚡'
 
-    message = ` ${icon} ${pluginName} plugin - ${message} `
+    message = ` [${icon} ${pluginName} plugin] - ${message} `
 
     console.log(
         '%c%s',
@@ -25,5 +25,5 @@ export function log(message: string, args?: any | any[], styleOptions?: IStyleOp
 }
 
 export function logError(message: string, args?: any | any[]) {
-    log(message, args, { bgColor: 'ffa653', color: 'white', icon: '🍍⚠️' })
+    log(message, args, { bgColor: '#ffa653', color: 'white', icon: '🍍⚠️' })
 }

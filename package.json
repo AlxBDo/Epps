@@ -3,13 +3,14 @@
   "files": [
     "dist"
   ],
-  "version": "0.0.0",
+  "version": "0.0.94",
   "type": "module",
   "main": "./dist/epps.umd.cjs",
   "module": "./dist/epps.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/epps.js",
       "require": "./dist/epps.umd.cjs"
     }

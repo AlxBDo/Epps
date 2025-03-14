@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { CollectionState, CollectionStoreMethods, PersistedStore, ExtendedStore } from '../../../types/store'
+import type { CollectionState, CollectionStoreMethods, PersistedStore, ExtendedStore, EppsStore } from '../../../types/store'
 import type { List } from '../../../models/liste'
 
 import { ref, computed } from 'vue'
@@ -34,7 +34,7 @@ function resetStore() {
 }
 
 
-const listsStore = useListsStore() as ExtendedStore<CollectionStoreMethods & PersistedStore, CollectionState<List>>
+const listsStore = useListsStore() as EppsStore<CollectionStoreMethods, CollectionState<List>>
 
 listsStore.remember().then(() => {
     if (!listsStore.items.length) {
