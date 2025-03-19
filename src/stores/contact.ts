@@ -5,44 +5,64 @@ import type { Item } from "../models/item"
 import { defineExtendedStoreId } from "./defineExtendedStoreId"
 import { getParentStorePropertyValue } from "../plugins/pinia/extendsStore/parentStore"
 import { extendedState } from "../plugins/pinia/extendsStore/extendedState";
-import { defineStore } from "pinia";
+import { defineEppsStore } from "../utils/store";
+import { computed, ref } from "vue";
 
 
-export interface IContactStore {
+export interface ContactStore {
     isPassword: (password: string) => boolean
     modifyPassword: (oldPassword: string, newPassword: string) => void
-    setData: (data: TContactState) => void
+    setData: (data: ContactState) => void
     contact: Contact
 }
 
-export type TContactState = ExtendState<Item, Contact>
+export type ContactState = ExtendState<Item, Contact>
 
-export const useContactStore = (id?: string) => defineStore(id ?? 'contact', {
-    state: (): TContactState => ({
-        ...extendedState(
+export const useContactStore = (id?: string) => defineEppsStore<ContactStore, ContactState>(
+    id ?? 'contact',
+    () => {
+        const email = ref<string>()
+        const firstname = ref<string>()
+        const lastname = ref<string>()
+
+        const {
+            excludedKeys,
+            actionsToExtends,
+            parentsStores,
+            persist,
+            persistedPropertiesToEncrypt
+        } = extendedState(
             [useItemStore(defineExtendedStoreId(id ?? 'contact', 'item'))],
             { actionsToExtends: ['setData'] }
-        ),
-        firstname: undefined,
-        email: undefined,
-        lastname: undefined
-    }),
+        )
 
-    getters: {
-        contact: (state) => ({
-            '@id': getParentStorePropertyValue('@id', 0, state.parentsStores),
-            id: getParentStorePropertyValue('id', 0, state.parentsStores),
-            email: state.email,
-            firstname: state.firstname,
-            lastname: state?.lastname
-        })
-    },
 
-    actions: {
-        setData(data: TContactState) {
-            if (data.email) { this.email = data.email; }
-            if (data.firstname) { this.firstname = data.firstname; }
-            if (data.lastname) { this.firstname = data.lastname; }
+        const contact = computed(() => ({
+            '@id': parentsStores && getParentStorePropertyValue('@id', 0, parentsStores()),
+            id: parentsStores && getParentStorePropertyValue('id', 0, parentsStores()),
+            email: email.value,
+            firstname: firstname.value,
+            lastname: lastname.value
+        }))
+
+
+        function setData(data: ContactState) {
+            if (data.email) { email.value = data.email; }
+            if (data.firstname) { firstname.value = data.firstname; }
+            if (data.lastname) { firstname.value = data.lastname; }
+        }
+
+        return {
+            actionsToExtends,
+            contact,
+            email,
+            firstname,
+            excludedKeys,
+            lastname,
+            parentsStores,
+            persist,
+            persistedPropertiesToEncrypt,
+            setData
         }
     }
-})()
+)()

@@ -1,5 +1,7 @@
 import type { Store } from "pinia"
-import type { AnyObject } from "../../../types"
+import type { AnyObject, DefineEppsStore, EppsStore, ExtendedStore } from "../../../types"
+import { EppsStoreMethods } from "../../../types/store"
+import { log } from "../../../utils/log"
 
 
 /**
@@ -8,7 +10,7 @@ import type { AnyObject } from "../../../types"
  * @param {Store[]} parentsStores 
  * @returns Store | undefined
  */
-export function getParentStore(parentStoreIdOrIndex: string | number, parentsStores: Store[]): Store | undefined {
+export function getParentStore(parentStoreIdOrIndex: string | number, parentsStores: Array<Store | EppsStoreMethods>): Store | undefined {
     let parentStore: Store | undefined
     if (typeof parentStoreIdOrIndex === 'string') {
         parentStore = getParentStoreById(parentStoreIdOrIndex, parentsStores)
@@ -49,7 +51,7 @@ export function getParentStoreByIndex(parentStoreIndex: number, parentsStores: S
 export function getParentStorePropertyValue(
     propertyName: string,
     parentStore: AnyObject | string | number | undefined,
-    parentsStores?: Store[]
+    parentsStores?: Store[] | EppsStoreMethods
 ): any {
     if (!parentsStores) { return }
 

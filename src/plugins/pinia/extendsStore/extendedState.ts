@@ -1,7 +1,7 @@
-import type { ExtendedState } from "../../../types/store";
+import type { EppsStore, ExtendedState } from "../../../types/store";
 import type { Store } from "pinia";
 
-import { ref, Ref } from "vue";
+import { ref, type Ref } from "vue";
 
 
 export interface ExtendedStateOptions {
@@ -22,7 +22,7 @@ export interface PersistOptions {
 
 const defaultExtendedStateOptions: ExtendedStateOptions = {
     actionsToExtends: [],
-    isOptionApi: true
+    isOptionApi: false
 }
 
 const defaultPersistEcludedKey = ['actionsToExtends', 'isExtended', 'isOptionApi', 'parentsStores']
@@ -44,8 +44,8 @@ const defaultPersistOptionsSetup = {
 }
 
 
-export const extendedState = (
-    parentsStores: Store[],
+export const extendedState = <TStore, TState>(
+    parentsStoresProps: Store[] | EppsStore<TStore, TState>,
     options?: ExtendedStateOptions
 
 ): ExtendedState => {
@@ -55,6 +55,8 @@ export const extendedState = (
         isOptionApi,
         persist
     }: ExtendedStateOptions = { ...defaultExtendedStateOptions, ...options }
+
+    const parentsStores = () => parentsStoresProps
 
     if (persist) {
         if (isOptionApi) {
@@ -85,6 +87,6 @@ export const extendedState = (
         actionsToExtends: ref<string[] | undefined>(actionsToExtends),
         isExtended: ref<boolean | undefined>(isExtended),
         isOptionApi: ref<boolean | undefined>(isOptionApi),
-        parentsStores: ref<Store[]>(parentsStores)
+        parentsStores
     })
 }

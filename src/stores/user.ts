@@ -7,50 +7,58 @@ import { useContactStore } from "./contact"
 import type { Contact } from "../models/contact"
 import type { ExtendState } from "../types/store"
 import type { User } from "../models/user"
+import { defineEppsStore } from "../utils/store"
+import { computed, ref } from "vue"
+import { List } from "../models/liste"
 
 
-export interface IUserStore {
+export interface UserStore {
     isPassword: (password: string) => boolean
     modifyPassword: (oldPassword: string, newPassword: string) => void
-    setData: (data: TUserState) => void
+    setData: (data: UserState) => void
     user: User
 }
 
-export type TUserState = ExtendState<Contact, User>
+export type UserState = ExtendState<Contact, User>
 
-export const useUserStore = (id?: string) => defineStore(id ?? 'user', {
-    state: (): TUserState => ({
-        ...extendedState(
+export const useUserStore = (id?: string) => defineEppsStore<UserStore, UserState>(
+    id ?? 'contact',
+    () => {
+        const lists = ref<List[]>()
+        const password = ref<string>()
+
+        const {
+            excludedKeys,
+            actionsToExtends,
+            parentsStores,
+            persist,
+            persistedPropertiesToEncrypt
+        } = extendedState(
             [useContactStore(defineExtendedStoreId(id ?? 'user', 'contact'))],
             { actionsToExtends: ['setData'] }
-        ),
-        lists: undefined,
-        password: undefined
-    }),
+        )
 
-    getters: {
-        user: (state) => ({
-            ...getParentStorePropertyValue('contact', 0, state.parentsStores),
-            password: state.password
-        })
-    },
+        const user = computed(() => ({
+            ...(parentsStores ? getParentStorePropertyValue('contact', 0, parentsStores()) : {}),
+            password: password.value
+        }))
 
-    actions: {
-        isPassword(password: string) {
-            return this.password === password
-        },
 
-        modifyPassword(oldPassword: string, newPassword: string) {
-            if (this.isPassword(oldPassword)) {
-                this.password = newPassword
-            }
-        },
+        function setData(data: UserState) {
+            if (data.lists) { lists.value = data.lists; }
+            if (data.password) { password.value = data.password; }
+        }
 
-        setData(data: TUserState) {
-            if (data.email) { this.email = data.email; }
-            if (data.firstname) { this.firstname = data.firstname; }
-            if (data.lists) { this.lists = data.lists; }
-            if (data.password) { this.password = data.password; }
+        return {
+            actionsToExtends,
+            excludedKeys,
+            lists,
+            parentsStores,
+            password,
+            persist,
+            persistedPropertiesToEncrypt,
+            setData,
+            user
         }
     }
-})()
+)()

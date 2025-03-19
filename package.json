@@ -3,7 +3,7 @@
   "files": [
     "dist"
   ],
-  "version": "0.0.94",
+  "version": "0.0.946",
   "type": "module",
   "main": "./dist/epps.umd.cjs",
   "module": "./dist/epps.js",
@@ -17,7 +17,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc",
+    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
     "preview": "vite preview"
   },
   "dependencies": {

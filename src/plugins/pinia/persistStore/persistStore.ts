@@ -5,17 +5,17 @@ import { cryptState } from "./cryptState"
 import Persister from "../../../services/Persister"
 import { toRaw } from "vue"
 import { StorageItemObject } from "../../../types/storage"
-import { Epps } from "../../epps"
 import { pluginName } from "../../../utils/constantes"
 import { getExcludedKeys } from "./getExludedKeys"
 import { augmentStore } from "./augmentStore"
 import { log, logError } from "../../../utils/log"
+import Crypt from "../../../services/Crypt"
 
 
 const logStyleOptions = { bgColor: 'black', icon: '☁️' }
 
 
-let augmentPinia: Epps
+let augmentPinia: { db: Persister, crypt?: Crypt }
 
 let persister: undefined | Persister
 
@@ -83,7 +83,7 @@ export async function persist(state: StateTree, store: AnyObject) {
     }
 }
 
-export function persistStorePlugin(context: PiniaPluginContext, pluginOptions: Epps) {
+export function persistStorePlugin(context: PiniaPluginContext, pluginOptions: { db: Persister, crypt?: Crypt }) {
     if (!pluginOptions) {
         new Error(`${pluginName} - PluginOptions is required`)
     }

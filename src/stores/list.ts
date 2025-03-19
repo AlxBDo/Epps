@@ -24,8 +24,9 @@ export const useListStore = (id: string | number) => defineStore(`list-${id}`, {
 })
  */
 
-export const useListStore = (id: string | number) => defineEppsStore<CollectionStoreMethods, ListStoreState>(`list-${id}`, () => {
-    return {
+export const useListStore = (id: string | number) => defineEppsStore<CollectionStoreMethods, ListStoreState>(
+    `list-${id}`,
+    () => ({
         ...extendedState(
             [useItemStore(`list-item-${id}`), useCollectionStore(`list-${id}-items`)],
             {
@@ -35,5 +36,5 @@ export const useListStore = (id: string | number) => defineEppsStore<CollectionS
         ),
         guest: ref<User[]>([]),
         owner: ref<User>()
-    }
-})()
+    })
+)()

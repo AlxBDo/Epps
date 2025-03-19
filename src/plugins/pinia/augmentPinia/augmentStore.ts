@@ -13,12 +13,14 @@ export function rewriteResetStore({ store }: PiniaPluginContext, initState: Stat
             store.removePersistedState()
         }
 
-        store.$patch(Object.assign({}, initState))
+        const parentsStores = typeof store.parentsStores === 'function' && store.parentsStores()
 
-        if (Array.isArray(store.$state?.parentsStores) && store.$state?.parentsStores.length) {
-            store.$state?.parentsStores.forEach(
+        if (Array.isArray(parentsStores) && parentsStores.length) {
+            parentsStores.forEach(
                 (parentStore: Store) => parentStore.$reset
             )
         }
+
+        store.$patch(Object.assign({}, initState))
     }
 }

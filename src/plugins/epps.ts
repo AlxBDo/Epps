@@ -5,7 +5,7 @@ import { persistStorePlugin } from "./pinia/persistStore/persistStore"
 import { rewriteResetStore } from "./pinia/augmentPinia/augmentStore"
 
 import type { AllowedKeyPath } from "../types/storage"
-import type { PiniaPluginContext } from "pinia"
+import type { PiniaPlugin, PiniaPluginContext } from "pinia"
 import type { PersistedStore } from "../types/store"
 import { log, logError } from "../utils/log"
 
@@ -47,14 +47,26 @@ export class Epps {
     }
 }
 
-export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string) {
+export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin {
     if (!dbName) {
         new Error('Database name is required')
     }
 
     const augmentPinia = new Epps({ dbName, cryptIv, cryptKey, dbKeyPath: 'storeName' })
 
-    return augmentPinia.plugin.bind(augmentPinia)
+    //return augmentPinia.plugin.bind(augmentPinia)
+
+    return (context: PiniaPluginContext) => {
+        try {
+            const { store } = context
+
+            rewriteResetStore(context, Object.assign({}, store.$state))
+            extendsStore(context)
+            persistStorePlugin(context, { db: augmentPinia.db, crypt: augmentPinia.crypt })
+        } catch (e) {
+            logError('plugin()', [e, context])
+        }
+    }
 }
 
 declare module 'pinia' {

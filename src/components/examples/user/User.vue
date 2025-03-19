@@ -2,17 +2,17 @@
 import { useConnectedUserStore } from '../../../stores/connectedUser'
 import { useListStore, type ListStoreState } from '../../../stores/list';
 
-import type { IUserStore, TUserState } from '../../../stores/user'
+import type { UserStore, UserState } from '../../../stores/user'
 import type { CollectionStoreMethods, EppsStore, ExtendedStore } from '../../../types/store';
 import { log } from '../../../utils/log';
 
-const connectedUser = useConnectedUserStore() as ExtendedStore<IUserStore, TUserState>
+const connectedUser = useConnectedUserStore() as ExtendedStore<UserStore, UserState>
 
 const testEpps = useListStore('test2list') as EppsStore<CollectionStoreMethods, ListStoreState>
 
 testEpps.setItems(['un truc'])
 
-log('testEpps', testEpps.items)
+log('testEpps', [testEpps.getItems(), testEpps, connectedUser])
 
 connectedUser.setData({
     email: 'connecteduser@mail.com',

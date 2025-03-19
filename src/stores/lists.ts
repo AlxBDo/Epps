@@ -1,19 +1,20 @@
-import { defineStore } from "pinia"
+import { ref } from "vue"
+import { defineEppsStore } from "../utils/store"
 import { extendedState } from "../plugins/pinia/extendsStore/extendedState"
 import { useCollectionStore } from "./collection"
 
+import type { CollectionState, CollectionStoreMethods } from "../types/store"
 import type { List } from "../models/liste"
-import type { CollectionState, CollectionStoreMethods, ExtendedState, DefineExtendedStore, DefineEppsStore } from "../types/store"
+
 
 const defaultStoreId: string = 'lists'
 
-export const useListsStore: DefineEppsStore<CollectionStoreMethods, CollectionState<List>> = (
-    id?: string
-) => defineStore(id ?? defaultStoreId, {
-    state: (): ExtendedState => ({
+export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(
+    id ?? defaultStoreId,
+    () => ({
         ...extendedState(
             [useCollectionStore('listsCollection')],
-            { persist: { persist: true } }
+            { isOptionApi: false, persist: { persist: ref(true) } }
         )
     })
-})()
+)()

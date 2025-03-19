@@ -1,26 +1,21 @@
-import { extendedState } from "../plugins/pinia/extendsStore/extendedState";
-import { defineExtendedStoreId } from "./defineExtendedStoreId";
-import { useUserStore, type IUserStore, type TUserState } from "./user";
-import type { PersistedStore, DefineExtendedStore, DefineEppsStore } from "../types/store";
-import { defineStore } from "pinia";
 import { ref } from "vue";
+import { defineEppsStore } from "../utils/store";
+import { extendedState } from "../plugins/pinia/extendsStore/extendedState";
+import { useUserStore, type UserStore, type UserState } from "./user";
 
 
-export const useConnectedUserStore: DefineEppsStore<IUserStore, TUserState> = defineStore('connectedUserTest', () => {
-    const { excludedKeys, isExtended, parentsStores, persist, persistedPropertiesToEncrypt, watchMutation } = extendedState(
-        [useUserStore(defineExtendedStoreId('connected', 'user'))],
-        {
-            isOptionApi: false,
-            persist: { persistedPropertiesToEncrypt: ref(['email', 'password', 'username']), watchMutation: ref(true) }
-        }
-    )
+export const useConnectedUserStore = defineEppsStore<UserStore, UserState>(
+    'connectedUser',
+    () => ({
+        ...extendedState(
+            [useUserStore('connected-user')],
+            {
+                persist: {
+                    persistedPropertiesToEncrypt: ref(['email', 'password', 'username']),
+                    watchMutation: ref(true)
+                }
+            }
+        )
+    })
+)
 
-    return {
-        excludedKeys,
-        isExtended,
-        parentsStores,
-        persist,
-        persistedPropertiesToEncrypt,
-        watchMutation
-    }
-})
