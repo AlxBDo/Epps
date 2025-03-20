@@ -45,7 +45,7 @@ const defaultPersistOptionsSetup = {
 
 
 export const extendedState = <TStore, TState>(
-    parentsStoresProps: Store[] | EppsStore<TStore, TState>,
+    parentsStoresProps: Store[] | EppsStore<TStore, TState>[],
     options?: ExtendedStateOptions
 
 ): ExtendedState => {

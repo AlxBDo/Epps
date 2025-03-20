@@ -10,7 +10,10 @@ import { log } from "../../../utils/log"
  * @param {Store[]} parentsStores 
  * @returns Store | undefined
  */
-export function getParentStore(parentStoreIdOrIndex: string | number, parentsStores: Array<Store | EppsStoreMethods>): Store | undefined {
+export function getParentStore(
+    parentStoreIdOrIndex: string | number,
+    parentsStores: Array<Store | EppsStore<AnyObject, AnyObject>>
+): Store | undefined {
     let parentStore: Store | undefined
     if (typeof parentStoreIdOrIndex === 'string') {
         parentStore = getParentStoreById(parentStoreIdOrIndex, parentsStores)
@@ -51,12 +54,12 @@ export function getParentStoreByIndex(parentStoreIndex: number, parentsStores: S
 export function getParentStorePropertyValue(
     propertyName: string,
     parentStore: AnyObject | string | number | undefined,
-    parentsStores?: Store[] | EppsStoreMethods
+    parentsStores?: Store[] | EppsStore<AnyObject, AnyObject>[]
 ): any {
     if (!parentsStores) { return }
 
     if (typeof parentStore === 'string' || typeof parentStore === 'number') {
-        parentStore = getParentStore(parentStore, parentsStores)
+        parentStore = parentsStores && getParentStore(parentStore, parentsStores)
     }
 
     if (typeof parentStore === 'object') {

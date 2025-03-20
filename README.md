@@ -18,7 +18,7 @@
 
 ## Introduction
 
-`Epps!` plugin extends Pinia stores with persistence and encryption capabilities, making them more robust and secure. It simplifies state and action management while ensuring sensitive data is protected.
+Epps! plugin extends Pinia stores with persistence and encryption capabilities, making them more robust and secure. It simplifies state and action management while ensuring sensitive data is protected.
 
 ## Advantages
 
@@ -56,6 +56,8 @@ yarn add epps
 
 To use the plugin, simply import it and add it to your Pinia instance:
 
+#### Vue
+
 ```javascript
 import { createPinia } from 'pinia'
 import { createPlugin } from 'epps'
@@ -69,6 +71,30 @@ const epps = createPlugin(
 )
 
 pinia.use(epps)
+```
+
+#### Nuxt
+
+```javascript
+import type { Pinia, PiniaPlugin, PiniaPluginContext } from "pinia"
+import { createPlugin } from 'epps'
+
+function eppsPlugin(pinia: PiniaPluginContext) {
+    if (window && pinia) {
+        const plugin = createPlugin('localStorage', 'jdskdslqjqldjsqidosqjdsoqss', 'duiosudosudsoqdsodqidq')
+
+        plugin(pinia)
+    }
+}
+
+
+export default defineNuxtPlugin({
+    name: 'eppsPlugin',
+    async setup() {
+        const { $pinia }: { $pinia: Pinia } = useNuxtApp()
+        $pinia.use(eppsPlugin)
+    }
+})
 ```
 
 #### Example Usage with useConnectedUserStore

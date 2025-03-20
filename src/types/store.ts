@@ -84,7 +84,7 @@ export interface ExtendedState extends PersistOptions {
     actionsToExtends?: string[] | Ref<string[] | undefined>
     isExtended?: boolean | Ref<boolean | undefined>
     isOptionApi?: boolean | Ref<boolean | undefined>
-    parentsStores?: () => Store[] | EppsStore<AnyObject, AnyObject>
+    parentsStores?: () => Store[] | EppsStore<AnyObject, AnyObject>[]
 }
 
 export type ExtendState<T, I> = T & I & ExtendedState

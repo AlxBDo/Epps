@@ -49,5 +49,5 @@ declare module 'epps' {
         parentsStores?: Store[]
     ): any;
 
-    export function useCollectionStore(): Store & CollectionState & CollectionStoreMethods;
+    export function useCollectionStore(id: string): Store & CollectionState & CollectionStoreMethods;
 }

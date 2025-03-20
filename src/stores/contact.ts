@@ -7,6 +7,7 @@ import { getParentStorePropertyValue } from "../plugins/pinia/extendsStore/paren
 import { extendedState } from "../plugins/pinia/extendsStore/extendedState";
 import { defineEppsStore } from "../utils/store";
 import { computed, ref } from "vue";
+import { Store } from "pinia";
 
 
 export interface ContactStore {
@@ -38,7 +39,7 @@ export const useContactStore = (id?: string) => defineEppsStore<ContactStore, Co
 
 
         const contact = computed(() => ({
-            '@id': parentsStores && getParentStorePropertyValue('@id', 0, parentsStores()),
+            '@id': parentsStores && getParentStorePropertyValue('@id', 0, parentsStores() ?? ([] as Store[])),
             id: parentsStores && getParentStorePropertyValue('id', 0, parentsStores()),
             email: email.value,
             firstname: firstname.value,
