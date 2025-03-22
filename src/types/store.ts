@@ -19,6 +19,14 @@ type OptionApiStore<TState> = {
 
 type PartialStore<TStore, TState> = Partial<TStore> & Partial<TState>
 
+type StdStatePropertyValue = AnyObject | boolean | null | number | string | undefined
+
+export type StatePropertyValue = StdStatePropertyValue
+    | Ref<StdStatePropertyValue>
+    | StdStatePropertyValue[]
+    | Ref<StdStatePropertyValue[]>
+    | Ref<StdStatePropertyValue>[]
+
 
 /**
  * - -- | Collection Store | -- -

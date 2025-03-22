@@ -35,6 +35,8 @@ export class Epps {
     }
 
     plugin(context: PiniaPluginContext) {
+        if (!window || !context) return
+
         try {
             const { store } = context
 
@@ -54,19 +56,7 @@ export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string
 
     const augmentPinia = new Epps({ dbName, cryptIv, cryptKey, dbKeyPath: 'storeName' })
 
-    //return augmentPinia.plugin.bind(augmentPinia)
-
-    return (context: PiniaPluginContext) => {
-        try {
-            const { store } = context
-
-            rewriteResetStore(context, Object.assign({}, store.$state))
-            extendsStore(context)
-            persistStorePlugin(context, { db: augmentPinia.db, crypt: augmentPinia.crypt })
-        } catch (e) {
-            logError('plugin()', [e, context])
-        }
-    }
+    return augmentPinia.plugin.bind(augmentPinia)
 }
 
 declare module 'pinia' {

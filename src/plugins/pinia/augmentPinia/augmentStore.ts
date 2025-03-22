@@ -17,7 +17,7 @@ export function rewriteResetStore({ store }: PiniaPluginContext, initState: Stat
 
         if (Array.isArray(parentsStores) && parentsStores.length) {
             parentsStores.forEach(
-                (parentStore: Store) => parentStore.$reset
+                (parentStore: Store) => parentStore.$reset()
             )
         }
 

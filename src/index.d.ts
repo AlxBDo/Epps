@@ -51,3 +51,58 @@ declare module 'epps' {
 
     export function useCollectionStore(id: string): Store & CollectionState & CollectionStoreMethods;
 }
+
+/**
+ import { PiniaPlugin, PiniaPluginContext, Store } from 'pinia';
+import { EppsConstructorProps } from '../plugins/epps';
+import { ExtendedStateOptions } from '../plugins/pinia/extendsStore/extendedState';
+import { CollectionState, CollectionStoreMethods, DefineEppsStore, ExtendedState } from './store';
+
+
+export interface AnyObject {
+    [key: number | string | symbol]: any;
+}
+export interface SearchCollectionCriteria {
+    [key: number | string | symbol]: boolean | number | string;
+}
+
+export type {
+    AugmentOptionApiStore,
+    AugmentStore,
+    CollectionState,
+    CollectionStoreMethods,
+    DefineExtendedStore,
+    DefineExtendedStoreOptionApi,
+    EppsStore,
+    ExtendState,
+    ExtendedStore,
+    PersistedState,
+    PersistedStore
+} from "./store";
+
+
+declare module 'epps' {
+    export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin;
+
+    export function defineEppsStore<TStore, TState>(id: string, storeDefinition: () => AnyObject): DefineEppsStore<TStore, TState>
+
+    export class Epps {
+        constructor({ dbName, dbKeyPath, cryptIv, cryptKey }: EppsConstructorProps)
+
+        plugin(context: PiniaPluginContext): void
+    }
+
+    export function extendedState(
+        parentsStores: Store[],
+        options?: ExtendedStateOptions
+    ): ExtendedState;
+
+    export function getParentStorePropertyValue(
+        propertyName: string,
+        parentStore: AnyObject | string | number | undefined,
+        parentsStores?: Store[]
+    ): any;
+
+    export function useCollectionStore<T>(id: string): Store & CollectionState<T> & CollectionStoreMethods;
+}
+ */
