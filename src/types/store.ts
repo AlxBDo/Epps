@@ -1,6 +1,6 @@
 import type { AnyObject, SearchCollectionCriteria } from ".";
 import type { _StoreWithGetters, PiniaCustomProperties, PiniaCustomStateProperties, Store, SubscriptionCallback } from "pinia";
-import type { PersistOptions } from "../plugins/pinia/extendsStore/extendedState";
+import type { PersistOptions } from "../plugins/extendedState";
 import type { Ref } from "vue";
 
 

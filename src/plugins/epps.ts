@@ -1,11 +1,10 @@
 import Crypt from "../services/Crypt"
-import { extendsStore } from "./pinia/extendsStore/extendsStore"
 import Persister from "../services/Persister"
-import { persistStorePlugin } from "./pinia/persistStore/persistStore"
-import { rewriteResetStore } from "./pinia/augmentPinia/augmentStore"
+import StoreExtension from "../core/StoreExtension"
+import StorePersister from "../core/StorePersister"
 
 import type { AllowedKeyPath } from "../types/storage"
-import type { PiniaPlugin, PiniaPluginContext } from "pinia"
+import type { PiniaPlugin, PiniaPluginContext, StateTree, Store } from "pinia"
 import type { PersistedStore } from "../types/store"
 import { log, logError } from "../utils/log"
 
@@ -20,6 +19,7 @@ export interface EppsConstructorProps {
 export class Epps {
     private _db: Persister
     private _crypt?: Crypt
+    private _watchedStore: string[] = []
 
 
     get db(): Persister { return this._db }
@@ -40,11 +40,30 @@ export class Epps {
         try {
             const { store } = context
 
-            rewriteResetStore(context, Object.assign({}, store.$state))
-            extendsStore(context)
-            persistStorePlugin(context, this)
+            this.rewriteResetStore(context, Object.assign({}, store.$state))
+            new StoreExtension(store, this._db, this._watchedStore, this._crypt)
+            new StorePersister(store, this._db, this._watchedStore, this._crypt)
         } catch (e) {
             logError('plugin()', [e, context])
+        }
+    }
+
+    rewriteResetStore({ store }: PiniaPluginContext, initState: StateTree): void {
+
+        store.$reset = () => {
+            if (store.$state.persist) {
+                store.removePersistedState()
+            }
+
+            const parentsStores = typeof store.parentsStores === 'function' && store.parentsStores()
+
+            if (Array.isArray(parentsStores) && parentsStores.length) {
+                parentsStores.forEach(
+                    (parentStore: Store) => parentStore.$reset()
+                )
+            }
+
+            store.$patch(Object.assign({}, initState))
         }
     }
 }

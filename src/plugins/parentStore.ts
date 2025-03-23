@@ -1,7 +1,5 @@
 import type { Store } from "pinia"
-import type { AnyObject, DefineEppsStore, EppsStore, ExtendedStore } from "../../../types"
-import { EppsStoreMethods } from "../../../types/store"
-import { log } from "../../../utils/log"
+import type { AnyObject, EppsStore } from "../types"
 
 
 /**

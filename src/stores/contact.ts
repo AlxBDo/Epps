@@ -3,8 +3,8 @@ import { useItemStore } from "./item"
 import type { ExtendState } from "../types/store";
 import type { Item } from "../models/item"
 import { defineExtendedStoreId } from "./defineExtendedStoreId"
-import { getParentStorePropertyValue } from "../plugins/pinia/extendsStore/parentStore"
-import { extendedState } from "../plugins/pinia/extendsStore/extendedState";
+import { getParentStorePropertyValue } from "../plugins/parentStore"
+import { extendedState } from "../plugins/extendedState";
 import { defineEppsStore } from "../utils/store";
 import { computed, ref } from "vue";
 import { Store } from "pinia";

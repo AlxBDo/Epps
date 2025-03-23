@@ -1,4 +1,4 @@
-import type { EppsStore, ExtendedState } from "../../../types/store";
+import type { EppsStore, ExtendedState } from "../types/store";
 import type { Store } from "pinia";
 
 import { ref, type Ref } from "vue";

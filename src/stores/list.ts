@@ -1,4 +1,4 @@
-import { extendedState } from "../plugins/pinia/extendsStore/extendedState";
+import { extendedState } from "../plugins/extendedState";
 import { useItemStore, type IItemStoreState } from "./item";
 import type { CollectionState, CollectionStoreMethods, ExtendedState } from "../types/store";
 import type { List } from "../models/liste";

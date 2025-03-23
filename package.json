@@ -13,7 +13,7 @@
   "files": [
     "dist"
   ],
-  "version": "0.0.954",
+  "version": "0.0.961",
   "type": "module",
   "main": "./dist/epps.umd.cjs",
   "module": "./dist/epps.js",

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { defineExtendedStoreId } from "./defineExtendedStoreId"
-import { extendedState } from "../plugins/pinia/extendsStore/extendedState"
-import { getParentStorePropertyValue } from "../plugins/pinia/extendsStore/parentStore"
+import { extendedState } from "../plugins/extendedState"
+import { getParentStorePropertyValue } from "../plugins/parentStore"
 import { useContactStore } from "./contact"
 
 import type { Contact } from "../models/contact"

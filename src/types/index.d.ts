@@ -1,6 +1,6 @@
 import { PiniaPluginContext, Store } from 'pinia';
 import { EppsConstructorProps } from '../plugins/epps';
-import { ExtendedStateOptions } from '../plugins/pinia/extendsStore/extendedState';
+import { ExtendedStateOptions } from '../plugins/extendedState';
 import { CollectionState, CollectionStoreMethods, DefineEppsStore, ExtendedState } from '../types/store';
 import { AnyObject } from './index';
 
@@ -23,8 +23,8 @@ export type {
 } from "./store";
 
 export { createPlugin, Epps } from "../plugins/epps";
-export { extendedState } from "../plugins/pinia/extendsStore/extendedState";
-export { getParentStorePropertyValue } from "../plugins/pinia/extendsStore/parentStore";
+export { extendedState } from "../plugins/extendedState";
+export { getParentStorePropertyValue } from "../plugins/parentStore";
 export { useCollectionStore } from '../stores/collection';
 
 

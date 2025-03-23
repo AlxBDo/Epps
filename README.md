@@ -1,8 +1,6 @@
-# `Epps!` plugin
-## Extends and Persist any Pinia Store
+# `Epps!` - Pinia plugin
+## Extends and Persist Pinia Store
 
-> **Warning**
-> The Epps plugin is in beta version. If you encounter any bugs, please report them by contacting me via my GitHub profile: [https://github.com/AlxBDo](https://github.com/AlxBDo).
 
 ## Table of Contents
 
@@ -13,7 +11,9 @@
 3. [Usage](#usage)
    - [Installation](#installation)
    - [Example Usage with `useConnectedUserStore`](#example-usage-with-useconnecteduserstore)
+   - [Example Usage with `useListsStore`](#example-usage-with-uselistsstore)
    - [Usage in a Component](#usage-in-a-component)
+   - [Usage in a Component with `useListsStore`](#usage-in-a-component-with-uselistsstore)
 4. [Advantages](#advantages)
 
 ## Introduction
@@ -109,56 +109,61 @@ export default defineNuxtPlugin({
 })
 ```
 
-#### Example Usage with useConnectedUserStore
+#### Example Usage with useListsStore
 
-The `useConnectedUserStore` store uses the plugin to manage connected user information, with persisted and encrypted data. It extends the `useUserStore` store, adding additional state and persistence capabilities. Additionally, it demonstrates the use of parent-child store relationships:
+The `useListsStore` store demonstrates how to create a collection-based store using the `useCollectionStore` store, which is integrated into the Epps plugin. This allows you to manage collections of items in your project seamlessly.
 
 ```javascript
 import { ref } from "vue";
-import { defineEppsStore, extendedState } from 'epps'
-import { useUserStore, type UserStore, type UserState } from "./user";
+import { defineEppsStore, extendedState, useCollectionStore } from 'epps';
+import type { CollectionState, CollectionStoreMethods } from "epps";
+import type { List } from "../models/liste";
 
-export const useConnectedUserStore = defineEppsStore<UserStore, UserState>(
-    'connectedUser',
+const defaultStoreId: string = 'lists';
+
+export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(
+    id ?? defaultStoreId,
     () => ({
         ...extendedState(
-            [useUserStore('connected-user')],
-            {
-                isOptionApi: false,
-                persist: {
-                    persistedPropertiesToEncrypt: ref(['email', 'password', 'username'])
-                }
-            }
+            [useCollectionStore('listsCollection')],
+            { isOptionApi: false, persist: { persist: ref(true) } }
         )
     })
-)
+)();
 ```
 
-For more details on this example, please visit the plugin's GitHub repository: [https://github.com/AlxBDo/Epps/tree/main/src/stores](https://github.com/AlxBDo/Epps/tree/main/src/stores).
+In this example:
+- `useCollectionStore` is a utility provided by the Epps plugin to manage collections of items.
+- The `useListsStore` store extends `useCollectionStore` to manage a collection of lists with persistence enabled.
+
+For more details on `useCollectionStore` and its integration, refer to the plugin's GitHub repository: [https://github.com/AlxBDo/Epps/tree/main/src/stores](https://github.com/AlxBDo/Epps/tree/main/src/stores).
 
 #### Usage in a Component
 
-To use the useConnectedUserStore store in a Vue component, you can import and use it as follows:
+To use the `useListsStore` store in a Vue component, you can import and use it as follows:
 
 ```javascript
 <script setup>
-import type { EppsStore } from 'epps'
-import type { UserStore, UserState } from "../stores/user"
-import { useConnectedUserStore } from '../stores/connectedUser'
+import { useListsStore } from '../stores/lists';
+import type { CollectionStoreMethods, CollectionState } from 'epps';
+import type { List } from "../models/liste";
 
-const connectedUser = useConnectedUserStore() as EppsStore<UserStore, UserState>
+const listsStore = useListsStore() as as EppsStore<CollectionStoreMethods, CollectionState<List>>;
 
-function logout() {
-  connectedUserStore.$reset()
-}
+// Example: Retrieve all lists
+const allLists = listsStore.getItems();
 </script>
 
 <template>
   <div>
-    <h1>Connected User</h1>
-    <p>Email: {{ connectedUser.email }}</p>
-    <p>Username: {{ connectedUser.username }}</p>
-    <button @click="logout">Logout</button>
+    <h1>Lists</h1>
+    <ul>
+      <li v-for="list in listsStore.items" :key="list.id">
+        {{ list.name }} (Type: {{ list.type }})
+      </li>
+    </ul>
   </div>
 </template>
-````
+```
+
+This example shows how to add a new list and retrieve all lists from the `useListsStore` store. The `useCollectionStore` integration simplifies collection management in your project.

@@ -1,6 +1,6 @@
 import { ref } from "vue"
 import { defineEppsStore } from "../utils/store"
-import { extendedState } from "../plugins/pinia/extendsStore/extendedState"
+import { extendedState } from "../plugins/extendedState"
 import { useCollectionStore } from "./collection"
 
 import type { CollectionState, CollectionStoreMethods } from "../types/store"
@@ -14,7 +14,7 @@ export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMet
     () => ({
         ...extendedState(
             [useCollectionStore('listsCollection')],
-            { isOptionApi: false, persist: { persist: ref(true) } }
+            { persist: { watchMutation: ref(true) } }
         )
     })
 )()

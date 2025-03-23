@@ -8,12 +8,6 @@ import { log } from '../../../utils/log';
 
 const connectedUser = useConnectedUserStore() as ExtendedStore<UserStore, UserState>
 
-const testEpps = useListStore('test2list') as EppsStore<CollectionStoreMethods, ListStoreState>
-
-testEpps.setItems(['un truc'])
-
-log('testEpps', [testEpps.getItems(), testEpps, connectedUser])
-
 connectedUser.setData({
     email: 'connecteduser@mail.com',
     firstname: 'Connecteduser',

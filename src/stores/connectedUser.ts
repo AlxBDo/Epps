@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineEppsStore } from "../utils/store";
-import { extendedState } from "../plugins/pinia/extendsStore/extendedState";
+import { extendedState } from "../plugins/extendedState";
 import { useUserStore, type UserStore, type UserState } from "./user";
 
 
