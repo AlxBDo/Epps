@@ -1,20 +1,36 @@
-# `Epps!` - Pinia plugin
-## Extends and Persist Pinia Store
 
+# `Epps!` - Pinia plugin
+
+## Extends and Persist Pinia Store
 
 ## Table of Contents
 
 1. [Introduction](#introduction)
-2. [Features](#features)
+2. [Advantages](#advantages)
+3. [Features](#features)
    - [Store Extension](#store-extension)
    - [Store Persistence](#store-persistence)
-3. [Usage](#usage)
+   - [Data Encryption](#data-encryption)
+4. [Getting Started](#getting-started)
+5. [Usage](#usage)
    - [Installation](#installation)
    - [Example Usage with `useConnectedUserStore`](#example-usage-with-useconnecteduserstore)
    - [Example Usage with `useListsStore`](#example-usage-with-uselistsstore)
    - [Usage in a Component](#usage-in-a-component)
    - [Usage in a Component with `useListsStore`](#usage-in-a-component-with-uselistsstore)
-4. [Advantages](#advantages)
+6. [Technical Documentation: Using the `epps` Plugin](#technical-documentation-using-the-epps-plugin)
+   - [Overview of `defineEppsStore`](#overview-of-defineeppstore)
+   - [Prototype of `extendedState`](#prototype-of-extendedstate)
+   - [Interface: `ExtendedState`](#interface-extendedstate)
+   - [Interface: `ExtendedStateOptions`](#interface-extendedstateoptions)
+   - [`useCollectionStore`](#usecollectionstore)
+7. [Examples](#examples)
+   - [Basic Store Definition](#example-1-basic-store-definition)
+   - [Store with Parent-Child Relationship](#example-2-store-with-parent-child-relationship)
+   - [Store with Encrypted Persistence](#example-3-store-with-encrypted-persistence)
+   - [Store with Custom Actions and State](#example-4-store-with-custom-actions-and-state)
+   - [Store with Multiple Parent Stores](#example-5-store-with-multiple-parent-stores)
+8. [Summary](#summary)
 
 ## Introduction
 
@@ -25,7 +41,6 @@ Epps! is a plugin for the Pinia state management library in Vue.js. It extends P
 - **Extensibility**: Facilitates adding new features to existing stores and supports parent-child store relationships.
 - **Data Persistence**: Retains store state between user sessions using IndexedDB or LocalStorage.
 - **Data Security**: Encrypts persisted data to protect sensitive information.
-- **Flexibility**: Supports both Option API and Composition API syntax for defining stores.
 
 By using the Epps plugin, you can create more powerful and flexible Pinia stores while ensuring data security and simplifying state management in your Vue.js or Nuxt application.
 
@@ -43,16 +58,83 @@ The plugin enables persisting the state of stores in IndexedDB or LocalStorage. 
 
 The plugin provides encryption for persisted state properties in the browser. This ensures that critical data stored in the browser is secure. However, the data remains readable within the store as it is decrypted when retrieved from LocalStorage or IndexedDB.
 
-### Parent-Child Store Relationships
+## Getting Started
 
-Epps supports defining parent-child relationships between stores. This allows child stores to inherit state and actions from parent stores, promoting code reuse and modularity.
+Follow these steps to quickly get started with the `epps` plugin:
 
-### Flexible Configuration
+### Step 1: Install the Plugin
 
-The plugin offers flexible configuration options, including:
-- Customizable persistence strategies (IndexedDB or LocalStorage).
-- Encryption settings using `CRYPT_IV` and `CRYPT_KEY`.
-- Watchers for automatic persistence on state changes.
+Install the plugin using npm or yarn:
+
+```sh
+npm install epps
+# or
+yarn add epps
+```
+
+### Step 2: Configure the Plugin
+
+Import and configure the plugin in your Pinia instance:
+
+```javascript
+import { createPinia } from 'pinia';
+import { createPlugin } from 'epps';
+
+const pinia = createPinia();
+
+const epps = createPlugin(
+    'localStorage', // Use 'localStorage' or 'IndexedDB'
+    import.meta.env.VITE_CRYPT_IV, // Encryption IV
+    import.meta.env.VITE_CRYPT_KEY // Encryption Key
+);
+
+pinia.use(epps);
+```
+
+### Step 3: Define Your First Store
+
+Define a store using `defineEppsStore`:
+
+```javascript
+import { ref } from "vue";
+import { defineEppsStore } from "epps";
+
+export const useExampleStore = defineEppsStore(
+    "exampleStore",
+    () => ({
+        count: ref(0),
+        increment() {
+            this.count++;
+        },
+        persist: {
+            persist: ref(true), // Enable persistence
+        }
+    })
+);
+```
+
+### Step 4: Use the Store in a Component
+
+Use the store in your Vue component:
+
+```javascript
+<script setup>
+import { useExampleStore } from '../stores/exampleStore';
+
+const exampleStore = useExampleStore();
+
+function incrementCount() {
+    exampleStore.increment();
+}
+</script>
+
+<template>
+  <div>
+    <p>Count: {{ exampleStore.count }}</p>
+    <button @click="incrementCount">Increment</button>
+  </div>
+</template>
+```
 
 ## Usage
 
@@ -80,7 +162,7 @@ import { createPlugin } from 'epps'
 const pinia = createPinia()
 
 const epps = createPlugin(
-    'localStorage', 
+    'localStorage',
     import.meta.env.VITE_CRYPT_IV,
     import.meta.env.VITE_CRYPT_KEY
 )
@@ -100,8 +182,8 @@ export default defineNuxtPlugin({
     async setup({ $pinia }) {
         ($pinia as Pinia).use(
             createPlugin(
-                'localStorage', 
-                useRuntimeConfig().public.cryptIv, 
+                'localStorage',
+                useRuntimeConfig().public.cryptIv,
                 useRuntimeConfig().public.cryptKey
             )
         )
@@ -109,7 +191,7 @@ export default defineNuxtPlugin({
 })
 ```
 
-#### Example Usage with useListsStore
+### Define Epps Store: Example Usage with `useListsStore`
 
 The `useListsStore` store demonstrates how to create a collection-based store using the `useCollectionStore` store, which is integrated into the Epps plugin. This allows you to manage collections of items in your project seamlessly.
 
@@ -138,7 +220,7 @@ In this example:
 
 For more details on `useCollectionStore` and its integration, refer to the plugin's GitHub repository: [https://github.com/AlxBDo/Epps/tree/main/src/stores](https://github.com/AlxBDo/Epps/tree/main/src/stores).
 
-#### Usage in a Component
+### Usage in a Component
 
 To use the `useListsStore` store in a Vue component, you can import and use it as follows:
 
@@ -148,7 +230,7 @@ import { useListsStore } from '../stores/lists';
 import type { CollectionStoreMethods, CollectionState } from 'epps';
 import type { List } from "../models/liste";
 
-const listsStore = useListsStore() as as EppsStore<CollectionStoreMethods, CollectionState<List>>;
+const listsStore = useListsStore() as EppsStore<CollectionStoreMethods, CollectionState<List>>;
 
 // Example: Retrieve all lists
 const allLists = listsStore.getItems();
@@ -167,3 +249,292 @@ const allLists = listsStore.getItems();
 ```
 
 This example shows how to add a new list and retrieve all lists from the `useListsStore` store. The `useCollectionStore` integration simplifies collection management in your project.
+
+## Technical Documentation: Using the `epps` Plugin
+
+The `epps` plugin provides advanced features for managing Pinia stores, such as persistence, encryption, and store extension. Below, we detail its usage and provide examples of defining stores using the `defineEppsStore` function.
+
+### Overview of `defineEppsStore`
+
+The `defineEppsStore` function is a utility provided by the `epps` plugin to define stores with extended capabilities. It allows you to:
+- Extend existing stores.
+- Add persistence with encryption.
+- Define parent-child relationships between stores.
+
+#### Type Requirements
+
+When using `defineEppsStore`, you must provide two generic types:
+1. **Store Methods (`TStore`)**: Defines the methods available in the store.
+2. **Store State (`TState`)**: Defines the state properties of the store.
+
+This ensures that the store is strongly typed, providing better type safety and developer experience.
+
+### Prototype of `extendedState`
+
+The `extendedState` function is used to extend the state of a store by integrating parent stores and adding persistence options.
+
+```typescript
+function extendedState<TStore, TState>(
+    parentsStores: Store[] | EppsStore<TStore, TState>[],
+    options?: ExtendedStateOptions
+): ExtendedState;
+```
+
+### Interface: `ExtendedState`
+
+The `ExtendedState` interface defines the structure of the extended state returned by the `extendedState` function.
+
+```typescript
+interface ExtendedState {
+    actionsToExtends?: string[] | Ref<string[] | undefined>;
+    isExtended?: boolean | Ref<boolean | undefined>;
+    isOptionApi?: boolean | Ref<boolean | undefined>;
+    parentsStores?: () => Store[] | EppsStore<AnyObject, AnyObject>[];
+    excludedKeys?: string[] | Ref<string[]>;
+    isEncrypted?: boolean | Ref<boolean>;
+    persist?: boolean | Ref<boolean>;
+    persistedPropertiesToEncrypt?: string[] | Ref<string[]>;
+    watchMutation?: boolean | Ref<boolean>;
+}
+```
+
+### Interface: `ExtendedStateOptions`
+
+The `ExtendedStateOptions` interface defines the optional configuration for the `extendedState` function.
+
+```typescript
+interface ExtendedStateOptions {
+    actionsToExtends?: string[];
+    isExtended?: boolean;
+    isOptionApi?: boolean;
+    persist?: {
+        excludedKeys?: string[] | Ref<string[]>;
+        isEncrypted?: boolean | Ref<boolean>;
+        persist?: boolean | Ref<boolean>;
+        persistedPropertiesToEncrypt?: string[] | Ref<string[]>;
+        watchMutation?: boolean | Ref<boolean>;
+    };
+}
+```
+
+### `useCollectionStore`
+
+The `useCollectionStore` is a utility provided by the `epps` plugin to manage collections of items. It simplifies the management of collections by providing predefined methods for adding, retrieving, updating, and removing items.
+
+#### Prototype
+
+```typescript
+function useCollectionStore<T>(id: string): Store & CollectionState<T> & CollectionStoreMethods;
+```
+
+#### Features
+
+- **Dynamic Collection Management**: Easily manage collections of items with predefined methods.
+- **Customizable**: Extend the store to add custom logic or integrate it with other stores.
+- **Persistence**: Combine with `defineEppsStore` to enable persistence for collections.
+
+#### Interfaces
+
+##### `CollectionState`
+
+Defines the state structure for a collection store.
+
+```typescript
+interface CollectionState<T> {
+    items: T[];
+}
+```
+
+##### `CollectionStoreMethods`
+
+Defines the methods available in a collection store.
+
+```typescript
+interface CollectionStoreMethods {
+    addItem: (item: AnyObject) => void;
+    getItem: (criteria: SearchCollectionCriteria) => AnyObject | undefined;
+    getItems: (criteria?: SearchCollectionCriteria) => AnyObject[];
+    removeItem: (item: AnyObject) => void;
+    setItems: <T>(items: T[]) => void;
+    updateItem: (updatedItem: AnyObject, oldItem?: AnyObject) => void;
+}
+```
+
+#### Example: Basic Usage of `useCollectionStore`
+
+```typescript
+import { useCollectionStore } from "epps";
+
+const collectionStore = useCollectionStore("exampleCollection");
+
+// Add an item to the collection
+collectionStore.addItem({ id: 1, name: "Item 1" });
+
+// Retrieve an item by criteria
+const item = collectionStore.getItem({ id: 1 });
+console.log(item);
+
+// Retrieve all items
+const allItems = collectionStore.getItems();
+console.log(allItems);
+
+// Update an item
+collectionStore.updateItem({ id: 1, name: "Updated Item 1" });
+
+// Remove an item
+collectionStore.removeItem({ id: 1 });
+```
+
+#### Example: Extending `useCollectionStore`
+
+You can extend `useCollectionStore` to add custom logic or integrate it with other stores.
+
+```typescript
+import { defineEppsStore, extendedState, useCollectionStore } from "epps";
+
+export const useCustomCollectionStore = defineEppsStore(
+    "customCollection",
+    () => ({
+        ...extendedState(
+            [useCollectionStore("exampleCollection")],
+            { persist: { persist: true } }
+        ),
+        customMethod() {
+            console.log("Custom method executed");
+        }
+    })
+);
+```
+
+The `useCollectionStore` utility is a powerful tool for managing collections in your application. By combining it with `defineEppsStore`, you can enable persistence and extend its functionality to meet your specific needs.
+
+### Example 1: Basic Store Definition
+
+This example demonstrates a simple store definition with persistence enabled.
+
+```typescript
+import { ref } from "vue";
+import { defineEppsStore } from "epps";
+
+interface BasicStoreMethods {
+    increment: () => void;
+}
+
+interface BasicStoreState {
+    count: number;
+}
+
+export const useBasicStore = defineEppsStore<BasicStoreMethods, BasicStoreState>(
+    "basicStore",
+    () => ({
+        count: ref(0),
+        persist: {
+            persist: ref(true), // Enable persistence
+            watchMutation: ref(true) // Automatically persist on state changes
+        },
+        increment() {
+            this.count++;
+        }
+    })
+);
+```
+
+### Example 2: Store with Parent-Child Relationship
+
+This example shows how to define a store that extends a parent store.
+
+```typescript
+import { ref } from "vue";
+import { defineEppsStore, extendedState } from "epps";
+import { useCollectionStore } from "./collection";
+
+export const useChildStore = defineEppsStore(
+    "childStore",
+    () => ({
+        ...extendedState(
+            [useCollectionStore("parentCollection")], // Extend the parent store
+            { persist: { persist: ref(true) } }
+        ),
+        childProperty: ref("childValue"),
+        childMethod() {
+            console.log("Child method called");
+        }
+    })
+);
+```
+
+### Example 3: Store with Encrypted Persistence
+
+This example demonstrates how to define a store with encrypted persistence for sensitive data.
+
+```typescript
+import { ref } from "vue";
+import { defineEppsStore } from "epps";
+
+export const useSecureStore = defineEppsStore(
+    "secureStore",
+    () => ({
+        sensitiveData: ref("secret"),
+        persist: {
+            persist: ref(true),
+            persistedPropertiesToEncrypt: ref(["sensitiveData"]), // Encrypt this property
+            watchMutation: ref(true)
+        }
+    })
+);
+```
+
+### Example 4: Store with Custom Actions and State
+
+This example shows how to define a store with custom actions and state, while extending another store.
+
+```typescript
+import { ref } from "vue";
+import { defineEppsStore, extendedState } from "epps";
+import { useCollectionStore } from "./collection";
+
+export const useCustomStore = defineEppsStore(
+    "customStore",
+    () => ({
+        ...extendedState(
+            [useCollectionStore("customCollection")],
+            { persist: { persist: ref(true) } }
+        ),
+        customState: ref("customValue"),
+        customAction() {
+            console.log("Custom action executed");
+        }
+    })
+);
+```
+
+### Example 5: Store with Multiple Parent Stores
+
+This example demonstrates how to define a store that extends multiple parent stores.
+
+```typescript
+import { ref } from "vue";
+import { defineEppsStore, extendedState } from "epps";
+import { useCollectionStore } from "./collection";
+import { useItemStore } from "./item";
+
+export const useMultiParentStore = defineEppsStore(
+    "multiParentStore",
+    () => ({
+        ...extendedState(
+            [useCollectionStore("collectionParent"), useItemStore("itemParent")],
+            { persist: { persist: ref(true) } }
+        ),
+        additionalState: ref("additionalValue"),
+        additionalAction() {
+            console.log("Additional action executed");
+        }
+    })
+);
+```
+
+### Summary
+
+The `defineEppsStore` function provides a flexible way to define stores with advanced features such as persistence, encryption, and parent-child relationships. By leveraging the `epps` plugin, you can simplify state management and enhance the capabilities of your Pinia stores.
+
+For more details, refer to the plugin's GitHub repository: [https://github.com/AlxBDo/Epps](https://github.com/AlxBDo/Epps).
