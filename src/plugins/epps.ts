@@ -26,17 +26,13 @@ export class Epps {
 
     get crypt(): Crypt | undefined { return this._crypt }
 
-    constructor({ dbName, dbKeyPath, cryptIv, cryptKey }: EppsConstructorProps) {
-        this._db = new Persister({ name: dbName, keyPath: dbKeyPath })
+    constructor(db: Persister, crypt?: Crypt) {
+        this._db = db
 
-        if (cryptIv && cryptKey) {
-            this._crypt = new Crypt(cryptKey, cryptIv)
-        }
+        if (crypt) { this._crypt = crypt }
     }
 
     plugin(context: PiniaPluginContext) {
-        if (!window || !context) return
-
         try {
             const { store } = context
 
@@ -73,9 +69,20 @@ export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string
         new Error('Database name is required')
     }
 
-    const augmentPinia = new Epps({ dbName, cryptIv, cryptKey, dbKeyPath: 'storeName' })
+    if (window) {
+        const db = new Persister({ name: dbName, keyPath: 'storeName' })
+        let crypt: Crypt | undefined
 
-    return augmentPinia.plugin.bind(augmentPinia)
+        if (cryptIv && cryptKey) {
+            crypt = new Crypt(cryptKey, cryptIv)
+        }
+
+        const augmentPinia = new Epps(db, crypt)
+
+        return augmentPinia.plugin.bind(augmentPinia)
+    }
+
+    return () => ({})
 }
 
 declare module 'pinia' {

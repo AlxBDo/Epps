@@ -29,7 +29,12 @@ export function arrayObjectFindAllBy<T extends AnyObject>(
     return arrayOfObject.filter(
         (item: T) => Object.keys(findBy).every(
             (key: string) => {
-                const itemKey = item[key].toLowerCase()
+                let itemKey = item[key]
+
+                if (typeof itemKey === 'string') {
+                    itemKey = itemKey.toLowerCase()
+                }
+
                 const findByKey = typeof findBy[key] === 'string' ? findBy[key].toLowerCase() : findBy[key]
 
                 return strict ? itemKey === findByKey : itemKey.indexOf(findByKey) >= 0
