@@ -1,9 +1,10 @@
-import { setActivePinia, createPinia } from 'pinia'
 import { createApp } from 'vue'
-import { beforeEach, describe, expect, it } from 'vitest'
-import { createPluginMock } from './mocks/epps'
+import { describe, expect, it } from 'vitest'
+
+import { beforeEachPiniaPlugin } from './utils/beforeEach'
 import { ListStoreState, useListStore } from '../stores/list'
-import { CollectionStoreMethods, EppsStore } from '../types'
+
+import type { CollectionStoreMethods, EppsStore } from '../types'
 
 
 const lists = [
@@ -14,15 +15,7 @@ const lists = [
 ]
 
 describe('ListsStore extends collectionStore', () => {
-    const app = createApp({})
-
-    beforeEach(() => {
-        const pinia = createPinia().use(
-            createPluginMock('localStorage', 'CryptK€Y-EPpS_t35t!n9&%?qa31z', 'Cryptk€Y-EPpS_t35t!n9')
-        )
-        app.use(pinia)
-        setActivePinia(pinia)
-    })
+    beforeEachPiniaPlugin()
 
     let listsStore: EppsStore<CollectionStoreMethods, ListStoreState> | undefined
 

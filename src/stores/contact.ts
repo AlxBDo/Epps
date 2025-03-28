@@ -50,7 +50,7 @@ export const useContactStore = (id?: string) => defineEppsStore<ContactStore, Co
         function setData(data: ContactState) {
             if (data.email) { email.value = data.email; }
             if (data.firstname) { firstname.value = data.firstname; }
-            if (data.lastname) { firstname.value = data.lastname; }
+            if (data.lastname) { lastname.value = data.lastname; }
         }
 
         return {
