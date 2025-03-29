@@ -2,18 +2,18 @@
   "name": "epps",
   "description": "Extend and Persist Pinia Stores",
   "keywords": [
-    "vue",
-    "nuxt",
-    "pinia",
-    "store",
-    "plugin",
-    "persist",
-    "extends"
+    "Vue",
+    "Nuxt",
+    "Pinia",
+    "extends store",
+    "Pinia plugin",
+    "persist store",
+    "reusable store"
   ],
   "files": [
     "dist"
   ],
-  "version": "0.0.962",
+  "version": "0.1.0",
   "type": "module",
   "main": "./dist/epps.umd.cjs",
   "module": "./dist/epps.js",
@@ -27,7 +27,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+    "build": "vitest && vite build && tsc --emitDeclarationOnly --outDir dist",
     "preview": "vite preview",
     "test": "vitest"
   },

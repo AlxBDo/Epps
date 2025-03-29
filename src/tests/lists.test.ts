@@ -1,5 +1,5 @@
-import { createApp } from 'vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { createTestingPinia } from '@pinia/testing'
 
 import { beforeEachPiniaPlugin } from './utils/beforeEach'
 import { ListStoreState, useListStore } from '../stores/list'

@@ -1,4 +1,4 @@
-import { PiniaPluginContext, Store } from 'pinia';
+import { PiniaPlugin, PiniaPluginContext, Store } from 'pinia';
 import { EppsConstructorProps } from '../plugins/epps';
 import { ExtendedStateOptions } from './plugins/extendedState';
 import { CollectionState, CollectionStoreMethods, DefineEppsStore, ExtendedState } from './types/store';
@@ -28,7 +28,9 @@ export { useCollectionStore } from '../stores/collection';
 
 
 declare module 'epps' {
-    export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string): CallableFunction;
+    export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin;
+
+    export function createPluginMock(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin;
 
     export function defineEppsStore<TStore, TState>(id: string, storeDefinition: () => AnyObject): DefineEppsStore<TStore, TState>
 
@@ -83,6 +85,8 @@ export type {
 
 declare module 'epps' {
     export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin;
+    
+    export function createPluginMock(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin;
 
     export function defineEppsStore<TStore, TState>(id: string, storeDefinition: () => AnyObject): DefineEppsStore<TStore, TState>
 

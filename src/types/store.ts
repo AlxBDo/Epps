@@ -63,6 +63,8 @@ export interface PersistedStore {
     persistState: () => void
     remember: () => Promise<void>
     removePersistedState: () => void
+    stateIsEmpty?: () => boolean
+    stopWatch: () => void
     watch: () => void
 }
 

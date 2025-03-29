@@ -1,4 +1,4 @@
-import { toRaw } from "vue"
+import { ref, toRaw } from "vue"
 import { areIdentical } from "../utils/validation/object"
 import Crypt from "../services/Crypt"
 import { isEmpty } from "../utils/validation"
@@ -49,6 +49,7 @@ export default class StorePersister extends Store {
                 this.storeSubscription()
             }
         }
+        this.store.stopWatch = () => this.stopWatch()
     }
 
     cryptState(state: StateTree, decrypt: boolean = false): StateTree {
@@ -102,7 +103,6 @@ export default class StorePersister extends Store {
 
         const newState = this.populateState(state, persistedState)
 
-
         /** 
             log(
                 `persistStore persist ${this.getStoreName()}`,
@@ -121,9 +121,10 @@ export default class StorePersister extends Store {
             )
          */
 
-        if (isEmpty(newState)) { return }
+        if (isEmpty(newState) || this.stateIsEmpty(newState)) { return }
 
         if (!persistedState || !areIdentical(newState, persistedState, this.getStatePropertyToNotPersist())) {
+
             (this._persister as Persister).setItem(this.getStoreName(), newState)
         }
     }
@@ -166,8 +167,21 @@ export default class StorePersister extends Store {
     private async remember() {
         const persistedState = await this.getPersistedState()
 
-        if (persistedState) {
+        if (persistedState && !this.stateIsEmpty(persistedState)) {
             this.store.$patch(persistedState)
+        }
+
+        this.executeToParentsStore('remember')
+    }
+
+    private stateIsEmpty(state: AnyObject): boolean {
+        return this.store?.stateIsEmpty && this.store?.stateIsEmpty(state)
+    }
+
+    private stopWatch() {
+        if (this.getStatePropertyValue('watchMutation')) {
+            this.addToState('watchMutation', false)
+            this.executeToParentsStore('stopWatch')
         }
     }
 
@@ -179,7 +193,8 @@ export default class StorePersister extends Store {
         (this._watchedStore as string[]).push(this.getStoreName())
 
         this.store.$subscribe((mutation: SubscriptionCallbackMutation<StateTree>, state: StateTree) => {
-            if (mutation.type !== 'patch object' && mutation?.events) {
+            if (mutation.type !== 'patch object' && mutation?.events && this.getStatePropertyValue('watchMutation')) {
+
                 const { newValue, oldValue } = mutation.events as AnyObject
 
                 if (!newValue || typeof newValue === 'function' || newValue === 'excludedKeys') {
@@ -203,6 +218,7 @@ export default class StorePersister extends Store {
     }
 
     toBeWatched(): boolean {
-        return this.shouldBePersisted() && !(this._watchedStore as string[]).includes(this.getStoreName())
+        return this.shouldBePersisted()
+            && !(this._watchedStore as string[]).includes(this.getStoreName())
     }
 }

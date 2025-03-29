@@ -55,6 +55,13 @@ export const useCollectionStore: AugmentingStore = (id: string) => defineStore(i
             }
         },
 
+        stateIsEmpty(state?: CollectionState<AnyObject>) {
+            if (state) {
+                return !state?.items?.length
+            }
+            return !this.items.length
+        },
+
         updateItem(updatedItem: AnyObject, oldItem?: AnyObject) {
             if (!oldItem) {
                 oldItem = this.getItem(updatedItem)

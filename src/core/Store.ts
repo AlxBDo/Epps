@@ -3,7 +3,7 @@ import Crypt from "../services/Crypt"
 import Persister from "../services/Persister"
 
 import type { Store as PiniaStore, StateTree } from "pinia"
-import type { AnyObject } from "../types"
+import type { AnyObject, EppsStore } from "../types"
 import type { StatePropertyValue } from "../types/store"
 
 
@@ -33,7 +33,7 @@ export default class Store {
     protected _watchedStore?: string[]
 
 
-    get parentsStores(): PiniaStore[] | undefined {
+    get parentsStores(): EppsStore<AnyObject, AnyObject>[] | undefined {
         return typeof this.store.parentsStores === 'function' && this.store.parentsStores()
     }
 
@@ -104,9 +104,22 @@ export default class Store {
         return (value as Ref)?.value ?? value
     }
 
+    hasParentsStores(): boolean {
+        return Array.isArray(this.parentsStores) && !!this.parentsStores.length
+    }
+
     hasPersistProperty(): boolean { return this.state.hasOwnProperty('persist') }
 
     isOptionApi(): boolean { return this.store._isOptionsAPI }
+
+    executeToParentsStore(methodName: string): void {
+        if (!this.hasParentsStores()) { return }
+
+        this.parentsStores?.forEach(
+            (parentStore: EppsStore<AnyObject, AnyObject>) => typeof parentStore[methodName] === 'function'
+                && parentStore[methodName]()
+        )
+    }
 
     shouldBePersisted(): boolean {
         return this.hasPersistProperty() && this.getStatePropertyValue('persist')

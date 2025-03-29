@@ -1,16 +1,13 @@
-import { createApp } from 'vue'
 import { describe, expect, it } from 'vitest'
 
 import { beforeEachPiniaPlugin } from './utils/beforeEach'
-import { useConnectedUserStore } from '../stores/connectedUser'
-import { ListStoreState, useListStore } from '../stores/list'
-
-import type { CollectionStoreMethods, EppsStore } from '../types'
-import type { UserState, UserStore } from '../stores/user'
-import { Contact } from '../models/contact'
-import { localStorageMock } from '../testing/mocks/localStorage'
 import PersisterMock from '../testing/mocks/persister'
-import { User } from '../models/user'
+import { useConnectedUserStore } from '../stores/connectedUser'
+
+import type { Contact } from '../models/contact'
+import type { EppsStore } from '../types'
+import type { User } from '../models/user'
+import type { UserState, UserStore } from '../stores/user'
 
 
 const user = {
@@ -21,6 +18,8 @@ const user = {
     lastname: 'Test',
     password: 'my-p@ssw0rd_72941'
 }
+
+const newLastname = 'Testte'
 
 describe('connectedUserStore extends userStore, contactStore and itemStore', () => {
     const persister = new PersisterMock({ name: 'localStorage' })
@@ -54,11 +53,37 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
         expect(persistedConnectedUser.password).not.toBe(user.password)
     })
 
-    it('Has access to parent state property and modify it', async () => {
+    it('Has access to parent state property and modify it', () => {
         if (connectedUserStore) {
-            const password = 'my_n€w-p@ssw0rd947'
-            connectedUserStore.password = password
-            expect(connectedUserStore.password).toStrictEqual(password)
+            connectedUserStore.lastname = newLastname
+            expect(connectedUserStore.lastname).toStrictEqual(newLastname)
+        }
+    })
+
+    it('Watch and persist state mutation', async () => {
+        if (connectedUserStore) {
+            const persistedContact = await persister.getItem('connected-user-contact') as Contact
+            expect(persistedContact?.lastname).toStrictEqual(newLastname)
+        }
+    })
+
+    it('ExcludedKeys are not persist', async () => {
+        if (connectedUserStore) {
+            const persistedContactItem = await persister.getItem('connected-user-contact-item') as Contact
+            expect(persistedContactItem['@id']).toBeUndefined()
+        }
+    })
+
+    it('Stop watch and persist state mutation', async () => {
+        if (connectedUserStore) {
+            connectedUserStore.stopWatch()
+
+            connectedUserStore.lastname = undefined
+            expect(connectedUserStore.lastname).toBeUndefined()
+
+            const persistedContact = await persister.getItem('connected-user-contact') as Contact
+
+            expect(persistedContact.lastname).toStrictEqual(newLastname)
         }
     })
 
