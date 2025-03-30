@@ -1,6 +1,6 @@
 {
   "name": "epps",
-  "description": "Extend and Persist Pinia Stores",
+  "description": "Extends and enhances Pinia stores with advanced features such as persistence, encryption, and store extension. Simplifies state management and ensures data security for Vue.js and Nuxt applications.",
   "keywords": [
     "Vue",
     "Nuxt",
@@ -13,7 +13,7 @@
   "files": [
     "dist"
   ],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "./dist/epps.umd.cjs",
   "module": "./dist/epps.js",

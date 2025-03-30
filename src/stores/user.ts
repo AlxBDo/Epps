@@ -1,5 +1,4 @@
-import { defineStore } from "pinia"
-import { defineExtendedStoreId } from "./defineExtendedStoreId"
+import { defineStoreId } from "../utils/defineStoreId"
 import { extendedState } from "../plugins/extendedState"
 import { getParentStorePropertyValue } from "../plugins/parentStore"
 import { useContactStore } from "./contact"
@@ -34,7 +33,7 @@ export const useUserStore = (id?: string) => defineEppsStore<UserStore, UserStat
             persist,
             persistedPropertiesToEncrypt
         } = extendedState(
-            [useContactStore(defineExtendedStoreId(id ?? 'user', 'contact'))],
+            [useContactStore(defineStoreId(id ?? 'user', 'contact'))],
             { actionsToExtends: ['setData'] }
         )
 

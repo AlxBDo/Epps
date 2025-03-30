@@ -30,7 +30,9 @@
    - [Store with Encrypted Persistence](#example-3-store-with-encrypted-persistence)
    - [Store with Custom Actions and State](#example-4-store-with-custom-actions-and-state)
    - [Store with Multiple Parent Stores](#example-5-store-with-multiple-parent-stores)
-8. [Summary](#summary)
+8. [Testing Pinia Stores with `epps`](#Testing-Pinia-Stores-with-epps)
+8. [Dependencies](#dependencies)
+9. [Summary](#summary)
 
 ## Introduction
 
@@ -532,6 +534,51 @@ export const useMultiParentStore = defineEppsStore(
     })
 );
 ```
+
+## Testing Pinia Stores with `epps`
+
+To test Pinia stores created with the `epps` package, you need to use the `createPluginMock` function. This function provides a mock implementation of the `epps` plugin, allowing you to simulate its behavior during testing. It creates a mock persistence layer and optionally supports encryption using the provided initialization vector (IV) and encryption key. By integrating this mock plugin into your Pinia instance, you can test your stores without relying on actual browser storage or encryption mechanisms.
+
+### Example: Using `createPluginMock` in a `beforeEach` Setup
+
+Here is an example of how to use `createPluginMock` in a `beforeEach` setup function:
+
+```typescript
+import { beforeEach } from "vitest";
+import { createPinia, setActivePinia } from "pinia";
+import { createPluginMock } from "../../testing/mocks/epps";
+import { createApp } from "vue";
+
+export function beforeEachPiniaPlugin() {
+    beforeEach(() => {
+        const app = createApp({});
+
+        // Create a Pinia instance with the mocked epps plugin
+        const pinia = createPinia().use(
+            createPluginMock(
+                'localStorage', // Mock database name
+                'Replace_with_your_IV_string', // Mock encryption IV
+                'Replace_with_your_KEY_string' // Mock encryption key
+            )
+        );
+
+        app.use(pinia);
+        setActivePinia(pinia); // Set the active Pinia instance for testing
+    });
+}
+```
+
+This setup ensures that all tests using Pinia stores with the epps plugin will have a consistent and isolated environment, making it easier to validate store behavior. 
+
+## Dependencies
+
+The `epps` package relies on the following dependencies to provide its features:
+
+- **Vue**: The progressive JavaScript framework for building user interfaces. [Official Documentation](https://vuejs.org/)
+- **Pinia**: A state management library for Vue.js. [Official Documentation](https://pinia.vuejs.org/)
+- **CryptoJS**: A library used for encrypting persisted data. [Official Documentation](https://cryptojs.gitbook.io/docs/)
+
+These dependencies are automatically installed with the `epps` package. Ensure your project uses compatible versions of Vue and Pinia for optimal functionality.
 
 ### Summary
 

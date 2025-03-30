@@ -90,6 +90,8 @@ declare module 'epps' {
 
     export function defineEppsStore<TStore, TState>(id: string, storeDefinition: () => AnyObject): DefineEppsStore<TStore, TState>
 
+    export function defineStoreId(prefix: string, id: string): string
+
     export class Epps {
         constructor({ dbName, dbKeyPath, cryptIv, cryptKey }: EppsConstructorProps)
 

@@ -2,7 +2,7 @@ import type { Contact } from "../models/contact"
 import { useItemStore } from "./item"
 import type { ExtendState } from "../types/store";
 import type { Item } from "../models/item"
-import { defineExtendedStoreId } from "./defineExtendedStoreId"
+import { defineStoreId } from "../utils/defineStoreId"
 import { getParentStorePropertyValue } from "../plugins/parentStore"
 import { extendedState } from "../plugins/extendedState";
 import { defineEppsStore } from "../utils/store";
@@ -33,7 +33,7 @@ export const useContactStore = (id?: string) => defineEppsStore<ContactStore, Co
             persist,
             persistedPropertiesToEncrypt
         } = extendedState(
-            [useItemStore(defineExtendedStoreId(id ?? 'contact', 'item'))],
+            [useItemStore(defineStoreId(id ?? 'contact', 'item'))],
             { actionsToExtends: ['setData'] }
         )
 
