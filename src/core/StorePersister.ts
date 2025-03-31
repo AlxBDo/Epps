@@ -21,8 +21,7 @@ export default class StorePersister extends Store {
 
         if (this.hasPersistProperty()) {
             this.augmentStore()
-
-            if (this.shouldBePersisted()) { this.persist() }
+            this.remember()
 
             if (this.toBeWatched()) {
                 this.storeSubscription()

@@ -76,80 +76,6 @@ yarn add epps
 
 ### Step 2: Configure the Plugin
 
-Import and configure the plugin in your Pinia instance:
-
-```javascript
-import { createPinia } from 'pinia';
-import { createPlugin } from 'epps';
-
-const pinia = createPinia();
-
-const epps = createPlugin(
-    'localStorage', // Use 'localStorage' or 'IndexedDB'
-    import.meta.env.VITE_CRYPT_IV, // Encryption IV
-    import.meta.env.VITE_CRYPT_KEY // Encryption Key
-);
-
-pinia.use(epps);
-```
-
-### Step 3: Define Your First Store
-
-Define a store using `defineEppsStore`:
-
-```javascript
-import { ref } from "vue";
-import { defineEppsStore } from "epps";
-
-export const useExampleStore = defineEppsStore(
-    "exampleStore",
-    () => ({
-        count: ref(0),
-        increment() {
-            this.count++;
-        },
-        persist: {
-            persist: ref(true), // Enable persistence
-        }
-    })
-);
-```
-
-### Step 4: Use the Store in a Component
-
-Use the store in your Vue component:
-
-```javascript
-<script setup>
-import { useExampleStore } from '../stores/exampleStore';
-
-const exampleStore = useExampleStore();
-
-function incrementCount() {
-    exampleStore.increment();
-}
-</script>
-
-<template>
-  <div>
-    <p>Count: {{ exampleStore.count }}</p>
-    <button @click="incrementCount">Increment</button>
-  </div>
-</template>
-```
-
-## Usage
-
-### Installation
-
-To install the plugin, you can use npm or yarn:
-
-```sh
-npm install epps
-# or
-yarn add epps
-```
-
 To use the plugin, simply import it and add it to your Pinia instance.
 
 In the examples below, the environment variables `CRYPT_IV` and `CRYPT_KEY` must be replaced with strings. These variables are used for encrypting data persisted in the browser.
@@ -174,7 +100,7 @@ pinia.use(epps)
 
 #### Nuxt
 
-```javascript
+```typeScript
 // ./plugins/epps-plugin.ts
 import type { Pinia, PiniaPlugin, PiniaPluginContext } from "pinia"
 import { createPlugin } from 'epps'
@@ -193,11 +119,13 @@ export default defineNuxtPlugin({
 })
 ```
 
+## Usage
+
 ### Define Epps Store: Example Usage with `useListsStore`
 
 The `useListsStore` store demonstrates how to create a collection-based store using the `useCollectionStore` store, which is integrated into the Epps plugin. This allows you to manage collections of items in your project seamlessly.
 
-```javascript
+```typeScript
 import { ref } from "vue";
 import { defineEppsStore, extendedState, useCollectionStore } from 'epps';
 import type { CollectionState, CollectionStoreMethods } from "epps";
@@ -226,7 +154,7 @@ For more details on `useCollectionStore` and its integration, refer to the plugi
 
 To use the `useListsStore` store in a Vue component, you can import and use it as follows:
 
-```javascript
+```vue
 <script setup>
 import { useListsStore } from '../stores/lists';
 import type { CollectionStoreMethods, CollectionState } from 'epps';
@@ -478,7 +406,6 @@ export const useSecureStore = defineEppsStore(
     () => ({
         sensitiveData: ref("secret"),
         persist: {
-            persist: ref(true),
             persistedPropertiesToEncrypt: ref(["sensitiveData"]), // Encrypt this property
             watchMutation: ref(true)
         }
