@@ -1,10 +1,11 @@
-import { ref, type Ref } from "vue"
+import { ref, toRef, type Ref } from "vue"
 import Crypt from "../services/Crypt"
 import Persister from "../services/Persister"
 
 import type { Store as PiniaStore, StateTree } from "pinia"
 import type { AnyObject, EppsStore } from "../types"
 import type { StatePropertyValue } from "../types/store"
+import { log } from "../utils/log"
 
 
 export default class Store {
@@ -83,6 +84,7 @@ export default class Store {
         }
 
         this.state[name] = value
+        this.store[name] = toRef(this.state, name)
     }
 
     getStatePropertyToNotPersist(): string[] {
@@ -100,8 +102,8 @@ export default class Store {
         return this.store.hasOwnProperty('getStoreName') ? this.store.getStoreName() : this.store.$id
     }
 
-    getValue(value: StatePropertyValue) {
-        return (value as Ref)?.value ?? value
+    getValue(value: AnyObject) {
+        return value?.__v_isRef ? value.value : value
     }
 
     hasParentsStores(): boolean {

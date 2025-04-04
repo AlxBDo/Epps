@@ -1,4 +1,4 @@
-import { computed } from "vue";
+import { computed, ref, toRef } from "vue";
 import Crypt from "../services/Crypt";
 import Persister from "../services/Persister";
 import Store from "./Store";
@@ -6,6 +6,7 @@ import StorePersister from "./StorePersister";
 
 import type { AnyObject, EppsStore } from "../types";
 import type { Store as PiniaStore } from "pinia";
+import { log } from "../utils/log";
 
 
 export default class StoreExtension extends Store {
@@ -21,6 +22,12 @@ export default class StoreExtension extends Store {
 
     get extendedActions(): string[] {
         return [...this._extendedActions, ...(this.getStatePropertyValue('actionsToExtends') ?? [])]
+    }
+
+    private addToCustomProperties(propertyName: string): void {
+        if (!import.meta.env.PROD) {
+            this.store._customProperties.add(propertyName)
+        }
     }
 
 
@@ -43,7 +50,7 @@ export default class StoreExtension extends Store {
      * Duplicates storeToExtend to extendedStore
      * @param {AnyObject} storeToExtend 
      */
-    duplicateStore(storeToExtend: AnyObject): void {
+    private duplicateStore(storeToExtend: AnyObject): void {
         const deniedFirstChars = ['$', '_']
 
         Object.keys(storeToExtend).forEach((key: string) => {
@@ -55,10 +62,12 @@ export default class StoreExtension extends Store {
                 if (this.storeHas(key)) {
                     if (this.extendedActions.includes(key)) { this.extendsAction(storeToExtend, key) }
                 } else {
-                    this.store[key] = storeToExtend[key];
+                    this.store[key] = storeToExtend[key]
+                    this.addToCustomProperties(key)
                 }
             } else if (!this.storeHas(key) && (typeOfProperty === 'undefined' || typeOfProperty === 'object')) {
                 this.store[key] = this.createComputed(storeToExtend, key)
+                this.addToCustomProperties(key)
             }
         })
     }
@@ -87,7 +96,8 @@ export default class StoreExtension extends Store {
     private extendsState(storeToExtend: AnyObject) {
         Object.keys(storeToExtend.$state).forEach((key: string) => {
             if (!this.stateHas(key)) {
-                this.store[key] = this.createComputed(storeToExtend.$state, key)
+                this.store[key] = this.state[key] = toRef(storeToExtend.$state, key)
+                this.addToCustomProperties(key)
             }
         })
     }
@@ -103,45 +113,12 @@ export default class StoreExtension extends Store {
 
             (storeToExtend as PiniaStore[]).forEach((ste: PiniaStore) => {
                 if (ste?.$state) {
-                    if (this.hasPersistProperty()) {
-                        this.persistChildStore(ste as EppsStore<AnyObject, AnyObject>)
-                    }
-
                     this.duplicateStore(ste)
                     this.extendsState(ste)
                 }
             })
 
             this.addToState('isExtended', true)
-        }
-    }
-
-    /**
-     * Add state properties necessary to persist
-     * @param {StateTree} state 
-     * @param {StateTree} childStoreState 
-     */
-    private persistChildStore(store: EppsStore<AnyObject, AnyObject>) {
-        const parentStore = new Store(store)
-
-        parentStore.addPropertiesToState(
-            ['excludedKeys', 'persist', 'persistedPropertiesToEncrypt', 'watchMutation'],
-            this.state
-        )
-
-        if (this._persister instanceof Persister) {
-            new StorePersister(
-                parentStore.store as PiniaStore,
-                this._persister,
-                this._watchedStore ?? [],
-                this._crypt
-            )
-        }
-
-        const parentsStores = typeof store.parentsStores === 'function' && store.parentsStores()
-
-        if (Array.isArray(parentsStores) && parentsStores.length) {
-            parentsStores.forEach((parentStore: EppsStore<AnyObject, AnyObject>) => this.persistChildStore(parentStore))
         }
     }
 }

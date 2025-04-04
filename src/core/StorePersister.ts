@@ -136,22 +136,20 @@ export default class StorePersister extends Store {
         return Object.keys(state).reduce((acc: StateTree, curr: string) => {
 
             if (!deniedFirstChar.includes(curr[0]) && !excludedKeys.includes(curr)) {
+                const stateValue = this.getValue(state[curr])
+                const persistedStateValue = persistedState && this.getValue(persistedState[curr])
 
-                if (!state[curr] && (persistedState && persistedState[curr])) {
-                    acc[curr] = persistedState[curr];
+                if (!stateValue && persistedStateValue) {
+                    acc[curr] = persistedStateValue
                 } else {
-                    if (Array.isArray(state[curr])) {
-                        acc[curr] = state[curr].map(
+                    if (Array.isArray(stateValue)) {
+                        acc[curr] = stateValue.map(
                             (item: any) => typeof item === "object" ? this.populateState(item) : toRaw(item)
                         )
-                    } else if (typeof state[curr] === 'object') {
-                        if (state[curr]?.__v_isRef) {
-                            acc[curr] = state[curr]?.value
-                        } else {
-                            acc[curr] = this.populateState(state[curr], persistedState && persistedState[curr])
-                        }
+                    } else if (typeof stateValue === 'object') {
+                        acc[curr] = this.populateState(stateValue, persistedStateValue)
                     } else {
-                        acc[curr] = toRaw(state[curr])
+                        acc[curr] = toRaw(stateValue ?? persistedStateValue)
                     }
                 }
             }

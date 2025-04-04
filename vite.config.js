@@ -14,10 +14,9 @@ export default defineConfig({
       fileName: 'epps',
     },
     rollupOptions: {
-      external: ['vue', 'pinia'],
+      external: ['pinia'],
       output: {
         globals: {
-          vue: 'Vue',
           pinia: 'Pinia'
         },
       },

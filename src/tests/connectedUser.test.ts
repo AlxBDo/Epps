@@ -36,7 +36,7 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
     })
 
     it('Is persisted', async () => {
-        const persistedContact = await persister.getItem('connected-user-contact') as Contact
+        const persistedContact = await persister.getItem('connectedUser') as User
 
         expect(persistedContact.firstname).toStrictEqual(user.firstname)
         expect(persistedContact.email).toBeDefined()
@@ -46,7 +46,7 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
     })
 
     it('Property define in persistedPropertiesToEncrypt is persisted encrypted', async () => {
-        const persistedConnectedUser = await persister.getItem('connected-user') as User
+        const persistedConnectedUser = await persister.getItem('connectedUser') as User
 
         expect(persistedConnectedUser.password).toBeDefined()
         expect(persistedConnectedUser.password?.length).toBeGreaterThan(user.password.length)
@@ -62,14 +62,14 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
 
     it('Watch and persist state mutation', async () => {
         if (connectedUserStore) {
-            const persistedContact = await persister.getItem('connected-user-contact') as Contact
+            const persistedContact = await persister.getItem('connectedUser') as User
             expect(persistedContact?.lastname).toStrictEqual(newLastname)
         }
     })
 
     it('ExcludedKeys are not persist', async () => {
         if (connectedUserStore) {
-            const persistedContactItem = await persister.getItem('connected-user-contact-item') as Contact
+            const persistedContactItem = await persister.getItem('connectedUser') as User
             expect(persistedContactItem['@id']).toBeUndefined()
         }
     })
@@ -81,7 +81,7 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
             connectedUserStore.lastname = undefined
             expect(connectedUserStore.lastname).toBeUndefined()
 
-            const persistedContact = await persister.getItem('connected-user-contact') as Contact
+            const persistedContact = await persister.getItem('connectedUser') as User
 
             expect(persistedContact.lastname).toStrictEqual(newLastname)
         }
@@ -90,11 +90,9 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
     it('$reset method clear all states (child and parents) and persisted data', async () => {
         if (connectedUserStore) {
             connectedUserStore.$reset()
-            const persistedConnectedUser = await persister.getItem('connected-user') as User
-            const persistedContact = await persister.getItem('connected-user-contact') as Contact
+            const persistedConnectedUser = await persister.getItem('connectedUser') as User
 
             expect(persistedConnectedUser).not.toBeDefined()
-            expect(persistedContact).not.toBeDefined()
 
             expect(connectedUserStore.user).not.toStrictEqual(user)
             expect(connectedUserStore.firstname).not.toBeDefined()

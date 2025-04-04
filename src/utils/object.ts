@@ -1,4 +1,5 @@
 import type { AnyObject, SearchCollectionCriteria } from "../types";
+import { log } from "./log";
 
 
 type TConditionFunction = (item: AnyObject) => boolean
@@ -30,8 +31,9 @@ export function arrayObjectFindAllBy<T extends AnyObject>(
         (item: T) => Object.keys(findBy).every(
             (key: string) => {
                 let itemKey = item[key]
+                const typeOfItemKey = typeof itemKey
 
-                if (typeof itemKey === 'string') {
+                if (typeOfItemKey === 'string') {
                     itemKey = itemKey.toLowerCase()
                 }
 

@@ -156,14 +156,33 @@ To use the `useListsStore` store in a Vue component, you can import and use it a
 
 ```vue
 <script setup>
-import { useListsStore } from '../stores/lists';
-import type { CollectionStoreMethods, CollectionState } from 'epps';
-import type { List } from "../models/liste";
+import { useListsStore } from '../stores/lists'
+import type { CollectionStoreMethods, CollectionState } from 'epps'
+import type { List } from "../models/liste"
 
-const listsStore = useListsStore() as EppsStore<CollectionStoreMethods, CollectionState<List>>;
+const listsStore = useListsStore() as EppsStore<CollectionStoreMethods, CollectionState<List>>
 
-// Example: Retrieve all lists
-const allLists = listsStore.getItems();
+/**
+ * ⚠️ NUXT 
+ * 
+ * In nuxt application, calling a method from a parent Store causes an error if the page is refreshed or if it is 
+ * the application's entry point To solve this problem, check that the method exists before 
+ * calling it.
+ * 
+ * Example : 
+ *  listsStore.remember & listsStore.remember().then...
+ * 
+ */
+listsStore.remember().then(() => {
+    if (!listsStore.items.length) {
+        listsStore.setItems([
+            { id: 1, name: 'My first list', type: '0' },
+            { id: 2, name: 'My second list', type: '1' },
+            { id: 3, name: 'My third list', type: '2' }
+        ])
+    }
+})
+
 </script>
 
 <template>

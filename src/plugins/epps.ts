@@ -36,9 +36,9 @@ export class Epps {
         try {
             const { store } = context
 
-            this.rewriteResetStore(context, Object.assign({}, store.$state))
             new StoreExtension(store, this._db, this._watchedStore, this._crypt)
             new StorePersister(store, this._db, this._watchedStore, this._crypt)
+            this.rewriteResetStore(context, Object.assign({}, store.$state))
         } catch (e) {
             logError('plugin()', [e, context])
         }
