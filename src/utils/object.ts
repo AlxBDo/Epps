@@ -39,7 +39,7 @@ export function arrayObjectFindAllBy<T extends AnyObject>(
 
                 const findByKey = typeof findBy[key] === 'string' ? findBy[key].toLowerCase() : findBy[key]
 
-                return strict ? itemKey === findByKey : itemKey.indexOf(findByKey) >= 0
+                return strict ? itemKey == findByKey : itemKey.indexOf(findByKey) >= 0
             }
         )
     );

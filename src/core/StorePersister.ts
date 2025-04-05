@@ -1,4 +1,4 @@
-import { ref, toRaw } from "vue"
+import { toRaw } from "vue"
 import { areIdentical } from "../utils/validation/object"
 import Crypt from "../services/Crypt"
 import { isEmpty } from "../utils/validation"
@@ -167,8 +167,6 @@ export default class StorePersister extends Store {
         if (persistedState && !this.stateIsEmpty(persistedState)) {
             this.store.$patch(persistedState)
         }
-
-        this.executeToParentsStore('remember')
     }
 
     private stateIsEmpty(state: AnyObject): boolean {
@@ -178,7 +176,6 @@ export default class StorePersister extends Store {
     private stopWatch() {
         if (this.getStatePropertyValue('watchMutation')) {
             this.addToState('watchMutation', false)
-            this.executeToParentsStore('stopWatch')
         }
     }
 

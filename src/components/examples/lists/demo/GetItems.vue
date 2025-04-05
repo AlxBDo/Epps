@@ -11,7 +11,7 @@ const props = defineProps({
         required: true
     }
 })
-const itemType = ref('0')
+const itemType = ref<string>('0')
 
 function getItemsByType() {
     return { result: props.listsStore.getItems({ type: itemType.value }), name: 'List' }

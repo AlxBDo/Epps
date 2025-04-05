@@ -1,10 +1,9 @@
-import { computed, ref, toRef } from "vue";
+import { computed, toRef } from "vue";
 import Crypt from "../services/Crypt";
 import Persister from "../services/Persister";
 import Store from "./Store";
-import StorePersister from "./StorePersister";
 
-import type { AnyObject, EppsStore } from "../types";
+import type { AnyObject } from "../types";
 import type { Store as PiniaStore } from "pinia";
 import { log } from "../utils/log";
 

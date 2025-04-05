@@ -83,7 +83,7 @@ In the examples below, the environment variables `CRYPT_IV` and `CRYPT_KEY` must
 #### Vue
 
 ```javascript
-// ./App.vue
+// ./main.js
 import { createPinia } from 'pinia'
 import { createPlugin } from 'epps'
 
@@ -138,7 +138,7 @@ export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMet
     () => ({
         ...extendedState(
             [useCollectionStore('listsCollection')],
-            { isOptionApi: false, persist: { persist: ref(true) } }
+            { persist: { persist: ref(true) } } // Store persisted manually. Use “watchMutation” to persist each time the State is modified.
         )
     })
 )();
@@ -170,18 +170,10 @@ const listsStore = useListsStore() as EppsStore<CollectionStoreMethods, Collecti
  * calling it.
  * 
  * Example : 
- *  listsStore.remember & listsStore.remember().then...
+ *  listsStore.remember & listsStore.remember()
  * 
  */
-listsStore.remember().then(() => {
-    if (!listsStore.items.length) {
-        listsStore.setItems([
-            { id: 1, name: 'My first list', type: '0' },
-            { id: 2, name: 'My second list', type: '1' },
-            { id: 3, name: 'My third list', type: '2' }
-        ])
-    }
-})
+listsStore.remember()
 
 </script>
 
@@ -327,6 +319,9 @@ console.log(item);
 const allItems = collectionStore.getItems();
 console.log(allItems);
 
+// Search items
+const itemsFound = collectionStore.getItems({ type: '1' })
+
 // Update an item
 collectionStore.updateItem({ id: 1, name: "Updated Item 1" });
 
@@ -346,7 +341,9 @@ export const useCustomCollectionStore = defineEppsStore(
     () => ({
         ...extendedState(
             [useCollectionStore("exampleCollection")],
-            { persist: { persist: true } }
+            persist: {
+                watchMutation: ref(true) // Automatically persist on state changes
+            }
         ),
         customMethod() {
             console.log("Custom method executed");
@@ -378,7 +375,6 @@ export const useBasicStore = defineEppsStore<BasicStoreMethods, BasicStoreState>
     () => ({
         count: ref(0),
         persist: {
-            persist: ref(true), // Enable persistence
             watchMutation: ref(true) // Automatically persist on state changes
         },
         increment() {
@@ -520,7 +516,6 @@ This setup ensures that all tests using Pinia stores with the epps plugin will h
 
 The `epps` package relies on the following dependencies to provide its features:
 
-- **Vue**: The progressive JavaScript framework for building user interfaces. [Official Documentation](https://vuejs.org/)
 - **Pinia**: A state management library for Vue.js. [Official Documentation](https://pinia.vuejs.org/)
 - **CryptoJS**: A library used for encrypting persisted data. [Official Documentation](https://cryptojs.gitbook.io/docs/)
 
