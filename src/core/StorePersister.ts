@@ -11,13 +11,37 @@ import type { AnyObject } from "../types"
 
 
 export default class StorePersister extends Store {
+    protected _crypt?: Crypt
+
+    protected _persister?: Persister
+
+    private _statePropertiesNotToPersist: string[] = [
+        '@context',
+        'activeLink',
+        'computed',
+        'dep',
+        'excludedKeys',
+        'fn',
+        'isEncrypted',
+        'isLoading',
+        'persist',
+        'persistedPropertiesToEncrypt',
+        'subs',
+        'version',
+        'watchMutation'
+    ]
 
     constructor(store: PiniaStore, persister: Persister, watchedStore: string[], crypt?: Crypt) {
         if (!(persister instanceof Persister)) {
             throw new Error('StorePersister must be instanciated with a Persister')
         }
 
-        super(store, persister, watchedStore, crypt)
+        super(store)
+
+        this._persister = persister
+        this._watchedStore = watchedStore ?? []
+
+        if (crypt) { this._crypt = crypt }
 
         if (this.hasPersistProperty()) {
             this.augmentStore()
@@ -90,6 +114,15 @@ export default class StorePersister extends Store {
             logError('getPersistedState Error', [storeName, e])
         }
     }
+
+    getStatePropertyToNotPersist(): string[] {
+        return [
+            ...this._statePropertiesNotToPersist,
+            ...(this.getStatePropertyValue('excludedKeys') ?? [])
+        ]
+    }
+
+    hasPersistProperty(): boolean { return this.state.hasOwnProperty('persist') }
 
     async persist() {
         let persistedState = await this.getPersistedState()
@@ -167,6 +200,10 @@ export default class StorePersister extends Store {
         if (persistedState && !this.stateIsEmpty(persistedState)) {
             this.store.$patch(persistedState)
         }
+    }
+
+    shouldBePersisted(): boolean {
+        return this.hasPersistProperty() && this.getStatePropertyValue('persist')
     }
 
     private stateIsEmpty(state: AnyObject): boolean {

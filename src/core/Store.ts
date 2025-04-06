@@ -1,6 +1,4 @@
 import { ref, toRef, type Ref } from "vue"
-import Crypt from "../services/Crypt"
-import Persister from "../services/Persister"
 
 import type { Store as PiniaStore, StateTree } from "pinia"
 import type { AnyObject, EppsStore } from "../types"
@@ -9,26 +7,6 @@ import { log } from "../utils/log"
 
 
 export default class Store {
-    protected _crypt?: Crypt
-
-    protected _persister?: Persister
-
-    private _statePropertiesNotToPersist: string[] = [
-        '@context',
-        'activeLink',
-        'computed',
-        'dep',
-        'excludedKeys',
-        'fn',
-        'isEncrypted',
-        'isLoading',
-        'persist',
-        'persistedPropertiesToEncrypt',
-        'subs',
-        'version',
-        'watchMutation'
-    ]
-
     private _store: PiniaStore
 
     protected _watchedStore?: string[]
@@ -47,13 +25,8 @@ export default class Store {
     set store(store: PiniaStore) { this._store = store }
 
 
-    constructor(store: PiniaStore, persister?: Persister, watchedStore?: string[], crypt?: Crypt) {
+    constructor(store: PiniaStore) {
         this._store = store
-        this._watchedStore = watchedStore ?? []
-
-        if (persister) { this._persister = persister }
-
-        if (crypt) { this._crypt = crypt }
     }
 
 
@@ -87,13 +60,6 @@ export default class Store {
         this.store[name] = toRef(this.state, name)
     }
 
-    getStatePropertyToNotPersist(): string[] {
-        return [
-            ...this._statePropertiesNotToPersist,
-            ...(this.getStatePropertyValue('excludedKeys') ?? [])
-        ]
-    }
-
     getStatePropertyValue(propertyName: string) {
         return this.getValue(this.state[propertyName])
     }
@@ -110,22 +76,7 @@ export default class Store {
         return Array.isArray(this.parentsStores) && !!this.parentsStores.length
     }
 
-    hasPersistProperty(): boolean { return this.state.hasOwnProperty('persist') }
-
     isOptionApi(): boolean { return this.store._isOptionsAPI }
-
-    executeToParentsStore(methodName: string): void {
-        if (!this.hasParentsStores()) { return }
-
-        this.parentsStores?.forEach(
-            (parentStore: EppsStore<AnyObject, AnyObject>) => typeof parentStore[methodName] === 'function'
-                && parentStore[methodName]()
-        )
-    }
-
-    shouldBePersisted(): boolean {
-        return this.hasPersistProperty() && this.getStatePropertyValue('persist')
-    }
 
     stateHas(property: string): boolean { return this.state.hasOwnProperty(property) }
 

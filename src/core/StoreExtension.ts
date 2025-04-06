@@ -1,6 +1,4 @@
 import { computed, toRef } from "vue";
-import Crypt from "../services/Crypt";
-import Persister from "../services/Persister";
 import Store from "./Store";
 
 import type { AnyObject } from "../types";
@@ -12,8 +10,8 @@ export default class StoreExtension extends Store {
     private _extendedActions: string[] = ['removePersistedState', 'watch', '$reset']
 
 
-    constructor(store: PiniaStore, persister?: Persister, watchedStore?: string[], crypt?: Crypt) {
-        super(store, persister, watchedStore, crypt)
+    constructor(store: PiniaStore) {
+        super(store)
 
         this.extendsStore()
     }
