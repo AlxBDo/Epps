@@ -64,3 +64,32 @@ export function getParentStorePropertyValue(
         return parentStore[propertyName]
     }
 }
+
+/**
+ * Provides the parent store method
+ * @param {string} methodName 
+ * @param {AnyObject | string | number | undefined} parentStore 
+ * @param {Store[] | EppsStore<AnyObject, AnyObject>[]} parentsStores 
+ * @returns Function
+ */
+export function getParentStoreMethod(
+    methodName: string,
+    parentStore: AnyObject | string | number | undefined,
+    parentsStores?: Store[] | EppsStore<AnyObject, AnyObject>[]
+): Function {
+    if (parentsStores) {
+        if (typeof parentStore === 'string' || typeof parentStore === 'number') {
+            parentStore = parentsStores && getParentStore(parentStore, parentsStores)
+        }
+
+        if (typeof parentStore === 'object') {
+            const method = parentStore[methodName]
+
+            if (typeof method === 'function') {
+                return method
+            }
+        }
+    }
+
+    return () => { }
+}

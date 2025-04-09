@@ -15,6 +15,7 @@ import SectionSelector from '../SectionSelector.vue'
 import StoreCreation from './explanation/StoreCreation.vue'
 import SyntaxStoreSelector from '../SyntaxStoreSelector.vue'
 import UseStore from './explanation/UseStore.vue'
+import { ListsStoreMethods } from '../../../stores/lists'
 
 
 const activeSection = ref<'explanation' | 'forms'>('explanation')
@@ -34,7 +35,7 @@ function resetStore() {
 }
 
 
-const listsStore = useListsStore() as EppsStore<CollectionStoreMethods, CollectionState<List>>
+const listsStore = useListsStore() as EppsStore<ListsStoreMethods, CollectionState<List>>
 
 listsStore.remember().then(() => {
     if (!listsStore.items.length) {

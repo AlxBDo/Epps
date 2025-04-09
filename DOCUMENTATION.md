@@ -123,7 +123,7 @@ const item = collectionStore.getItem({ id: 1 });
 console.log(item);
 
 // Retrieve all items
-const allItems = collectionStore.getItems();
+const allItems = collectionStore.items;
 console.log(allItems);
 
 // Search items
@@ -144,147 +144,84 @@ You can extend `useCollectionStore` to add custom logic or integrate it with oth
 
 ```typescript
 import { defineEppsStore, extendedState, useCollectionStore } from "epps";
+import type { CollectionState, CollectionStore } from "epps";
 
-export const useCustomCollectionStore = defineEppsStore(
-    "customCollection",
-    () => ({
-        ...extendedState(
-            [useCollectionStore("exampleCollection")],
-            persist: {
-                watchMutation: ref(true) // Automatically persist on state changes
-            }
-        ),
-        customMethod() {
-            console.log("Custom method executed");
+import { List, SearchCollectionCriteria } from "../types"
+
+export type ListsStoreMethods = CollectionStoreMethods & { getLists: (criteria?: SearchCollectionCriteria) => List[] }
+
+export const useCustomCollectionStore = defineEppsStore<ListsStoreMethods, CollectionState<List>>(
+    "lists",
+    () => {
+        const {
+            excludedKeys,
+            actionsToExtends,
+            parentsStores,
+            persist,
+            persistedPropertiesToEncrypt
+        } = extendedState(
+            [useCollectionStore('listsCollection')],
+            { persist: { watchMutation: ref(true) } } // Automatically persist on state changes
+        )
+
+        function getLists(criteria?: SearchCollectionCriteria) {
+            return parentsStores && getParentStoreMethod('getItems', 0, parentsStores())(criteria)
         }
-    })
+
+        return {
+            actionsToExtends,
+            getLists,
+            excludedKeys,
+            parentsStores,
+            persist,
+            persistedPropertiesToEncrypt
+        }
+    }
 );
 ```
 
 The `useCollectionStore` utility is a powerful tool for managing collections in your application. By combining it with `defineEppsStore`, you can enable persistence and extend its functionality to meet your specific needs.
 
-### Example 1: Basic Store Definition
+### Example: Persisted Store Definition
 
-This example demonstrates a simple store definition with persistence enabled.
+This example demonstrates a simple store definition with persistence enabled and data encryption.
 
 ```typescript
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
 import { defineEppsStore } from "epps";
 
-interface BasicStoreMethods {
-    increment: () => void;
+interface PersistedStoreMethods {
+    setSensitiveData: (sensitiveData: string) => void;
 }
 
-interface BasicStoreState {
-    count: number;
+interface PersistedStoreState {
+    sensitiveData: Ref<string|undefined>;
 }
 
-export const useBasicStore = defineEppsStore<BasicStoreMethods, BasicStoreState>(
+export const usePersistedStore = defineEppsStore<PersistedStoreMethods, PersistedStoreState>(
     "basicStore",
-    () => ({
-        count: ref(0),
-        persist: {
-            watchMutation: ref(true) // Automatically persist on state changes
-        },
-        increment() {
-            this.count++;
+    () => {
+        const persist = ref(true)
+        const persistedPropertiesToEncrypt = ref(["sensitiveData"]) // Encrypt this property
+        const sensitiveData = ref("secret")
+        const watchMutation = ref(true) // Automatically persist on state changes
+
+        function setSensitiveData(newData: string) { 
+            if(newData) {
+                sensitiveData.value = newData
+            }
         }
-    })
+
+        return {
+            persist, 
+            persistedPropertiesToEncrypt, 
+            sensitiveData, 
+            watchMutation
+        }
+    }
 );
 ```
 
-### Example 2: Store with Parent-Child Relationship
-
-This example shows how to define a store that extends a parent store.
-
-```typescript
-import { ref } from "vue";
-import { defineEppsStore, extendedState } from "epps";
-import { useCollectionStore } from "./collection";
-
-export const useChildStore = defineEppsStore(
-    "childStore",
-    () => ({
-        ...extendedState(
-            [useCollectionStore("parentCollection")], // Extend the parent store
-            { persist: { persist: ref(true) } }
-        ),
-        childProperty: ref("childValue"),
-        childMethod() {
-            console.log("Child method called");
-        }
-    })
-);
-```
-
-### Example 3: Store with Encrypted Persistence
-
-This example demonstrates how to define a store with encrypted persistence for sensitive data.
-
-```typescript
-import { ref } from "vue";
-import { defineEppsStore } from "epps";
-
-export const useSecureStore = defineEppsStore(
-    "secureStore",
-    () => ({
-        sensitiveData: ref("secret"),
-        persist: {
-            persistedPropertiesToEncrypt: ref(["sensitiveData"]), // Encrypt this property
-            watchMutation: ref(true)
-        }
-    })
-);
-```
-
-### Example 4: Store with Custom Actions and State
-
-This example shows how to define a store with custom actions and state, while extending another store.
-
-```typescript
-import { ref } from "vue";
-import { defineEppsStore, extendedState } from "epps";
-import { useCollectionStore } from "./collection";
-
-export const useCustomStore = defineEppsStore(
-    "customStore",
-    () => ({
-        ...extendedState(
-            [useCollectionStore("customCollection")],
-            { persist: { persist: ref(true) } }
-        ),
-        customState: ref("customValue"),
-        customAction() {
-            console.log("Custom action executed");
-        }
-    })
-);
-```
-
-### Example 5: Store with Multiple Parent Stores
-
-This example demonstrates how to define a store that extends multiple parent stores.
-
-```typescript
-import { ref } from "vue";
-import { defineEppsStore, extendedState } from "epps";
-import { useCollectionStore } from "./collection";
-import { useItemStore } from "./item";
-
-export const useMultiParentStore = defineEppsStore(
-    "multiParentStore",
-    () => ({
-        ...extendedState(
-            [useCollectionStore("collectionParent"), useItemStore("itemParent")],
-            { persist: { persist: ref(true) } }
-        ),
-        additionalState: ref("additionalValue"),
-        additionalAction() {
-            console.log("Additional action executed");
-        }
-    })
-);
-```
 
 ## Testing Pinia Stores with `epps`
 

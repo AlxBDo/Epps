@@ -68,7 +68,7 @@ pinia.use(epps)
 #### Nuxt
 
 ```typeScript
-// ./plugins/epps-plugin.ts
+// ./plugins/epps-plugin.client.ts
 import type { Pinia, PiniaPlugin, PiniaPluginContext } from "pinia"
 import { createPlugin } from 'epps'
 
@@ -96,7 +96,7 @@ The `useListsStore` store demonstrates how to create a collection-based store us
 import { ref } from "vue";
 import { defineEppsStore, extendedState, useCollectionStore } from 'epps';
 import type { CollectionState, CollectionStoreMethods } from "epps";
-import type { List } from "../models/liste";
+import type { List } from "../models/list";
 
 const defaultStoreId: string = 'lists';
 
@@ -160,5 +160,5 @@ This example shows how to add a new list and retrieve all lists from the `useLis
 
 ## For more details
 
-Read [Documentation](https://github.com/AlxBDo/Epps/DOCUMENTATION.md)
-Refer to the plugin's GitHub repository: [https://github.com/AlxBDo/Epps](https://github.com/AlxBDo/Epps).
+- Read [Documentation](https://github.com/AlxBDo/Epps/blob/main/DOCUMENTATION.md) 
+- Refer to the plugin's GitHub repository: [https://github.com/AlxBDo/Epps](https://github.com/AlxBDo/Epps).

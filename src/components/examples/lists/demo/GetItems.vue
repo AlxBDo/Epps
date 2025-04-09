@@ -4,17 +4,18 @@ import MethodDemoForm from '../../../shared/form/MethodDemoForm.vue'
 import type { } from '../../../../stores/collection'
 import type { CollectionState, CollectionStoreMethods, ExtendedStore } from '../../../../types/store'
 import type { List } from '../../../../models/liste'
+import { ListsStoreMethods } from '../../../../stores/lists'
 
 const props = defineProps({
     listsStore: {
-        type: Object as PropType<ExtendedStore<CollectionStoreMethods, CollectionState<List>>>,
+        type: Object as PropType<ExtendedStore<ListsStoreMethods, CollectionState<List>>>,
         required: true
     }
 })
 const itemType = ref<string>('0')
 
 function getItemsByType() {
-    return { result: props.listsStore.getItems({ type: itemType.value }), name: 'List' }
+    return { result: props.listsStore.getLists({ type: itemType.value }), name: 'List' }
 }
 </script>
 

@@ -2,6 +2,7 @@ import WindowStorage from './WindowStorage'
 import { AllowedKeyPath, ClientStorage, StorageItem } from '../types/storage'
 import IndexedDB from './IndexedDB'
 import { log, logError } from '../utils/log'
+import { localStorageMock } from '../testing/mocks/localStorage'
 
 export type DbOptions = {
     keyPath?: AllowedKeyPath
@@ -18,6 +19,9 @@ export default class Persister {
     }
 
     defineDb(): ClientStorage {
+        // Nuxt error fix
+        if (!window) { return localStorageMock }
+
         let { keyPath, name } = this._db_options
         let db: ClientStorage
 

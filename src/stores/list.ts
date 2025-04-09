@@ -7,6 +7,8 @@ import { defineStore } from "pinia";
 import { defineEppsStore } from "../utils/store";
 import { ref } from "vue";
 import { User } from "../models/user";
+import { SearchCollectionCriteria } from "../types";
+import { getParentStoreMethod } from "../plugins/parentStore";
 
 
 export type ListStoreState = IItemStoreState & ExtendedState & CollectionState<List>
