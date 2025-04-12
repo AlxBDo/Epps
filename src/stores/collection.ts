@@ -6,6 +6,10 @@ import { arrayObjectFindAllBy, arrayObjectFindBy } from '../utils/object'
 
 type AugmentingStore = (id: string) => AugmentOptionApiStore<CollectionStoreMethods, CollectionState<AnyObject>>
 
+function getItemCriteria(item: AnyObject): SearchCollectionCriteria {
+    return item.id ? { id: item.id } : { '@id': item['@id'] }
+}
+
 
 export const useCollectionStore: AugmentingStore = (id: string) => defineStore(id, {
     state: (): CollectionState<AnyObject> => ({
@@ -17,7 +21,10 @@ export const useCollectionStore: AugmentingStore = (id: string) => defineStore(i
             let foundedItem: AnyObject | undefined
 
             if (item.id || item['@id']) {
-                foundedItem = this.getItem(item)
+                foundedItem = this.getItem(
+                    getItemCriteria(item)
+                )
+
                 if (foundedItem) {
                     this.updateItem(item, foundedItem)
                     return
@@ -64,7 +71,7 @@ export const useCollectionStore: AugmentingStore = (id: string) => defineStore(i
 
         updateItem(updatedItem: AnyObject, oldItem?: AnyObject) {
             if (!oldItem) {
-                oldItem = this.getItem(updatedItem)
+                oldItem = this.getItem(getItemCriteria(updatedItem))
             }
 
             if (oldItem) {

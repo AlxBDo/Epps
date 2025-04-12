@@ -1,10 +1,10 @@
-import { describe, expect, it, vi } from 'vitest'
-import { createTestingPinia } from '@pinia/testing'
+import { describe, expect, it } from 'vitest'
 
 import { beforeEachPiniaPlugin } from './utils/beforeEach'
-import { ListStoreState, useListStore } from '../stores/list'
+import { useListsStore, type ListsStoreMethods } from '../stores/lists'
 
-import type { CollectionStoreMethods, EppsStore } from '../types'
+import type { CollectionState, EppsStore } from '../types'
+import { List } from '../models/liste'
 
 
 const lists = [
@@ -17,10 +17,10 @@ const lists = [
 describe('ListsStore extends collectionStore', () => {
     beforeEachPiniaPlugin()
 
-    let listsStore: EppsStore<CollectionStoreMethods, ListStoreState> | undefined
+    let listsStore: EppsStore<ListsStoreMethods, CollectionState<List>> | undefined
 
     it('Has addItem method', () => {
-        listsStore = useListStore('lists-testing') as EppsStore<CollectionStoreMethods, ListStoreState>
+        listsStore = useListsStore('lists-testing') as EppsStore<ListsStoreMethods, CollectionState<List>>
         listsStore.addItem(lists[0])
 
         expect(listsStore.getItems()).toHaveLength(1)
@@ -58,12 +58,30 @@ describe('ListsStore extends collectionStore', () => {
         }
     })
 
+    it('Can use parent store method in child store method', () => {
+        if (listsStore) {
+            expect(listsStore.getLists()).toHaveLength(lists.length)
+            expect(listsStore.getLists({ id: 2 })).toStrictEqual([lists[1]])
+            expect(listsStore.getLists({ type: '0' })).toStrictEqual([lists[0], lists[3]])
+        }
+    })
+
     it('Has updateItem method', () => {
         if (listsStore) {
             const updatedItem = { ...lists[0], name: 'updatedList1' }
-            listsStore.updateItem(updatedItem, lists[0])
+            listsStore.updateItem(updatedItem)
 
             expect(listsStore.getItems({ id: 1 })).toStrictEqual([updatedItem])
+        }
+    })
+
+
+    it('Add existing item update it', () => {
+        if (listsStore) {
+            const newItem = { ...lists[1], name: 'updatedList2' }
+            listsStore.addItem(newItem)
+
+            expect(listsStore.getItem({ id: 2 })).toStrictEqual(newItem)
         }
     })
 
@@ -72,6 +90,7 @@ describe('ListsStore extends collectionStore', () => {
             listsStore.removeItem({ id: 1 })
 
             expect(listsStore.items).toHaveLength(3)
+            expect(listsStore.getItem({ id: 1 })).toBeUndefined()
         }
     })
 })

@@ -87,6 +87,18 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
         }
     })
 
+    it('Remember state with decrypted properties', async () => {
+        const otherUserStore = useConnectedUserStore() as EppsStore<UserStore, UserState>
+
+        expect(otherUserStore.firstname).not.toBeDefined()
+        expect(otherUserStore.id).not.toBeDefined()
+        expect(otherUserStore.lastname).not.toBeDefined()
+
+        await otherUserStore.remember()
+
+        expect(otherUserStore.user).toStrictEqual({ ...user, lastname: newLastname, '@id': undefined })
+    })
+
     it('$reset method clear all states (child and parents) and persisted data', async () => {
         if (connectedUserStore) {
             connectedUserStore.$reset()

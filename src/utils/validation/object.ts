@@ -19,7 +19,7 @@ export const areIdentical = (object1: AnyObject, object2: AnyObject, excludedKey
     const object2Keys = object2 && Object.keys(object2)
 
     if (
-        !object2 || !object2Keys || (!excludedKeys && object1.length !== object2.length)
+        !object2 || !object2Keys || (!excludedKeys && object1Keys.length !== object2Keys.length)
         || (
             excludedKeys &&
             object1Keys.filter((property: string) => !excludedKeys.includes(property)).length !== object2Keys.filter((property: string) => !excludedKeys.includes(property)).length

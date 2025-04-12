@@ -1,7 +1,5 @@
 import CryptoJS from "crypto-js";
 
-const logStyleOptions = { bgColor: 'black', icon: '🧮' }
-
 
 export default class Crypt {
     private _key: any;

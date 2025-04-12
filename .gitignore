@@ -13,6 +13,9 @@ dist-ssr
 *.local
 module-declaration.ts
 
+# tests
+coverage/*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

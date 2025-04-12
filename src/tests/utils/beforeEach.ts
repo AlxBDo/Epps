@@ -1,8 +1,7 @@
 import { beforeEach } from "vitest"
 import { createPinia, setActivePinia } from "pinia"
-import { createTestingPinia } from "@pinia/testing"
 import { createPluginMock } from "../../testing/mocks/epps"
-import { App, createApp } from "vue"
+import { createApp } from "vue"
 
 
 export function beforeEachPiniaPlugin() {
@@ -11,7 +10,7 @@ export function beforeEachPiniaPlugin() {
         const app = createApp({})
 
         const pinia = createPinia().use(
-            createPluginMock('localStorage', 'CryptK€Y-EPpS_t35t!n9&%?qa31z', 'Cryptk€Y-EPpS_t35t!n9')
+            createPluginMock('localStorage', 'HrN2t2nCr6pTkEy20221l2B3dOcPr4j2', 'HrN2t2nCr6pTiV22')
         )
 
         app.use(pinia)

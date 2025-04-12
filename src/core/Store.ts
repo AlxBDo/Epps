@@ -22,8 +22,6 @@ export default class Store {
 
     get store(): AnyObject { return this._store }
 
-    set store(store: PiniaStore) { this._store = store }
-
 
     constructor(store: PiniaStore) {
         this._store = store
@@ -70,10 +68,6 @@ export default class Store {
 
     getValue(value: AnyObject) {
         return value?.__v_isRef ? value.value : value
-    }
-
-    hasParentsStores(): boolean {
-        return Array.isArray(this.parentsStores) && !!this.parentsStores.length
     }
 
     isOptionApi(): boolean { return this.store._isOptionsAPI }

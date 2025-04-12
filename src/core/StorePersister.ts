@@ -87,6 +87,7 @@ export default class StorePersister extends Store {
             const encryptedState = {} as StateTree
 
             persistedPropertiesToEncrypt.forEach((property: string) => {
+
                 if (state[property]) {
                     const value = this.getValue(state[property])
                     encryptedState[property] = decrypt ? Crypt.decrypt(value) : Crypt.encrypt(value)
@@ -106,7 +107,7 @@ export default class StorePersister extends Store {
             let persistedState = await (this._persister as Persister).getItem(storeName) as StateTree
 
             if (this.toBeCrypted() && persistedState) {
-                persistedState = this.cryptState({ ...toRaw(this.state), ...persistedState }, true)
+                persistedState = this.cryptState({ ...toRaw(this.state), ...persistedState, isEncrypted: true }, true)
             }
 
             return persistedState

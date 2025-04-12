@@ -14,14 +14,15 @@ export default class Persister {
     private _db_options: DbOptions
 
     constructor(dbOptions: DbOptions) {
+        if (!dbOptions) {
+            throw new Error('DbOptions is required')
+        }
+
         this._db_options = dbOptions
         this._db = this.defineDb()
     }
 
     defineDb(): ClientStorage {
-        // Nuxt error fix
-        if (!window) { return localStorageMock }
-
         let { keyPath, name } = this._db_options
         let db: ClientStorage
 

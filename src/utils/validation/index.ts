@@ -1,6 +1,6 @@
 export function isEmpty(value: any): boolean {
     if (!value) {
-        return typeof value === 'boolean' || typeof value === 'number'
+        return (typeof value === 'boolean' || typeof value === 'number') ? false : true
     }
 
     if (Array.isArray(value)) {
@@ -12,7 +12,7 @@ export function isEmpty(value: any): boolean {
     }
 
     if (typeof value === 'string') {
-        return value === ''
+        return value.trim() === ''
     }
 
     return false

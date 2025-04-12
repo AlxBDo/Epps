@@ -9,16 +9,21 @@ import { log } from '../../../utils/log';
 const connectedUser = useConnectedUserStore() as ExtendedStore<UserStore, UserState>
 
 connectedUser.setData({
-    email: 'connecteduser@mail.com',
-    firstname: 'Connecteduser',
+    email: 'mitchwee@mail.com',
+    firstname: 'Mitch',
+    id: 1,
+    lastname: 'Wee',
     password: 'C4Nn€cT2D@!12'
 })
 
 log('connectedUser', connectedUser.user)
 
-setTimeout(() => {
+setTimeout(async () => {
+    //const anotherUser = useConnectedUserStore() as ExtendedStore<UserStore, UserState>
+    //await anotherUser.remember()
+    //log('anotherUser', anotherUser.user)
     connectedUser.$reset()
-    log('reset user', connectedUser.user)
+    log('$reset user', connectedUser.user)
 }, 3000)
 </script>
 
