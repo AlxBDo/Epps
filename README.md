@@ -1,9 +1,9 @@
 
-# `Epps!` - Extends and Persist Pinia Store
+# `epps` - Extends and Persist Pinia Store
 
 ## Introduction
 
-Epps! is a plugin for the Pinia state management library in Vue.js. It extends Pinia stores with advanced features such as persistence, encryption, and store extension. It simplifies state and action management while ensuring sensitive data is protected and enabling seamless integration of parent-child store relationships.
+`epps` is a plugin for the Pinia state management library in Vue.js. It extends Pinia stores with advanced features such as persistence, encryption, and store extension. It simplifies state and action management while ensuring sensitive data is protected and enabling seamless integration of parent-child store relationships.
 
 ## Advantages
 
@@ -11,7 +11,7 @@ Epps! is a plugin for the Pinia state management library in Vue.js. It extends P
 - **Data Persistence**: Retains store state between user sessions using IndexedDB or LocalStorage.
 - **Data Security**: Encrypts persisted data to protect sensitive information.
 
-By using the Epps plugin, you can create more powerful and flexible Pinia stores while ensuring data security and simplifying state management in your Vue.js or Nuxt application.
+By using the `epps` plugin, you can create more powerful and flexible Pinia stores while ensuring data security and simplifying state management in your Vue.js or Nuxt application.
 
 ## Features
 
@@ -77,7 +77,7 @@ export default defineNuxtPlugin({
     async setup({ $pinia }) {
         ($pinia as Pinia).use(
             createPlugin(
-                'localStorage',
+                'localStorage', // define another database name to use IndexedDB
                 useRuntimeConfig().public.cryptIv,
                 useRuntimeConfig().public.cryptKey
             )
@@ -130,9 +130,9 @@ import type { List } from "../models/liste"
 const listsStore = useListsStore() as EppsStore<CollectionStoreMethods, CollectionState<List>>
 
 /**
- * ⚠️ NUXT 
+ * ⚠️ In Nuxt application ⚠️
  * 
- * In nuxt application, calling a method from a parent Store causes an error if the page is refreshed or if it is 
+ * calling a method from a parent Store causes an error if the page is refreshed or if it is 
  * the application's entry point To solve this problem, check that the method exists before 
  * calling it.
  * 

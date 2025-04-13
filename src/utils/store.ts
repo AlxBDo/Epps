@@ -26,7 +26,3 @@ export const persistedState = (
 export function defineEppsStore<Sto, Sta>(id: string, storeDefinition: () => AnyObject): DefineEppsStore<Sto, Sta> {
     return defineStore(id, storeDefinition)
 }
-
-export function getStoreName(store: AnyObject): string {
-    return store.hasOwnProperty('getStoreName') ? store.getStoreName() : store.$id
-}

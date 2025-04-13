@@ -1,42 +1,58 @@
 import { extendedState } from "../plugins/extendedState";
-import { useItemStore, type IItemStoreState } from "./item";
+import { IItemStore, useItemStore, type IItemStoreState } from "./item";
 import type { CollectionState, CollectionStoreMethods, ExtendedState } from "../types/store";
 import type { List } from "../models/liste";
 import { useCollectionStore } from "./collection";
-import { defineStore } from "pinia";
 import { defineEppsStore } from "../utils/store";
-import { ref } from "vue";
+import { Ref, ref } from "vue";
 import { User } from "../models/user";
-import { SearchCollectionCriteria } from "../types";
 import { getParentStoreMethod } from "../plugins/parentStore";
+import { ListTypes } from "../types/list";
+import { Item } from "../models/item";
 
 
-export type ListStoreState = IItemStoreState & ExtendedState & CollectionState<List>
+export interface ListStoreState extends IItemStoreState, ExtendedState, CollectionState<Item>, Omit<List, 'items'> {
+    guest?: Ref<User[]> | User[]
+    owner?: Ref<User> | User
+}
+export type ListStoreMethods = CollectionStoreMethods & IItemStore & { setData: (data: ListStoreState) => void }
 
-/**
-export const useListStore = (id: string | number) => defineStore(`list-${id}`, {
-    state: (): ListStoreState => ({
-        ...extendedState(
-            [useItemStore(`list-item-${id}`), useCollectionStore(`list-${id}-items`)]
-        ),
-        guest: [],
-        owner: undefined,
-        type: undefined
-    }),
-})
- */
 
 export const useListStore = (id: string | number) => defineEppsStore<CollectionStoreMethods, ListStoreState>(
     `list-${id}`,
-    () => ({
-        ...extendedState(
+    () => {
+        const extendedStates = extendedState(
             [useItemStore(`list-item-${id}`), useCollectionStore(`list-${id}-items`)],
-            {
-                isOptionApi: false,
-                persist: { persist: ref(true), watchMutation: ref(true) }
+            { actionsToExtends: ['setData'] }
+        )
+        const guest = ref<User[]>([])
+        const owner = ref<User>()
+        const type = ref<ListTypes>()
+
+        function setData(data: ListStoreState) {
+            if (data.guest) { guest.value = Array.isArray(data.guest) ? data.guest : data.guest?.value; }
+
+            if (data.items) {
+                const setItems = extendedStates.parentsStores && getParentStoreMethod(
+                    'setItems',
+                    `list-${id}-items`,
+                    extendedStates.parentsStores()
+                )
+
+                setItems && setItems(data.items)
             }
-        ),
-        guest: ref<User[]>([]),
-        owner: ref<User>()
-    })
+
+            if (data.owner) { owner.value = (data.owner as Ref)?.value ?? data.owner; }
+
+            if (data.type) { type.value = data.type }
+        }
+
+        return {
+            ...extendedStates,
+            guest,
+            owner,
+            type,
+            setData
+        }
+    }
 )()

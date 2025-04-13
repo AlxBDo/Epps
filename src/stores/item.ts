@@ -17,7 +17,7 @@ export const useItemStore = (id?: string) => defineStore(id ?? 'item', {
     }),
 
     actions: {
-        setData(data: IItemStoreState) {
+        setData(data: Partial<IItemStoreState>) {
             if (data['@id']) { this['@id'] = data['@id'] }
 
             if (data.id) { this.id = data.id }

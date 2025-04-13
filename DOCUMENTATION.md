@@ -2,6 +2,28 @@
 
 The `epps` plugin provides advanced features for managing Pinia stores, such as persistence, encryption, and store extension. Below, we detail its usage and provide examples of defining stores using the `defineEppsStore` function.
 
+
+## Table des matières
+- [Overview of `defineEppsStore`](#overview-of-defineeppsstore)
+- [Type Requirements](#type-requirements)
+- [Prototype of `extendedState`](#prototype-of-extendedstate)
+- [Interface: `ExtendedState`](#interface-extendedstate)
+- [Interface: `ExtendedStateOptions`](#interface-extendedstateoptions)
+- [`useCollectionStore`](#usecollectionstore)
+  - [Prototype](#prototype)
+  - [Features](#features)
+  - [Interfaces](#interfaces)
+    - [`CollectionState`](#collectionstate)
+    - [`CollectionStoreMethods`](#collectionstoremethods)
+  - [Example: Basic Usage of `useCollectionStore`](#example-basic-usage-of-usecollectionstore)
+- [Epps Stores examples](#epps-stores-examples)
+  - [Example: Extending `useCollectionStore`](#example-extending-usecollectionstore)
+  - [Example: Persisted Store Definition](#example-persisted-store-definition)
+  - [Example: Store Definition extending several parent Stores](#example-store-definition-extending-several-parent-stores)
+- [Testing Pinia Stores with `epps`](#testing-pinia-stores-with-epps)
+  - [Example: Using `createPluginMock` in a `beforeEach` Setup](#example-using-createpluginmock-in-a-beforeeach-setup)
+- [Dependencies](#dependencies)
+
 ## Overview of `defineEppsStore`
 
 The `defineEppsStore` function is a utility provided by the `epps` plugin to define stores with extended capabilities. It allows you to:
@@ -220,6 +242,71 @@ export const usePersistedStore = defineEppsStore<PersistedStoreMethods, Persiste
         }
     }
 );
+```
+
+### Example: Store Definition extending several parent Stores
+
+This example shows the definition of a non-persisted Store, extending several parent Stores whose id is defined dynamically. In addition, the Store extends the setData method also declared in the parent Store useItemStore. For the setData method to be extended, it must be declared in the extendedState.options.actionsToExtends parameter (see [`ExtendedStateOptions`](#interface-extendedstateoptions)).
+
+```typescript
+import { defineStore } from "pinia";
+import { defineEppsStore, extendedState,  getParentStoreMethod, useCollectionStore } from "epps";
+import { Ref, ref } from "vue";
+
+import { ItemStore, useItemStore, type ItemStoreState } from "./item";
+import { User } from "../models/user";
+import { ListTypes } from "../types/list";
+import { Item } from "../models/item";
+
+import type { CollectionState, CollectionStoreMethods, ExtendedState } from "epps";
+import type { List } from "../models/liste";
+
+
+export interface ListStoreState extends ItemStoreState, ExtendedState, CollectionState<Item>, Omit<List, 'items'> {
+    guest?: Ref<User[]> | User[]
+    owner?: Ref<User> | User
+}
+export type ListStoreMethods = CollectionStoreMethods & ItemStore & { setData: (data: ListStoreState) => void }
+
+
+export const useListStore = (id: string | number) => defineEppsStore<CollectionStoreMethods, ListStoreState>(
+    `list-${id}`,
+    () => {
+        const extendedStates = extendedState(
+            [useItemStore(`list-item-${id}`), useCollectionStore(`list-${id}-items`)],
+            { actionsToExtends: ['setData'] }
+        )
+        const guest = ref<User[]>([])
+        const owner = ref<User>()
+        const type = ref<ListTypes>()
+
+        function setData(data: ListStoreState) {
+            if (data.guest) { guest.value = Array.isArray(data.guest) ? data.guest : data.guest?.value; }
+
+            if (data.items) {
+                const setItems = extendedStates.parentsStores && getParentStoreMethod(
+                    'setItems',
+                    `list-${id}-items`,
+                    extendedStates.parentsStores()
+                )
+
+                setItems && setItems(data.items)
+            }
+
+            if (data.owner) { owner.value = (data.owner as Ref)?.value ?? data.owner; }
+
+            if (data.type) { type.value = data.type }
+        }
+
+        return {
+            ...extendedStates,
+            guest,
+            owner,
+            type,
+            setData
+        }
+    }
+)()
 ```
 
 
