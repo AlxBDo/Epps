@@ -13,7 +13,7 @@
   "files": [
     "dist"
   ],
-  "version": "0.1.5",
+  "version": "0.1.62",
   "type": "module",
   "main": "./dist/epps.umd.cjs",
   "module": "./dist/epps.js",
@@ -33,7 +33,6 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@vitest/coverage-v8": "^3.1.1",
     "crypto-js": "^4.2.0",
     "pinia": "^3.0.1",
     "vue": "^3.5.13"
@@ -42,6 +41,7 @@
     "@pinia/testing": "^1.0.0",
     "@types/crypto-js": "^4.2.2",
     "@vitejs/plugin-vue": "^5.2.1",
+    "@vitest/coverage-v8": "^3.1.1",
     "@vitest/ui": "^3.1.1",
     "typescript": "^5.8.2",
     "vite": "^6.1.1",
