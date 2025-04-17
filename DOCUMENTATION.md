@@ -17,11 +17,11 @@ The `epps` plugin provides advanced features for managing Pinia stores, such as 
     - [`CollectionStoreMethods`](#collectionstoremethods)
   - [Example: Basic Usage of `useCollectionStore`](#example-basic-usage-of-usecollectionstore)
 - [Epps Stores examples](#epps-stores-examples)
-  - [Example: Extending `useCollectionStore`](#example-extending-usecollectionstore)
-  - [Example: Persisted Store Definition](#example-persisted-store-definition)
-  - [Example: Store Definition extending several parent Stores](#example-store-definition-extending-several-parent-stores)
+  - [Extending `useCollectionStore`](#example-extending-usecollectionstore)
+  - [Persisted Store Definition](#example-persisted-store-definition)
+  - [Store Definition extending several parent Stores](#example-store-definition-extending-several-parent-stores)
+  - [Store deep inheritance and Store parent method extension](#example-Store-deep-inheritance-and-Store-parent-method-extension)
 - [Testing Pinia Stores with `epps`](#testing-pinia-stores-with-epps)
-  - [Example: Using `createPluginMock` in a `beforeEach` Setup](#example-using-createpluginmock-in-a-beforeeach-setup)
 - [Dependencies](#dependencies)
 
 ## Overview of `defineEppsStore`
@@ -246,10 +246,9 @@ export const usePersistedStore = defineEppsStore<PersistedStoreMethods, Persiste
 
 ### Example: Store Definition extending several parent Stores
 
-This example shows the definition of a non-persisted Store, extending several parent Stores whose id is defined dynamically. In addition, the Store extends the setData method also declared in the parent Store useItemStore. For the setData method to be extended, it must be declared in the extendedState.options.actionsToExtends parameter (see [`ExtendedStateOptions`](#interface-extendedstateoptions)).
+This example shows the definition of a non-persisted Store, extending several parent Stores whose id is defined dynamically.
 
 ```typescript
-import { defineStore } from "pinia";
 import { defineEppsStore, extendedState,  getParentStoreMethod, useCollectionStore } from "epps";
 import { Ref, ref } from "vue";
 
@@ -273,8 +272,7 @@ export const useListStore = (id: string | number) => defineEppsStore<CollectionS
     `list-${id}`,
     () => {
         const extendedStates = extendedState(
-            [useItemStore(`list-item-${id}`), useCollectionStore(`list-${id}-items`)],
-            { actionsToExtends: ['setData'] }
+            [useItemStore(`list-item-${id}`), useCollectionStore(`list-${id}-items`)]
         )
         const guest = ref<User[]>([])
         const owner = ref<User>()
@@ -309,6 +307,175 @@ export const useListStore = (id: string | number) => defineEppsStore<CollectionS
 )()
 ```
 
+### Example: Store deep inheritance and Store parent method extension
+
+
+This example presents the useUserStore. This store inherits from the useContactStore, which in turn inherits from the useItemStore. 
+In addition, the Store extends the setData method also declared in the parent Store useItemStore. For the setData method to be extended, it must be declared in the extendedState.options.actionsToExtends parameter (see [`ExtendedStateOptions`](#interface-extendedstateoptions)).
+
+```typescript
+// ./stores/item.ts
+import { defineStore } from "pinia";
+import type { Item } from "../models/item";
+
+export interface IItemStore {
+    setData: (data: Item) => void
+}
+
+export const useItemStore = (id?: string) => defineStore(id ?? 'item', {
+    state: (): Item => ({
+        "@id": undefined,
+        id: undefined
+    }),
+
+    actions: {
+        setData(data: Partial<Item>) {
+            if (data['@id']) { this['@id'] = data['@id'] }
+            if (data.id) { this.id = data.id }
+        }
+    }
+})()
+```
+
+```typescript
+// ./stores/contact.ts
+import { computed, ref } from "vue";
+import { defineEppsStore, defineStoreId, extendedState, getParentStorePropertyValue } from "epps"
+import { Store } from "pinia";
+
+import { useItemStore } from "./item"
+
+import type { Contact } from "../models/contact"
+import type { ExtendState } from "../types/store";
+import type { Item } from "../models/item"
+
+
+export interface ContactStore {
+    setData: (data: ContactState) => void
+    contact: Contact
+}
+
+export type ContactState = ExtendState<Item, Contact>
+
+export const useContactStore = (id?: string) => defineEppsStore<ContactStore, ContactState>(
+    id ?? 'contact',
+    () => {
+        const email = ref<string>()
+        const firstname = ref<string>()
+        const lastname = ref<string>()
+
+        const {
+            excludedKeys,
+            actionsToExtends,
+            parentsStores,
+            persist,
+            persistedPropertiesToEncrypt
+        } = extendedState(
+            [useItemStore(defineStoreId(id ?? 'contact', 'item'))],
+            { actionsToExtends: ['setData'] }
+        )
+
+
+        const contact = computed(() => ({
+            '@id': parentsStores && getParentStorePropertyValue('@id', 0, parentsStores() ?? ([] as Store[])),
+            id: parentsStores && getParentStorePropertyValue('id', 0, parentsStores()),
+            email: email.value,
+            firstname: firstname.value,
+            lastname: lastname.value
+        }))
+
+
+        function setData(data: ContactState) {
+            if (data.email) { email.value = data.email; }
+            if (data.firstname) { firstname.value = data.firstname; }
+            if (data.lastname) { lastname.value = data.lastname; }
+            // When this method is called, the parent Store method is also executed.
+            //This is possible because the “setData” method is defined in the ‘actionsToExtends’ parameter of the “extendedState” function.
+        }
+
+        return {
+            actionsToExtends,
+            contact,
+            email,
+            firstname,
+            excludedKeys,
+            lastname,
+            parentsStores,
+            persist,
+            persistedPropertiesToEncrypt,
+            setData
+        }
+    }
+)()
+```
+
+```typescript
+// ./stores/user.ts
+
+import { computed, ref } from "vue";
+import { defineEppsStore, defineStoreId, extendedState, getParentStorePropertyValue } from "epps"
+
+import { useContactStore } from "./contact"
+
+import type { ExtendState } from "epps"
+
+import type { Contact } from "../models/contact"
+import type { List } from "../models/list"
+import type { User } from "../models/user"
+
+
+export interface UserStore {
+    setData: (data: UserState) => void
+    user: User
+}
+
+export type UserState = ExtendState<Contact, User>
+
+export const useUserStore = (id?: string) => defineEppsStore<UserStore, UserState>(
+    id ?? 'contact',
+    () => {
+        const lists = ref<List[]>()
+        const password = ref<string>()
+
+        const {
+            excludedKeys,
+            actionsToExtends,
+            parentsStores,
+            persist,
+            persistedPropertiesToEncrypt
+        } = extendedState(
+            [useContactStore(defineStoreId(id ?? 'user', 'contact'))],
+            { actionsToExtends: ['setData'] }
+        )
+
+        const user = computed(() => ({
+            ...(parentsStores ? getParentStorePropertyValue('contact', 0, parentsStores()) : {}),
+            password: password.value
+        }))
+
+
+        function setData(data: UserState) {
+            if (data.lists) { lists.value = data.lists; }
+            if (data.password) { password.value = data.password; }
+            // When this method is called, the parent Store method is also executed.
+            // This is possible because the “setData” method is defined in the ‘actionsToExtends’ parameter of the “extendedState” function.
+        }
+
+        return {
+            actionsToExtends,
+            excludedKeys,
+            lists,
+            parentsStores,
+            password,
+            persist,
+            persistedPropertiesToEncrypt,
+            setData,
+            user
+        }
+    }
+)()
+```
+
 
 ## Testing Pinia Stores with `epps`
 
@@ -320,9 +487,9 @@ Here is an example of how to use `createPluginMock` in a `beforeEach` setup func
 
 ```typescript
 import { beforeEach } from "vitest";
-import { createPinia, setActivePinia } from "pinia";
-import { createPluginMock } from "../../testing/mocks/epps";
 import { createApp } from "vue";
+import { createPinia, setActivePinia } from "pinia";
+import { createPluginMock } from "epps";
 
 export function beforeEachPiniaPlugin() {
     beforeEach(() => {

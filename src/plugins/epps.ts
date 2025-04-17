@@ -14,10 +14,12 @@ export interface EppsConstructorProps {
     dbKeyPath?: AllowedKeyPath
     cryptKey?: string
     cryptIv?: string
+    debug?: boolean
 }
 
 export class Epps {
     private _db: Persister
+    private _debug: boolean = false
     private _crypt?: Crypt
     private _watchedStore: string[] = []
 
@@ -26,8 +28,9 @@ export class Epps {
 
     get crypt(): Crypt | undefined { return this._crypt }
 
-    constructor(db: Persister, crypt?: Crypt) {
+    constructor(db: Persister, crypt?: Crypt, debug: boolean = false) {
         this._db = db
+        this._debug = debug
 
         if (crypt) { this._crypt = crypt }
     }
@@ -36,8 +39,8 @@ export class Epps {
         try {
             const { store } = context
 
-            new StoreExtension(store)
-            new StorePersister(store, this._db, this._watchedStore, this._crypt)
+            new StoreExtension(store, this._debug)
+            new StorePersister(store, this._db, this._watchedStore, this._crypt, this._debug)
             this.rewriteResetStore(context, Object.assign({}, store.$state))
         } catch (e) {
             logError('plugin()', [e, context])
@@ -64,7 +67,7 @@ export class Epps {
     }
 }
 
-export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin {
+export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string, debug: boolean = false): PiniaPlugin {
     if (!dbName) {
         new Error('Database name is required')
     }
@@ -77,7 +80,7 @@ export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string
             crypt = new Crypt(cryptKey, cryptIv)
         }
 
-        const augmentPinia = new Epps(db, crypt)
+        const augmentPinia = new Epps(db, crypt, debug)
 
         return augmentPinia.plugin.bind(augmentPinia)
     }

@@ -31,12 +31,18 @@ export default class StorePersister extends Store {
         'watchMutation'
     ]
 
-    constructor(store: PiniaStore, persister: Persister, watchedStore: string[], crypt?: Crypt) {
+    constructor(
+        store: PiniaStore,
+        persister: Persister,
+        watchedStore: string[],
+        crypt?: Crypt,
+        debug: boolean = false
+    ) {
         if (!(persister instanceof Persister)) {
             throw new Error('StorePersister must be instanciated with a Persister')
         }
 
-        super(store)
+        super(store, debug)
 
         this._persister = persister
         this._watchedStore = watchedStore ?? []
@@ -80,21 +86,34 @@ export default class StorePersister extends Store {
         const persistedPropertiesToEncrypt = this.getValue(state.persistedPropertiesToEncrypt)
         const isEncrypted = this.getValue(state.isEncrypted)
 
+        this.debugLog(`cryptState - ${this.getStoreName()} ${decrypt ? 'decrypt' : 'crypt'}`, [
+            'can',
+            Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0
+            && isEncrypted === decrypt && !!Crypt,
+            [
+                Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0,
+                Crypt
+            ],
+            state
+        ])
+
         if (
             Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0
-            && isEncrypted === decrypt && Crypt
+            && Crypt
         ) {
             const encryptedState = {} as StateTree
 
             persistedPropertiesToEncrypt.forEach((property: string) => {
 
-                if (state[property]) {
+                if (!isEmpty(state[property])) {
                     const value = this.getValue(state[property])
                     encryptedState[property] = decrypt ? Crypt.decrypt(value) : Crypt.encrypt(value)
                 }
             })
 
-            state = { ...state, ...encryptedState, isEncrypted: !decrypt }
+            if (!isEmpty(encryptedState)) {
+                state = { ...state, ...encryptedState, isEncrypted: !decrypt }
+            }
         }
 
         return state
@@ -107,8 +126,10 @@ export default class StorePersister extends Store {
             let persistedState = await (this._persister as Persister).getItem(storeName) as StateTree
 
             if (this.toBeCrypted() && persistedState) {
-                persistedState = this.cryptState({ ...toRaw(this.state), ...persistedState, isEncrypted: true }, true)
+                persistedState = this.cryptState({ ...toRaw(this.state), ...persistedState }, true)
             }
+
+            this.debugLog(`getPersistedState ${storeName}`, [persistedState, this.state])
 
             return persistedState
         } catch (e) {
@@ -129,30 +150,25 @@ export default class StorePersister extends Store {
         let persistedState = await this.getPersistedState()
         let state = this.state
 
-        if (this.toBeCrypted()) {
-            state = this.cryptState(state)
-            if (persistedState) { persistedState = this.cryptState(persistedState) }
-        }
+        if (this.toBeCrypted()) { state = this.cryptState(state) }
 
         const newState = this.populateState(state, persistedState)
 
-        /** 
-            log(
-                `persistStore persist ${this.getStoreName()}`,
-                [
-                    'areIdentical',
-                    areIdentical(newState, persistedState ?? {}, this.getStatePropertyToNotPersist()),
-                    'newState',
-                    newState,
-                    'persistedState',
-                    persistedState,
-                    'state',
-                    state,
-                    'store',
-                    this.store
-                ]
-            )
-         */
+        this.debugLog(
+            `persistStore persist ${this.getStoreName()}`,
+            [
+                'areIdentical',
+                areIdentical(newState, persistedState ?? {}, this.getStatePropertyToNotPersist()),
+                'newState',
+                newState,
+                'persistedState',
+                persistedState,
+                'state',
+                state,
+                'store',
+                this.store
+            ]
+        )
 
         if (isEmpty(newState) || this.stateIsEmpty(newState)) { return }
 
@@ -173,7 +189,7 @@ export default class StorePersister extends Store {
                 const stateValue = this.getValue(state[curr])
                 const persistedStateValue = persistedState && this.getValue(persistedState[curr])
 
-                if (!stateValue && persistedStateValue) {
+                if (isEmpty(stateValue) && persistedStateValue) {
                     acc[curr] = persistedStateValue
                 } else {
                     if (Array.isArray(stateValue)) {
@@ -196,11 +212,15 @@ export default class StorePersister extends Store {
     }
 
     private async remember() {
-        const persistedState = await this.getPersistedState()
+        return new Promise(async (resolve) => {
+            let persistedState = await this.getPersistedState()
 
-        if (persistedState && !this.stateIsEmpty(persistedState)) {
-            this.store.$patch(persistedState)
-        }
+            if (persistedState && !this.stateIsEmpty(persistedState)) {
+                this.store.$patch(persistedState)
+            }
+
+            return resolve(true)
+        })
     }
 
     shouldBePersisted(): boolean {

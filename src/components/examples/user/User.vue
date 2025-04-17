@@ -8,23 +8,30 @@ import { log } from '../../../utils/log';
 
 const connectedUser = useConnectedUserStore() as ExtendedStore<UserStore, UserState>
 
-connectedUser.setData({
-    email: 'mitchwee@mail.com',
-    firstname: 'Mitch',
-    id: 1,
-    lastname: 'Wee',
-    password: 'C4Nn€cT2D@!12'
+connectedUser.remember().then(() => {
+    log('connectedUser', connectedUser.user)
+
+    if (!connectedUser.user.id) {
+        connectedUser.setData({
+            email: 'mitchwee@mail.com',
+            firstname: 'Mitch',
+            id: 1,
+            lastname: 'Wee',
+            password: 'C4Nn€cT2D@!12'
+        })
+    }
 })
 
-log('connectedUser', connectedUser.user)
 
-setTimeout(async () => {
-    //const anotherUser = useConnectedUserStore() as ExtendedStore<UserStore, UserState>
-    //await anotherUser.remember()
-    //log('anotherUser', anotherUser.user)
-    connectedUser.$reset()
-    log('$reset user', connectedUser.user)
+/**
+ setTimeout(async () => {
+    const anotherUser = useConnectedUserStore() as ExtendedStore<UserStore, UserState>
+    await anotherUser.remember()
+    log('anotherUser', anotherUser.user)
+    //connectedUser.$reset()
+    //log('$reset user', connectedUser.user)
 }, 3000)
+ */
 </script>
 
 <template>

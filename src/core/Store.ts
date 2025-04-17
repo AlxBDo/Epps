@@ -7,10 +7,13 @@ import { log } from "../utils/log"
 
 
 export default class Store {
+    private _debug: boolean = false
     private _store: PiniaStore
 
     protected _watchedStore?: string[]
 
+    get debug(): boolean { return this._debug }
+    set debug(debug: boolean) { this._debug = debug }
 
     get parentsStores(): EppsStore<AnyObject, AnyObject>[] | undefined {
         return typeof this.store.parentsStores === 'function' && this.store.parentsStores()
@@ -23,7 +26,8 @@ export default class Store {
     get store(): AnyObject { return this._store }
 
 
-    constructor(store: PiniaStore) {
+    constructor(store: PiniaStore, debug: boolean = false) {
+        this._debug = debug
         this._store = store
     }
 
@@ -56,6 +60,10 @@ export default class Store {
 
         this.state[name] = value
         this.store[name] = toRef(this.state, name)
+    }
+
+    debugLog(message: string, args: any): void {
+        if (this._debug) { log(message, args) }
     }
 
     getStatePropertyValue(propertyName: string) {

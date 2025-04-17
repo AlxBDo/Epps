@@ -10,8 +10,8 @@ export default class StoreExtension extends Store {
     private _extendedActions: string[] = ['removePersistedState', 'watch', '$reset']
 
 
-    constructor(store: PiniaStore) {
-        super(store)
+    constructor(store: PiniaStore, debug: boolean = false) {
+        super(store, debug)
 
         this.extendsStore()
     }
