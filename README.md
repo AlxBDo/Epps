@@ -1,4 +1,3 @@
-
 # `epps` - Extends and Persist Pinia Store
 
 ## Introduction
@@ -129,17 +128,6 @@ import type { List } from "../models/liste"
 
 const listsStore = useListsStore() as EppsStore<CollectionStoreMethods, CollectionState<List>>
 
-/**
- * ⚠️ In Nuxt application ⚠️
- * 
- * calling a method from a parent Store causes an error if the page is refreshed or if it is 
- * the application's entry point To solve this problem, check that the method exists before 
- * calling it.
- * 
- * Example : 
- *  listsStore.remember & listsStore.remember()
- * 
- */
 listsStore.remember()
 
 </script>
@@ -157,6 +145,8 @@ listsStore.remember()
 ```
 
 This example shows how to add a new list and retrieve all lists from the `useListsStore` store. The `useCollectionStore` integration simplifies collection management in your project.
+
+> **Warning**: In a Nuxt application, it is not recommended to call a method from a store modified by the plugin directly from a page. Instead, prefer calling the method within a component. If you must call the method from a page, ensure its existence before invoking it: `myStore.myMethod && myStore.myMethod()`.
 
 ## For more details
 

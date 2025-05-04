@@ -157,6 +157,8 @@ export default class StorePersister extends Store {
         this.debugLog(
             `persistStore persist ${this.getStoreName()}`,
             [
+                'toBeCrypted',
+                this.toBeCrypted(),
                 'areIdentical',
                 areIdentical(newState, persistedState ?? {}, this.getStatePropertyToNotPersist()),
                 'newState',
@@ -166,7 +168,9 @@ export default class StorePersister extends Store {
                 'state',
                 state,
                 'store',
-                this.store
+                this.store,
+                'Crypt',
+                this._crypt
             ]
         )
 

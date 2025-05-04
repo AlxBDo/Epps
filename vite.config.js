@@ -14,10 +14,11 @@ export default defineConfig({
       fileName: 'epps',
     },
     rollupOptions: {
-      external: ['pinia'],
+      external: ['pinia', 'crypto-js'],
       output: {
         globals: {
-          pinia: 'Pinia'
+          pinia: 'Pinia', 
+          'crypto-js': 'CryptoJS'
         },
       },
     },

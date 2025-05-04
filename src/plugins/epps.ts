@@ -7,10 +7,11 @@ import type { AllowedKeyPath } from "../types/storage"
 import type { PiniaPlugin, PiniaPluginContext, StateTree, Store } from "pinia"
 import type { PersistedStore } from "../types/store"
 import { log, logError } from "../utils/log"
+import { isEmpty } from "../utils/validation"
 
 
 export interface EppsConstructorProps {
-    dbName: string
+    dbName?: string
     dbKeyPath?: AllowedKeyPath
     cryptKey?: string
     cryptIv?: string
@@ -18,19 +19,22 @@ export interface EppsConstructorProps {
 }
 
 export class Epps {
-    private _db: Persister
+    private _db?: Persister
     private _debug: boolean = false
     private _crypt?: Crypt
     private _watchedStore: string[] = []
 
 
-    get db(): Persister { return this._db }
+    get db(): Persister | undefined { return this._db }
 
     get crypt(): Crypt | undefined { return this._crypt }
 
-    constructor(db: Persister, crypt?: Crypt, debug: boolean = false) {
-        this._db = db
+    constructor(db?: Persister, crypt?: Crypt, debug: boolean = false) {
         this._debug = debug
+
+        if (db instanceof Persister) {
+            this._db = db
+        }
 
         if (crypt) { this._crypt = crypt }
     }
@@ -40,7 +44,11 @@ export class Epps {
             const { store } = context
 
             new StoreExtension(store, this._debug)
-            new StorePersister(store, this._db, this._watchedStore, this._crypt, this._debug)
+
+            if (this.db instanceof Persister) {
+                new StorePersister(store, this.db, this._watchedStore, this._crypt, this._debug)
+            }
+
             this.rewriteResetStore(context, Object.assign({}, store.$state))
         } catch (e) {
             logError('plugin()', [e, context])
@@ -67,13 +75,12 @@ export class Epps {
     }
 }
 
-export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string, debug: boolean = false): PiniaPlugin {
-    if (!dbName) {
-        new Error('Database name is required')
-    }
-
+export function createPlugin(dbName?: string, cryptIv?: string, cryptKey?: string, debug: boolean = false): PiniaPlugin {
     if (window) {
-        const db = new Persister({ name: dbName, keyPath: 'storeName' })
+        const db = (!isEmpty(dbName) && dbName)
+            ? new Persister({ name: dbName, keyPath: 'storeName' })
+            : undefined
+
         let crypt: Crypt | undefined
 
         if (cryptIv && cryptKey) {
