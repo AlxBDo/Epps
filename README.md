@@ -150,5 +150,5 @@ This example shows how to add a new list and retrieve all lists from the `useLis
 
 ## For more details
 
-- Read [Documentation](https://github.com/AlxBDo/Epps/blob/main/DOCUMENTATION.md) 
+- Read [Documentation](https://main.d1f2uye6dxmhh3.amplifyapp.com/) 
 - Refer to the plugin's GitHub repository: [https://github.com/AlxBDo/Epps](https://github.com/AlxBDo/Epps).

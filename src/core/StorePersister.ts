@@ -53,6 +53,10 @@ export default class StorePersister extends Store {
             this.augmentStore()
             this.remember()
 
+            this.debugLog('StorePersister constructor', [
+                this.toBeWatched(), watchedStore, persister, store
+            ])
+
             if (this.toBeWatched()) {
                 this.storeSubscription()
             }
@@ -242,6 +246,9 @@ export default class StorePersister extends Store {
     }
 
     private storeSubscription() {
+
+        this.debugLog(`storeSubscription ${this.getStoreName()}`, [this.toBeWatched(), this.state, this.store])
+
         if (!this.toBeWatched()) {
             return
         }
@@ -249,21 +256,29 @@ export default class StorePersister extends Store {
         (this._watchedStore as string[]).push(this.getStoreName())
 
         this.store.$subscribe((mutation: SubscriptionCallbackMutation<StateTree>, state: StateTree) => {
-            if (mutation.type !== 'patch object' && mutation?.events && this.getStatePropertyValue('watchMutation')) {
 
-                const { newValue, oldValue } = mutation.events as AnyObject
+            this.debugLog(`store.$subscribe ${this.getStoreName()}`, [
+                mutation.type !== 'patch object' && this.getStatePropertyValue('watchMutation'),
+                this.getStatePropertyValue('watchMutation'), mutation, this.state, this.store
+            ])
 
-                if (!newValue || typeof newValue === 'function' || newValue === 'excludedKeys') {
-                    return
-                }
+            if (mutation.type !== 'patch object' && this.getStatePropertyValue('watchMutation')) {
 
                 this.persist()
 
-                if (
-                    (typeof newValue === 'object' ? !areIdentical(newValue, oldValue) : newValue !== oldValue)
-                    && typeof this.store.mutationCallback === 'function'
-                ) {
-                    this.store.mutationCallback(mutation)
+                if (mutation?.events) {
+                    const { newValue, oldValue } = mutation.events as AnyObject
+
+                    if (!newValue || typeof newValue === 'function' || newValue === 'excludedKeys') {
+                        return
+                    }
+
+                    if (
+                        (typeof newValue === 'object' ? !areIdentical(newValue, oldValue) : newValue !== oldValue)
+                        && typeof this.store.mutationCallback === 'function'
+                    ) {
+                        this.store.mutationCallback(mutation)
+                    }
                 }
             }
         })

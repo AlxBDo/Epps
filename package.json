@@ -1,6 +1,11 @@
 {
+  "author": "Alexandre Bidaud <alexbidaud85@gmail.com> (https://github.com/AlxBDo)",
   "name": "epps",
   "description": "Enhances Pinia stores with advanced features such as persistence, encryption, and store extension. Simplifies state management and ensures data security for Vue.js and Nuxt applications.",
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://main.d1f2uye6dxmhh3.amplifyapp.com/",
   "keywords": [
     "Vue",
     "Nuxt",
@@ -10,10 +15,12 @@
     "persist store",
     "reusable store"
   ],
-  "files": [
-    "dist"
-  ],
-  "version": "0.1.71",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AlxBDo/Epps"
+  },
+  "version": "0.1.84",
   "type": "module",
   "main": "./dist/epps.umd.cjs",
   "module": "./dist/epps.js",

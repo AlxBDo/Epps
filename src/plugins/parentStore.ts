@@ -51,13 +51,11 @@ export function getParentStoreByIndex(parentStoreIndex: number, parentsStores: S
  */
 export function getParentStorePropertyValue(
     propertyName: string,
-    parentStore: AnyObject | string | number | undefined,
+    parentStore: AnyObject | string | number,
     parentsStores?: Store[] | EppsStore<AnyObject, AnyObject>[]
 ): any {
-    if (!parentsStores) { return }
-
-    if (typeof parentStore === 'string' || typeof parentStore === 'number') {
-        parentStore = parentsStores && getParentStore(parentStore, parentsStores)
+    if (parentsStores && (typeof parentStore === 'string' || typeof parentStore === 'number')) {
+        parentStore = getParentStore(parentStore, parentsStores) as AnyObject
     }
 
     if (typeof parentStore === 'object') {
@@ -74,20 +72,18 @@ export function getParentStorePropertyValue(
  */
 export function getParentStoreMethod(
     methodName: string,
-    parentStore: AnyObject | string | number | undefined,
+    parentStore: AnyObject | string | number,
     parentsStores?: Store[] | EppsStore<AnyObject, AnyObject>[]
 ): Function {
-    if (parentsStores) {
-        if (typeof parentStore === 'string' || typeof parentStore === 'number') {
-            parentStore = parentsStores && getParentStore(parentStore, parentsStores)
-        }
+    if (parentsStores && typeof parentStore === 'string' || typeof parentStore === 'number') {
+        parentStore = getParentStore(parentStore, parentsStores as Store[]) as AnyObject
+    }
 
-        if (typeof parentStore === 'object') {
-            const method = parentStore[methodName]
+    if (typeof parentStore === 'object') {
+        const method = parentStore[methodName]
 
-            if (typeof method === 'function') {
-                return method
-            }
+        if (typeof method === 'function') {
+            return method
         }
     }
 
