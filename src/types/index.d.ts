@@ -11,12 +11,8 @@ export type {
 
 export type {
     AugmentOptionApiStore,
-    AugmentStore,
     CollectionState,
     CollectionStoreMethods,
-    DefineExtendedStore,
-    DefineExtendedStoreOptionApi,
-    ExtendState,
     ExtendedStore,
     PersistedState,
     PersistedStore

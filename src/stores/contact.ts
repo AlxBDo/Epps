@@ -1,23 +1,24 @@
 import type { Contact } from "../models/contact"
-import { useItemStore } from "./item"
-import type { ExtendState } from "../types/store";
-import type { Item } from "../models/item"
+import { useErrorsStore } from "./errors";
+import { IItemStoreState, useItemStore } from "./item"
 import { defineStoreId } from "../utils/defineStoreId"
-import { getParentStorePropertyValue } from "../plugins/parentStore"
+import { getParentStoreMethod, getParentStorePropertyValue } from "../plugins/parentStore"
 import { extendedState } from "../plugins/extendedState";
 import { defineEppsStore } from "../utils/store";
 import { computed, ref } from "vue";
 import { Store } from "pinia";
+import type { ErrorState, ErrorsStore } from "./errors";
+import { isEmpty } from "../utils/validation";
 
 
-export interface ContactStore {
-    isPassword: (password: string) => boolean
-    modifyPassword: (oldPassword: string, newPassword: string) => void
+export interface ContactStore extends ErrorsStore {
     setData: (data: ContactState) => void
     contact: Contact
 }
 
-export type ContactState = ExtendState<Item, Contact>
+export interface ContactState extends Contact, ErrorState, IItemStoreState {
+    strictValidation?: boolean
+}
 
 export const useContactStore = (id?: string) => defineEppsStore<ContactStore, ContactState>(
     id ?? 'contact',
@@ -25,6 +26,7 @@ export const useContactStore = (id?: string) => defineEppsStore<ContactStore, Co
         const email = ref<string>()
         const firstname = ref<string>()
         const lastname = ref<string>()
+        const strictValidation = ref<boolean>(true)
 
         const {
             excludedKeys,
@@ -33,7 +35,7 @@ export const useContactStore = (id?: string) => defineEppsStore<ContactStore, Co
             persist,
             persistedPropertiesToEncrypt
         } = extendedState(
-            [useItemStore(defineStoreId(id ?? 'contact', 'item'))],
+            [useItemStore(defineStoreId(id ?? 'contact', 'item')), useErrorsStore('contact')],
             { actionsToExtends: ['setData'] }
         )
 
@@ -48,7 +50,15 @@ export const useContactStore = (id?: string) => defineEppsStore<ContactStore, Co
 
 
         function setData(data: ContactState) {
-            if (data.email) { email.value = data.email; }
+            if (!isEmpty(data.email)) {
+                email.value = data.email;
+            } else if (strictValidation.value) {
+                parentsStores && getParentStoreMethod('addError', 1, parentsStores())({
+                    id: 'contact-email',
+                    message: 'Email is required'
+                })
+            }
+
             if (data.firstname) { firstname.value = data.firstname; }
             if (data.lastname) { lastname.value = data.lastname; }
         }

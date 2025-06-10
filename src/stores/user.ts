@@ -1,24 +1,25 @@
 import { defineStoreId } from "../utils/defineStoreId"
 import { extendedState } from "../plugins/extendedState"
 import { getParentStorePropertyValue } from "../plugins/parentStore"
-import { useContactStore } from "./contact"
+import { ContactState, ContactStore, useContactStore } from "./contact"
 
-import type { Contact } from "../models/contact"
-import type { ExtendState } from "../types/store"
 import type { User } from "../models/user"
 import { defineEppsStore } from "../utils/store"
 import { computed, ref } from "vue"
 import { List } from "../models/liste"
 
 
-export interface UserStore {
+export interface UserStore extends ContactStore {
     isPassword: (password: string) => boolean
     modifyPassword: (oldPassword: string, newPassword: string) => void
-    setData: (data: UserState) => void
+    setData: (data: Partial<UserState>) => void
     user: User
 }
 
-export type UserState = ExtendState<Contact, User>
+export interface UserState extends ContactState, User {
+    lists?: List[]
+    password: string
+}
 
 export const useUserStore = (id?: string) => defineEppsStore<UserStore, UserState>(
     id ?? 'contact',

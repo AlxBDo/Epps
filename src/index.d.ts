@@ -10,13 +10,9 @@ export type {
 
 export type {
     AugmentOptionApiStore,
-    AugmentStore,
     CollectionState,
     CollectionStoreMethods,
     DefineExtendedStore,
-    DefineExtendedStoreOptionApi,
-    ExtendState,
-    ExtendedStore,
     PersistedState,
     PersistedStore
 } from "./store";
@@ -70,14 +66,10 @@ export interface SearchCollectionCriteria {
 
 export type {
     AugmentOptionApiStore,
-    AugmentStore,
     CollectionState,
     CollectionStoreMethods,
     DefineExtendedStore,
-    DefineExtendedStoreOptionApi,
     EppsStore,
-    ExtendState,
-    ExtendedStore,
     PersistedState,
     PersistedStore
 } from "./store";

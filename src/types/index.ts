@@ -4,14 +4,10 @@ export interface SearchCollectionCriteria { [key: number | string | symbol]: boo
 
 export type {
     AugmentOptionApiStore,
-    AugmentStore,
     CollectionState,
     CollectionStoreMethods,
     DefineEppsStore,
-    DefineExtendedStore,
-    DefineExtendedStoreOptionApi,
     EppsStore,
-    ExtendState,
     ExtendedStore,
     PersistedState,
     PersistedStore

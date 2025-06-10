@@ -11,7 +11,7 @@ export const useConnectedUserStore = defineEppsStore<UserStore, UserState>(
             [useUserStore('connected-user')],
             {
                 persist: {
-                    excludedKeys: ref(['@id']),
+                    excludedKeys: ref(['@id', 'errors']),
                     persistedPropertiesToEncrypt: ref(['email', 'password', 'username']),
                     watchMutation: ref(true)
                 }
