@@ -25,12 +25,12 @@ export { useCollectionStore } from '../stores/collection';
 
 
 declare module 'epps' {
-    export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string): CallableFunction;
+    export function createPlugin(dbName: string, cryptKey?: string): CallableFunction;
 
     export function defineEppsStore<TStore, TState>(id: string, storeDefinition: () => AnyObject): DefineEppsStore<TStore, TState>
 
     export class Epps {
-        constructor({ dbName, dbKeyPath, cryptIv, cryptKey }: EppsConstructorProps)
+        constructor({ dbName, dbKeyPath, cryptKey }: EppsConstructorProps)
 
         plugin(context: PiniaPluginContext): void
     }

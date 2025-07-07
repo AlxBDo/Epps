@@ -11,8 +11,8 @@ const dbNameLocalStorage = 'localStorage'
 
 const eppsPlugin = createPlugin(
     dbNameLocalStorage, 
-    import.meta.env.VITE_CRYPT_IV, 
-    import.meta.env.VITE_CRYPT_KEY
+    import.meta.env.VITE_CRYPT_IV,
+    'jdlfsd fds fdslkjfkdslfkdssd'
 )
 
 pinia.use(eppsPlugin)

@@ -2,7 +2,7 @@
 import type { User } from '../../../models/user';
 import { useListStore, type ListStoreState, type ListStoreMethods } from '../../../stores/list';
 import type { EppsStore } from '../../../types';
-import { log } from '../../../utils/log';
+import { eppsLog } from '../../../utils/log';
 
 const owner: User = { id: 1, firstname: 'Omar', lastname: 'Teen', email: 'omarteen@mail.com' }
 const items = [{ id: 1, name: 'Item 1' }, { id: 2, name: 'Item 2' }, { id: 3, name: 'Item 3' }]
@@ -14,7 +14,7 @@ listStore.addItem({ id: 4, name: 'Item 4' })
 
 const listOwner = listStore.owner
 
-log('ListStore', [listStore.items, listStore.$state])
+eppsLog('ListStore', [listStore.items, listStore.$state])
 </script>
 
 <template>

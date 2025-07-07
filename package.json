@@ -20,7 +20,7 @@
     "type": "git",
     "url": "https://github.com/AlxBDo/Epps"
   },
-  "version": "0.1.91",
+  "version": "0.2.1",
   "type": "module",
   "main": "./dist/epps.umd.cjs",
   "module": "./dist/epps.js",
@@ -39,12 +39,9 @@
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
-  "dependencies": {
-    "crypto-js": "^4.2.0"
-  },
   "devDependencies": {
     "@pinia/testing": "^1.0.0",
-    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^24.0.10",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitest/coverage-v8": "^3.1.1",
     "@vitest/ui": "^3.1.1",

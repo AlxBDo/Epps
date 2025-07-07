@@ -6,7 +6,7 @@ import StorePersister from "../core/StorePersister"
 import type { AllowedKeyPath } from "../types/storage"
 import type { PiniaPlugin, PiniaPluginContext, StateTree, Store } from "pinia"
 import type { PersistedStore } from "../types/store"
-import { log, logError } from "../utils/log"
+import { log, eppsLogError } from "../utils/log"
 import { isEmpty } from "../utils/validation"
 
 
@@ -14,7 +14,6 @@ export interface EppsConstructorProps {
     dbName?: string
     dbKeyPath?: AllowedKeyPath
     cryptKey?: string
-    cryptIv?: string
     debug?: boolean
 }
 
@@ -51,7 +50,7 @@ export class Epps {
 
             this.rewriteResetStore(context, Object.assign({}, store.$state))
         } catch (e) {
-            logError('plugin()', [e, context])
+            eppsLogError('plugin()', [e, context])
         }
     }
 
@@ -75,7 +74,7 @@ export class Epps {
     }
 }
 
-export function createPlugin(dbName?: string, cryptIv?: string, cryptKey?: string, debug: boolean = false): PiniaPlugin {
+export function createPlugin(dbName?: string, cryptKey?: string, debug: boolean = false): PiniaPlugin {
     if (window) {
         const db = (!isEmpty(dbName) && dbName)
             ? new Persister({ name: dbName, keyPath: 'storeName' })
@@ -83,8 +82,17 @@ export function createPlugin(dbName?: string, cryptIv?: string, cryptKey?: strin
 
         let crypt: Crypt | undefined
 
-        if (cryptIv && cryptKey) {
-            crypt = new Crypt(cryptKey, cryptIv)
+        if (cryptKey) {
+            crypt = new Crypt(cryptKey)
+        }
+
+        if (typeof debug !== 'boolean') {
+            debug = false
+
+            eppsLogError(
+                'Since version 0.2.00, the encryption service has been modified and requires all encrypted data in localStorage or IndexedDB to be deleted.',
+                ['Delete the keys corresponding to stores where one or more state data are encrypted, so that they can be correctly persisted again.']
+            )
         }
 
         const augmentPinia = new Epps(db, crypt, debug)

@@ -10,7 +10,7 @@ export function beforeEachPiniaPlugin() {
         const app = createApp({})
 
         const pinia = createPinia().use(
-            createPluginMock('localStorage', 'HrN2t2nCr6pTkEy20221l2B3dOcPr4j2', 'HrN2t2nCr6pTiV22')
+            createPluginMock('localStorage', 'HrN2t2nCr6pTkEy20221l2B3dOcPr4j2')
         )
 
         app.use(pinia)

@@ -5,7 +5,7 @@ import { Epps } from "../plugins/epps";
 import PersisterMock from '../testing/mocks/persister'
 
 describe('Epps class', () => {
-    const crypt = new Crypt('HrN2t2nCr6pTiV22', 'HrN2t2nCr6pTkEy20221l2B3dOcPr4j2')
+    const crypt = new Crypt('HrN2t2nCr6pTiV22')
     const persister = new PersisterMock({ name: 'localStorage' })
     const epps = new Epps(persister, crypt)
 

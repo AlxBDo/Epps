@@ -1,9 +1,9 @@
-import type { AnyObject, SearchCollectionCriteria } from "../types";
+import type { AnyObject } from "../types";
 
 
 export function arrayObjectFindAllBy<T extends AnyObject>(
     arrayOfObject: T[],
-    findBy: SearchCollectionCriteria & Partial<T>,
+    findBy: Partial<T>,
     strict: boolean = true
 ): T[] {
     return arrayOfObject.filter(
@@ -18,6 +18,6 @@ export function arrayObjectFindAllBy<T extends AnyObject>(
     );
 }
 
-export function arrayObjectFindBy<T extends AnyObject>(arrayOfObject: T[], findBy: SearchCollectionCriteria & Partial<T>): T | undefined {
+export function arrayObjectFindBy<T extends AnyObject>(arrayOfObject: T[], findBy: Partial<T>): T | undefined {
     return arrayOfObject.find((item: T) => Object.keys(findBy).every((key: string) => item[key] === findBy[key]));
 }

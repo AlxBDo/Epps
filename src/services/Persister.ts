@@ -1,7 +1,7 @@
 import WindowStorage from './WindowStorage'
 import { AllowedKeyPath, ClientStorage, StorageItem } from '../types/storage'
 import IndexedDB from './IndexedDB'
-import { log, logError } from '../utils/log'
+import { log, eppsLogError } from '../utils/log'
 import { localStorageMock } from '../testing/mocks/localStorage'
 
 export type DbOptions = {
@@ -68,7 +68,7 @@ export default class Persister {
                     }
                 })
             } catch (e) {
-                logError('Persister - setItem Error', e)
+                eppsLogError('Persister - setItem Error', e)
                 this._db.setItem({ storename: key, ...item })
             }
         } else {

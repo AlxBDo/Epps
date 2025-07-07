@@ -2,7 +2,7 @@ import { toRaw } from "vue"
 import { areIdentical } from "../utils/validation/object"
 import Crypt from "../services/Crypt"
 import { isEmpty } from "../utils/validation"
-import { log, logError } from "../utils/log"
+import { log, eppsLogError } from "../utils/log"
 import Persister from "../services/Persister"
 import Store from "./Store"
 
@@ -85,7 +85,7 @@ export default class StorePersister extends Store {
         this.store.stopWatch = () => this.stopWatch()
     }
 
-    cryptState(state: StateTree, decrypt: boolean = false): StateTree {
+    async cryptState(state: StateTree, decrypt: boolean = false): Promise<StateTree> {
         const Crypt = this._crypt as Crypt
         const persistedPropertiesToEncrypt = this.getValue(state.persistedPropertiesToEncrypt)
         const isEncrypted = this.getValue(state.isEncrypted)
@@ -107,13 +107,20 @@ export default class StorePersister extends Store {
         ) {
             const encryptedState = {} as StateTree
 
-            persistedPropertiesToEncrypt.forEach((property: string) => {
+            for (const property of persistedPropertiesToEncrypt) {
+                const value = this.getValue(state[property])
 
-                if (!isEmpty(state[property])) {
-                    const value = this.getValue(state[property])
-                    encryptedState[property] = decrypt ? Crypt.decrypt(value) : Crypt.encrypt(value)
+                if (decrypt) {
+                    encryptedState[property] = await Crypt.decrypt(value)
+                } else {
+                    encryptedState[property] = await Crypt.encrypt(value)
                 }
-            })
+            }
+
+            this.debugLog(`cryptState - ${this.getStoreName()}`, [
+                'encryptedState',
+                encryptedState
+            ])
 
             if (!isEmpty(encryptedState)) {
                 state = { ...state, ...encryptedState, isEncrypted: !decrypt }
@@ -130,14 +137,14 @@ export default class StorePersister extends Store {
             let persistedState = await (this._persister as Persister).getItem(storeName) as StateTree
 
             if (this.toBeCrypted() && persistedState) {
-                persistedState = this.cryptState({ ...toRaw(this.state), ...persistedState }, true)
+                persistedState = await this.cryptState({ ...toRaw(this.state), ...persistedState }, true)
             }
 
             this.debugLog(`getPersistedState ${storeName}`, [persistedState, this.state])
 
             return persistedState
         } catch (e) {
-            logError('getPersistedState Error', [storeName, e])
+            eppsLogError('getPersistedState Error', [storeName, e])
         }
     }
 
@@ -154,7 +161,7 @@ export default class StorePersister extends Store {
         let persistedState = await this.getPersistedState()
         let state = this.state
 
-        if (this.toBeCrypted()) { state = this.cryptState(state) }
+        if (this.toBeCrypted()) { state = await this.cryptState(state) }
 
         const newState = this.populateState(state, persistedState)
 

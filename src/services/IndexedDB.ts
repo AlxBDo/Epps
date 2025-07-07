@@ -1,5 +1,5 @@
 import { ClientStorage, StorageItem } from "../types/storage"
-import { log, logError } from "../utils/log"
+import { eppsLog, eppsLogError } from "../utils/log"
 
 interface ObjectStoreCreationOptions {
     autoIncrement?: boolean
@@ -121,7 +121,7 @@ export default class IndexedDB implements ClientStorage {
     }
 
     private handleDeleteRequest(deleteRequest: IDBRequest, key: string): void {
-        deleteRequest.onerror = () => logError(`IndexedDB - Item "${key}" remove`, deleteRequest.error);
+        deleteRequest.onerror = () => eppsLogError(`IndexedDB - Item "${key}" remove`, deleteRequest.error);
     }
 
     private onError(error: any, callback?: Function): void {
@@ -151,7 +151,7 @@ export default class IndexedDB implements ClientStorage {
                     successCallback();
                 }
             } catch (error) {
-                logError('indexedDB - transaction error', [error]);
+                eppsLogError('indexedDB - transaction error', [error]);
             }
         };
 
@@ -223,7 +223,7 @@ export default class IndexedDB implements ClientStorage {
                     });
                 };
 
-                const error = () => logError('IndexedDB - removeItems', [getAllRequest.error]);
+                const error = () => eppsLogError('IndexedDB - removeItems', [getAllRequest.error]);
 
                 this.requestEventsHandler(getAllRequest, { error, success: handleGetAllSuccess });
             }
@@ -259,7 +259,7 @@ export default class IndexedDB implements ClientStorage {
                     const handleAddSuccess = () => {
                         index.forEach((i) => {
                             this._objectStore?.createIndex(i, i, { unique: true });
-                            log(`"${i}" index created`);
+                            eppsLog(`"${i}" index created`);
                         });
                     };
 
@@ -279,7 +279,7 @@ export default class IndexedDB implements ClientStorage {
             if (this._objectStore) {
                 const addRequest = this._objectStore.put(item)
                 addRequest.onerror = () =>
-                    logError('update item', [addRequest.error, item])
+                    eppsLogError('update item', [addRequest.error, item])
             }
         }
 

@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import { eppsLog } from '../../../utils/log';
 import { useConnectedUserStore } from '../../../stores/connectedUser'
 import { useOptionApiStore, type OptionApiStore, type OptionApiState } from '../../../stores/optionApi'
 
 import type { UserStore, UserState } from '../../../stores/user'
 import type { EppsStore } from '../../../types/store';
-import { log } from '../../../utils/log';
 
 const connectedUser = useConnectedUserStore() as EppsStore<UserStore, UserState>
 
 connectedUser.remember().then(() => {
-    log('connectedUser', connectedUser.user)
+    eppsLog('connectedUser', connectedUser.user)
 
     if (!connectedUser.user.id) {
         connectedUser.setData({
@@ -33,16 +33,16 @@ setTimeout(async () => {
 }, 3000)
 
 setTimeout(async () => {
-    connectedUser.setData({ email: '' })
+    connectedUser.setData({ email: 'another@email' })
 }, 6000)
 
 /**
  setTimeout(async () => {
     const anotherUser = useConnectedUserStore() as ExtendedStore<UserStore, UserState>
     await anotherUser.remember()
-    log('anotherUser', anotherUser.user)
+    eppsLog('anotherUser', anotherUser.user)
     //connectedUser.$reset()
-    //log('$reset user', connectedUser.user)
+    //eppsLog('$reset user', connectedUser.user)
 }, 3000)
  */
 </script>

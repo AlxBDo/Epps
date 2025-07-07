@@ -24,14 +24,14 @@ export { useCollectionStore } from '../stores/collection';
 
 
 declare module 'epps' {
-    export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin;
+    export function createPlugin(dbName: string, cryptKey?: string, cryptKey?: string): PiniaPlugin;
 
-    export function createPluginMock(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin;
+    export function createPluginMock(dbName: string, cryptKey?: string, cryptKey?: string): PiniaPlugin;
 
     export function defineEppsStore<TStore, TState>(id: string, storeDefinition: () => AnyObject): DefineEppsStore<TStore, TState>
 
     export class Epps {
-        constructor({ dbName, dbKeyPath, cryptIv, cryptKey }: EppsConstructorProps)
+        constructor({ dbName, dbKeyPath, cryptKey, cryptKey }: EppsConstructorProps)
 
         plugin(context: PiniaPluginContext): void
     }
@@ -76,16 +76,16 @@ export type {
 
 
 declare module 'epps' {
-    export function createPlugin(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin;
+    export function createPlugin(dbName: string, cryptKey?: string, cryptKey?: string): PiniaPlugin;
     
-    export function createPluginMock(dbName: string, cryptIv?: string, cryptKey?: string): PiniaPlugin;
+    export function createPluginMock(dbName: string, cryptKey?: string, cryptKey?: string): PiniaPlugin;
 
     export function defineEppsStore<TStore, TState>(id: string, storeDefinition: () => AnyObject): DefineEppsStore<TStore, TState>
 
     export function defineStoreId(prefix: string, id: string): string
 
     export class Epps {
-        constructor({ dbName, dbKeyPath, cryptIv, cryptKey }: EppsConstructorProps)
+        constructor({ dbName, dbKeyPath, cryptKey, cryptKey }: EppsConstructorProps)
 
         plugin(context: PiniaPluginContext): void
     }

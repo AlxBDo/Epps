@@ -3,8 +3,6 @@ import { ref, type Ref } from "vue";
 import { arrayObjectFindAllBy } from "../utils/object";
 import { isEmpty } from "../utils/validation";
 
-import type { SearchCollectionCriteria } from "../types";
-
 
 export interface IError {
     id: string
@@ -53,7 +51,7 @@ export const useErrorsStore = <TError extends IError = IError>(id: string) => de
                 throw new Error(`${id}Store - getErrors - level is number but its value is : ${value}`)
             }
 
-            return arrayObjectFindAllBy(errors.value, { [findBy]: value } as SearchCollectionCriteria & Partial<TError>)
+            return arrayObjectFindAllBy(errors.value, { [findBy]: value } as Partial<TError>)
         }
 
         function hasError(level: number = 0): boolean {

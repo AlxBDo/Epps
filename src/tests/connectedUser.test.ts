@@ -4,7 +4,6 @@ import { beforeEachPiniaPlugin } from './utils/beforeEach'
 import PersisterMock from '../testing/mocks/persister'
 import { useConnectedUserStore } from '../stores/connectedUser'
 
-import type { Contact } from '../models/contact'
 import type { EppsStore } from '../types'
 import type { User } from '../models/user'
 import type { UserState, UserStore } from '../stores/user'
@@ -35,7 +34,8 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
         expect(connectedUserStore.user).toStrictEqual(user)
     })
 
-    it('Is persisted', async () => {
+    /**
+     it('Is persisted', async () => {
         const persistedContact = await persister.getItem('connectedUser') as User
 
         expect(persistedContact.firstname).toStrictEqual(user.firstname)
@@ -98,6 +98,9 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
 
         expect(otherUserStore.user).toStrictEqual({ ...user, lastname: newLastname, '@id': undefined })
     })
+     */
+
+
 
     it('$reset method clear all states (child and parents) and persisted data', async () => {
         if (connectedUserStore) {

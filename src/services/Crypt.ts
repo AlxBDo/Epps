@@ -1,13 +1,41 @@
-import CryptoJS from "crypto-js";
-
-
 export default class Crypt {
+    private _encoder: TextEncoder = new TextEncoder()
     private _key: any;
-    private _iv: any;
 
-    constructor(key: string, iv: string) {
-        this._key = CryptoJS.enc.Utf8.parse(key);
-        this._iv = CryptoJS.enc.Utf8.parse(iv);
+    private static DECRYPT: 'decrypt' = 'decrypt'
+    private static ENCRYPT: 'encrypt' = 'encrypt'
+
+    constructor(key: string) {
+        this.setKeyMaterial(key)
+    }
+
+    async getKey(mode: 'decrypt' | 'encrypt') {
+        return await crypto.subtle.deriveKey(
+            {
+                name: 'PBKDF2',
+                salt: this._encoder.encode('salt'),
+                iterations: 100000,
+                hash: 'SHA-256'
+            },
+            this.getKeyMaterial(),
+            { name: 'AES-GCM', length: 256 },
+            false,
+            [mode]
+        )
+    }
+
+    getKeyMaterial() {
+        return this._key
+    }
+
+    async setKeyMaterial(key: string) {
+        this._key = await crypto.subtle.importKey(
+            'raw',
+            this._encoder.encode(key),
+            { name: 'PBKDF2' },
+            false,
+            ['deriveKey']
+        )
     }
 
     /**
@@ -15,20 +43,37 @@ export default class Crypt {
      * @param {string} item - encrypted string
      * @returns {string} decrypted item
      */
-    decrypt(item: string): string {
-        let cipherParams = CryptoJS.lib.CipherParams.create({ ciphertext: CryptoJS.enc.Base64.parse(item) });
-        let decryptedFromText = CryptoJS.AES.decrypt(cipherParams, this._key, { iv: this._iv });
-        return decryptedFromText.toString(CryptoJS.enc.Utf8)
+    async decrypt(item: string): Promise<string> {
+        const [ivString, encryptedString] = item.split(':')
+        const decrypted = await crypto.subtle.decrypt(
+            {
+                name: 'AES-GCM',
+                iv: Uint8Array.from(atob(ivString), c => c.charCodeAt(0))
+            },
+            await this.getKey(Crypt.DECRYPT),
+            Uint8Array.from(atob(encryptedString), c => c.charCodeAt(0))
+        );
+        return new TextDecoder().decode(decrypted)
     }
 
     /**
      * Encrypt string passed in parameter
      * @param {string} item
-     * @returns {string} encrypted item
+     * @returns {Promise<string>} encrypted item
      */
-    encrypt(item: string): string {
-        let encryptedCP = CryptoJS.AES.encrypt(item, this._key, { iv: this._iv });
-        let cryptText = encryptedCP.toString();
-        return cryptText
+    async encrypt(item: string): Promise<string> {
+        const iv = crypto.getRandomValues(new Uint8Array(12))
+        const encrypted = await crypto.subtle.encrypt(
+            {
+                name: 'AES-GCM',
+                iv: iv
+            },
+            await this.getKey(Crypt.ENCRYPT),
+            this._encoder.encode(item)
+        )
+
+        return btoa(String.fromCharCode(...new Uint8Array(iv)))
+            + ':'
+            + btoa(String.fromCharCode(...new Uint8Array(encrypted)));
     }
 }

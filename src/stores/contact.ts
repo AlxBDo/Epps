@@ -7,7 +7,7 @@ import { extendedState } from "../plugins/extendedState";
 import { defineEppsStore } from "../utils/store";
 import { computed, ref } from "vue";
 import { Store } from "pinia";
-import type { ErrorState, ErrorsStore } from "./errors";
+import type { ErrorState, ErrorsStore, IError } from "./errors";
 import { isEmpty } from "../utils/validation";
 
 
@@ -17,8 +17,8 @@ export interface ContactStore extends ErrorsStore {
 }
 
 export interface ContactState extends Contact, ErrorState, IItemStoreState {
-    strictValidation?: boolean
 }
+
 
 export const useContactStore = (id?: string) => defineEppsStore<ContactStore, ContactState>(
     id ?? 'contact',
@@ -26,7 +26,6 @@ export const useContactStore = (id?: string) => defineEppsStore<ContactStore, Co
         const email = ref<string>()
         const firstname = ref<string>()
         const lastname = ref<string>()
-        const strictValidation = ref<boolean>(true)
 
         const {
             excludedKeys,
@@ -49,10 +48,10 @@ export const useContactStore = (id?: string) => defineEppsStore<ContactStore, Co
         }))
 
 
-        function setData(data: ContactState) {
+        function setData(data: ContactState, strictValidation: boolean = true) {
             if (!isEmpty(data.email)) {
                 email.value = data.email;
-            } else if (strictValidation.value) {
+            } else if (strictValidation) {
                 parentsStores && getParentStoreMethod('addError', 1, parentsStores())({
                     id: 'contact-email',
                     message: 'Email is required'

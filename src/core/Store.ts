@@ -3,7 +3,7 @@ import { ref, toRef, type Ref } from "vue"
 import type { Store as PiniaStore, StateTree } from "pinia"
 import type { AnyObject, EppsStore } from "../types"
 import type { StatePropertyValue } from "../types/store"
-import { log } from "../utils/log"
+import { eppsLog } from "../utils/log"
 
 
 export default class Store {
@@ -63,7 +63,7 @@ export default class Store {
     }
 
     debugLog(message: string, args: any): void {
-        if (this._debug) { log(message, args) }
+        if (this._debug) { eppsLog(message, args) }
     }
 
     getStatePropertyValue(propertyName: string) {

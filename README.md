@@ -44,7 +44,9 @@ yarn add epps
 
 To use the plugin, simply import it and add it to your Pinia instance.
 
-In the examples below, the environment variables `CRYPT_IV` and `CRYPT_KEY` must be replaced with strings. These variables are used for encrypting data persisted in the browser.
+All createPlugin function parameters are optional.
+
+In the examples below, the environment variable `CRYPT_KEY` must be replaced with string. It's used for encrypting data persisted in the browser.
 
 #### Vue
 
@@ -56,9 +58,8 @@ import { createPlugin } from 'epps'
 const pinia = createPinia()
 
 const epps = createPlugin(
-    'localStorage',
-    import.meta.env.VITE_CRYPT_IV,
-    import.meta.env.VITE_CRYPT_KEY
+    'localStorage', // define another database name to use IndexedDB
+    import.meta.env.CRYPT_KEY
 )
 
 pinia.use(epps)
@@ -77,7 +78,6 @@ export default defineNuxtPlugin({
         ($pinia as Pinia).use(
             createPlugin(
                 'localStorage', // define another database name to use IndexedDB
-                useRuntimeConfig().public.cryptIv,
                 useRuntimeConfig().public.cryptKey
             )
         )
