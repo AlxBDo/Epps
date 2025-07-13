@@ -24,9 +24,7 @@ export interface ErrorsStore<TError extends IError = IError> {
 export const useErrorsStore = <TError extends IError = IError>(id: string) => defineStore(
     `${id}Store`,
     () => {
-
         const errors: Ref<TError[]> = ref([])
-
 
         function addError(error: TError): void {
             if (!error?.id) {

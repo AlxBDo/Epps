@@ -1,14 +1,14 @@
-import { extendedState } from "../plugins/extendedState";
+import { extendedState } from "../../plugins/extendedState";
 import { IItemStore, useItemStore, type IItemStoreState } from "./item";
-import type { CollectionState, CollectionStoreMethods, ExtendedState } from "../types/store";
-import type { List } from "../models/liste";
-import { useCollectionStore } from "./collection";
-import { defineEppsStore } from "../utils/store";
+import type { CollectionState, CollectionStoreMethods, ExtendedState } from "../../types/store";
+import type { List } from "../../models/liste";
+import { useCollectionStore } from "../collection";
+import { defineEppsStore } from "../../utils/store";
 import { Ref, ref } from "vue";
-import { User } from "../models/user";
-import { getParentStoreMethod } from "../plugins/parentStore";
-import { ListTypes } from "../types/list";
-import { Item } from "../models/item";
+import { User } from "../../models/user";
+import { getParentStoreMethod } from "../../plugins/parentStore";
+import { ListTypes } from "../../types/list";
+import { Item } from "../../models/item";
 
 
 export interface ListStoreState extends IItemStoreState, ExtendedState, CollectionState<Item>, Omit<List, 'items'> {

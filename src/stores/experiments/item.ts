@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { Item } from "../models/item";
+import type { Item } from "../../models/item";
 
 export interface IItemStore {
     setData: (data: Item) => void

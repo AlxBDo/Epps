@@ -1,12 +1,12 @@
-import { defineStoreId } from "../utils/defineStoreId"
-import { extendedState } from "../plugins/extendedState"
-import { getParentStorePropertyValue } from "../plugins/parentStore"
+import { defineStoreId } from "../../utils/defineStoreId"
+import { extendedState } from "../../plugins/extendedState"
+import { getParentStorePropertyValue } from "../../plugins/parentStore"
 import { ContactState, ContactStore, useContactStore } from "./contact"
 
-import type { User } from "../models/user"
-import { defineEppsStore } from "../utils/store"
+import type { User } from "../../models/user"
+import { defineEppsStore } from "../../utils/store"
 import { computed, ref } from "vue"
-import { List } from "../models/liste"
+import { List } from "../../models/liste"
 
 
 export interface UserStore extends ContactStore {

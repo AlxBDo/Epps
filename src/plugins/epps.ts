@@ -1,13 +1,11 @@
 import Crypt from "../services/Crypt"
+import { eppsLogError } from "../utils/log"
 import Persister from "../services/Persister"
 import StoreExtension from "../core/StoreExtension"
 import StorePersister from "../core/StorePersister"
 
 import type { AllowedKeyPath } from "../types/storage"
-import type { PiniaPlugin, PiniaPluginContext, StateTree, Store } from "pinia"
-import type { PersistedStore } from "../types/store"
-import { log, eppsLogError } from "../utils/log"
-import { isEmpty } from "../utils/validation"
+import type { PiniaPluginContext, StateTree, Store } from "pinia"
 
 
 export interface EppsConstructorProps {
@@ -71,39 +69,5 @@ export class Epps {
 
             store.$patch(Object.assign({}, initState))
         }
-    }
-}
-
-export function createPlugin(dbName?: string, cryptKey?: string, debug: boolean = false): PiniaPlugin {
-    if (window) {
-        const db = (!isEmpty(dbName) && dbName)
-            ? new Persister({ name: dbName, keyPath: 'storeName' })
-            : undefined
-
-        let crypt: Crypt | undefined
-
-        if (cryptKey) {
-            crypt = new Crypt(cryptKey)
-        }
-
-        if (typeof debug !== 'boolean') {
-            debug = false
-
-            eppsLogError(
-                'Since version 0.2.00, the encryption service has been modified and requires all encrypted data in localStorage or IndexedDB to be deleted.',
-                ['Delete the keys corresponding to stores where one or more state data are encrypted, so that they can be correctly persisted again.']
-            )
-        }
-
-        const augmentPinia = new Epps(db, crypt, debug)
-
-        return augmentPinia.plugin.bind(augmentPinia)
-    }
-
-    return () => ({})
-}
-
-declare module 'pinia' {
-    export interface PiniaCustomProperties extends PersistedStore {
     }
 }

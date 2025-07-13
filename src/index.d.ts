@@ -17,10 +17,11 @@ export type {
     PersistedStore
 } from "./store";
 
-export { createPlugin, Epps } from "../plugins/epps";
-export { extendedState } from "../plugins/extendedState";
-export { getParentStorePropertyValue } from "../plugins/parentStore";
-export { useCollectionStore } from '../stores/collection';
+export { createPlugin } from './plugins/createPlugin'
+export { Epps } from "./plugins/epps";
+export { extendedState } from "./plugins/extendedState";
+export { getParentStorePropertyValue } from "./plugins/parentStore";
+export { useCollectionStore } from './stores/collection';
 
 
 declare module 'epps' {

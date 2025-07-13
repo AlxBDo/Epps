@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import { beforeEachPiniaPlugin } from './utils/beforeEach'
 import PersisterMock from '../testing/mocks/persister'
-import { useConnectedUserStore } from '../stores/connectedUser'
+import { useConnectedUserStore } from '../stores/experiments/connectedUser'
 
 import type { EppsStore } from '../types'
 import type { User } from '../models/user'
-import type { UserState, UserStore } from '../stores/user'
+import type { UserState, UserStore } from '../stores/experiments/user'
 
 
 const user = {
@@ -27,15 +27,16 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
 
     let connectedUserStore: EppsStore<UserStore, UserState> | undefined
 
-    it('Has setData method and methods defined in actionsToExtends are extends', () => {
+    it('Has setData method and methods defined in actionsToExtends are extends', async () => {
         connectedUserStore = useConnectedUserStore() as EppsStore<UserStore, UserState>
         connectedUserStore.setData(user)
 
         expect(connectedUserStore.user).toStrictEqual(user)
+
+        await connectedUserStore.persistState()
     })
 
-    /**
-     it('Is persisted', async () => {
+    it('Is persisted', async () => {
         const persistedContact = await persister.getItem('connectedUser') as User
 
         expect(persistedContact.firstname).toStrictEqual(user.firstname)
@@ -53,9 +54,10 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
         expect(persistedConnectedUser.password).not.toBe(user.password)
     })
 
-    it('Has access to parent state property and modify it', () => {
+    it('Has access to parent state property and modify it', async () => {
         if (connectedUserStore) {
             connectedUserStore.lastname = newLastname
+            await new Promise(resolve => setTimeout(resolve, 500)) // wait for state mutation
             expect(connectedUserStore.lastname).toStrictEqual(newLastname)
         }
     })
@@ -98,9 +100,6 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
 
         expect(otherUserStore.user).toStrictEqual({ ...user, lastname: newLastname, '@id': undefined })
     })
-     */
-
-
 
     it('$reset method clear all states (child and parents) and persisted data', async () => {
         if (connectedUserStore) {

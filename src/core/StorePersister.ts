@@ -73,8 +73,8 @@ export default class StorePersister extends Store {
 
 
         // Augment Store
-        this.store.persistState = () => this.persist()
-        this.store.remember = async () => this.remember()
+        this.store.persistState = async () => await this.persist()
+        this.store.remember = async () => await this.remember()
         this.store.removePersistedState = () => (this._persister as Persister).removeItem(this.getStoreName())
         this.store.watch = () => {
             if (this.toBeWatched()) {
@@ -86,48 +86,50 @@ export default class StorePersister extends Store {
     }
 
     async cryptState(state: StateTree, decrypt: boolean = false): Promise<StateTree> {
-        const Crypt = this._crypt as Crypt
-        const persistedPropertiesToEncrypt = this.getValue(state.persistedPropertiesToEncrypt)
-        const isEncrypted = this.getValue(state.isEncrypted)
+        return await new Promise(async (resolve) => {
+            const Crypt = this._crypt as Crypt
+            const persistedPropertiesToEncrypt = this.getValue(state.persistedPropertiesToEncrypt)
+            const isEncrypted = this.getValue(state.isEncrypted)
 
-        this.debugLog(`cryptState - ${this.getStoreName()} ${decrypt ? 'decrypt' : 'crypt'}`, [
-            'can',
-            Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0
-            && isEncrypted === decrypt && !!Crypt,
-            [
-                Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0,
-                Crypt
-            ],
-            state
-        ])
+            this.debugLog(`cryptState - ${this.getStoreName()} ${decrypt ? 'decrypt' : 'crypt'}`, [
+                'can',
+                Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0
+                && isEncrypted === decrypt && !!Crypt,
+                [
+                    Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0,
+                    Crypt
+                ],
+                state
+            ])
 
-        if (
-            Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0
-            && Crypt
-        ) {
-            const encryptedState = {} as StateTree
+            if (
+                Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0
+                && Crypt
+            ) {
+                const encryptedState = {} as StateTree
 
-            for (const property of persistedPropertiesToEncrypt) {
-                const value = this.getValue(state[property])
+                for (const property of persistedPropertiesToEncrypt) {
+                    const value = this.getValue(state[property])
 
-                if (decrypt) {
-                    encryptedState[property] = await Crypt.decrypt(value)
-                } else {
-                    encryptedState[property] = await Crypt.encrypt(value)
+                    if (decrypt) {
+                        encryptedState[property] = await Crypt.decrypt(value)
+                    } else {
+                        encryptedState[property] = await Crypt.encrypt(value)
+                    }
+                }
+
+                this.debugLog(`cryptState - ${this.getStoreName()}`, [
+                    'encryptedState',
+                    encryptedState
+                ])
+
+                if (!isEmpty(encryptedState)) {
+                    state = { ...state, ...encryptedState, isEncrypted: !decrypt }
                 }
             }
 
-            this.debugLog(`cryptState - ${this.getStoreName()}`, [
-                'encryptedState',
-                encryptedState
-            ])
-
-            if (!isEmpty(encryptedState)) {
-                state = { ...state, ...encryptedState, isEncrypted: !decrypt }
-            }
-        }
-
-        return state
+            resolve(state)
+        })
     }
 
     async getPersistedState(): Promise<StateTree | undefined> {
@@ -162,6 +164,7 @@ export default class StorePersister extends Store {
         let state = this.state
 
         if (this.toBeCrypted()) { state = await this.cryptState(state) }
+
 
         const newState = this.populateState(state, persistedState)
 
@@ -253,7 +256,6 @@ export default class StorePersister extends Store {
     }
 
     private storeSubscription() {
-
         this.debugLog(`storeSubscription ${this.getStoreName()}`, [this.toBeWatched(), this.state, this.store])
 
         if (!this.toBeWatched()) {
@@ -265,8 +267,8 @@ export default class StorePersister extends Store {
         this.store.$subscribe((mutation: SubscriptionCallbackMutation<StateTree>, state: StateTree) => {
 
             this.debugLog(`store.$subscribe ${this.getStoreName()}`, [
-                mutation.type !== 'patch object' && this.getStatePropertyValue('watchMutation'),
-                this.getStatePropertyValue('watchMutation'), mutation, this.state, this.store
+                mutation.type !== 'patch object', this.getStatePropertyValue('watchMutation'),
+                mutation, this.state, this.store
             ])
 
             if (mutation.type !== 'patch object' && this.getStatePropertyValue('watchMutation')) {

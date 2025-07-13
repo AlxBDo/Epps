@@ -1,14 +1,14 @@
-import type { Contact } from "../models/contact"
-import { useErrorsStore } from "./errors";
+import type { Contact } from "../../models/contact"
+import { useErrorsStore } from "../errors";
 import { IItemStoreState, useItemStore } from "./item"
-import { defineStoreId } from "../utils/defineStoreId"
-import { getParentStoreMethod, getParentStorePropertyValue } from "../plugins/parentStore"
-import { extendedState } from "../plugins/extendedState";
-import { defineEppsStore } from "../utils/store";
+import { defineStoreId } from "../../utils/defineStoreId"
+import { getParentStoreMethod, getParentStorePropertyValue } from "../../plugins/parentStore"
+import { extendedState } from "../../plugins/extendedState";
+import { defineEppsStore } from "../../utils/store";
 import { computed, ref } from "vue";
 import { Store } from "pinia";
-import type { ErrorState, ErrorsStore, IError } from "./errors";
-import { isEmpty } from "../utils/validation";
+import type { ErrorState, ErrorsStore, IError } from "../errors";
+import { isEmpty } from "../../utils/validation";
 
 
 export interface ContactStore extends ErrorsStore {

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { eppsLog } from '../../../utils/log';
-import { useConnectedUserStore } from '../../../stores/connectedUser'
-import { useOptionApiStore, type OptionApiStore, type OptionApiState } from '../../../stores/optionApi'
+import { useConnectedUserStore } from '../../../stores/experiments/connectedUser'
+import { useOptionApiStore, type OptionApiStore, type OptionApiState } from '../../../stores/experiments/optionApi'
 
-import type { UserStore, UserState } from '../../../stores/user'
+import type { UserStore, UserState } from '../../../stores/experiments/user'
 import type { EppsStore } from '../../../types/store';
+import { useWebUserStore, WebUserState, WebUserStore } from '../../../stores/webuser';
 
 const connectedUser = useConnectedUserStore() as EppsStore<UserStore, UserState>
 
@@ -25,30 +26,25 @@ connectedUser.remember().then(() => {
 
 const optionApiStore = useOptionApiStore() as EppsStore<OptionApiStore, OptionApiState>
 optionApiStore.setTest({ id: 1, test: 'my test string' })
-optionApiStore.logTest()
-
 
 setTimeout(async () => {
     optionApiStore.test = 'An another test string'
 }, 3000)
 
-setTimeout(async () => {
-    connectedUser.setData({ email: 'another@email' })
-}, 6000)
+const webUserStore = useWebUserStore() as EppsStore<WebUserStore, WebUserState>
+webUserStore.setData({ '@id': '/webuser/1', username: 'webusername', password: 'W€BuS2RpWd' })
+webUserStore.id = 1
+console.log('webuser', webUserStore, webUserStore.id)
 
-/**
- setTimeout(async () => {
-    const anotherUser = useConnectedUserStore() as ExtendedStore<UserStore, UserState>
-    await anotherUser.remember()
-    eppsLog('anotherUser', anotherUser.user)
-    //connectedUser.$reset()
-    //eppsLog('$reset user', connectedUser.user)
-}, 3000)
- */
+
+setTimeout(async () => {
+    connectedUser.setData({ email: '' })
+}, 6000)
 </script>
 
 <template>
     <p v-if="connectedUser.firstname">Hello {{ connectedUser.firstname }}</p>
+    <p v-if="webUserStore.username">Hello {{ webUserStore.id }}</p>
     <div v-if="connectedUser.hasError()">
         <p>🚧 ERROR</p>
         <p v-for="error of connectedUser?.errors">{{ error.message }}</p>

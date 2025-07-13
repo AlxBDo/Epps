@@ -13,6 +13,10 @@ export default class Persister {
     private _db: ClientStorage
     private _db_options: DbOptions
 
+    get dbName(): string {
+        return this._db_options.name
+    }
+
     constructor(dbOptions: DbOptions) {
         if (!dbOptions) {
             throw new Error('DbOptions is required')

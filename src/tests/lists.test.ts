@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { beforeEachPiniaPlugin } from './utils/beforeEach'
-import { useListsStore, type ListsStoreMethods } from '../stores/lists'
+import { useListsStore, type ListsStoreMethods } from '../stores/experiments/lists'
 
 import type { CollectionState, EppsStore } from '../types'
 import { List } from '../models/liste'

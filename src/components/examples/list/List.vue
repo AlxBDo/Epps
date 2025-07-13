@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { User } from '../../../models/user';
-import { useListStore, type ListStoreState, type ListStoreMethods } from '../../../stores/list';
+import { useListStore, type ListStoreState, type ListStoreMethods } from '../../../stores/experiments/list';
 import type { EppsStore } from '../../../types';
 import { eppsLog } from '../../../utils/log';
 

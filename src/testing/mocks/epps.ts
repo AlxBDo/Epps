@@ -8,6 +8,7 @@ export function createPluginMock(dbName: string, cryptKey?: string) {
     if (cryptKey) {
         crypt = new Crypt(cryptKey)
     }
+
     const epps = new Epps(new PersisterMock({ name: dbName }), crypt)
 
     return epps.plugin.bind(epps)

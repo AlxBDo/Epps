@@ -1,5 +1,5 @@
-import { extendedState } from "../plugins/extendedState";
-import { defineEppsStore } from "../utils/store";
+import { extendedState } from "../../plugins/extendedState";
+import { defineEppsStore } from "../../utils/store";
 
 import { useItemStore, type IItemStore, type IItemStoreState } from "./item";
 
@@ -18,9 +18,6 @@ export const useOptionApiStore = defineEppsStore<Partial<OptionApiStore>, Option
         ...extendedState([useItemStore('optionApi')])
     }),
     actions: {
-        logTest() {
-            console.log('test has value: ', this.test)
-        },
         setTest(testData: OptionApiState) {
             if (testData.test) { this.test = testData.test }
 

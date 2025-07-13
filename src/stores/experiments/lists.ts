@@ -1,12 +1,12 @@
 import { ref } from "vue"
-import { defineEppsStore } from "../utils/store"
-import { extendedState } from "../plugins/extendedState"
-import { useCollectionStore } from "./collection"
+import { defineEppsStore } from "../../utils/store"
+import { extendedState } from "../../plugins/extendedState"
+import { getParentStoreMethod } from "../../plugins/parentStore"
+import { useCollectionStore } from "../collection"
 
-import type { CollectionState, CollectionStoreMethods } from "../types/store"
-import type { List } from "../models/liste"
-import { SearchCollectionCriteria } from "../types"
-import { getParentStoreMethod } from "../plugins/parentStore"
+import type { CollectionState, CollectionStoreMethods } from "../../types/store"
+import type { List } from "../../models/liste"
+import type { SearchCollectionCriteria } from "../../types"
 
 
 export type ListsStoreMethods = CollectionStoreMethods & { getLists: (criteria?: SearchCollectionCriteria) => List[] }

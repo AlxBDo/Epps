@@ -3,7 +3,7 @@ import type { CollectionState, CollectionStoreMethods, PersistedStore, ExtendedS
 import type { List } from '../../../models/liste'
 
 import { ref, computed } from 'vue'
-import { useListsStore } from '../../../stores/lists'
+import { useListsStore } from '../../../stores/experiments/lists'
 
 import AddList from './demo/AddList.vue'
 import DisplayResult from '../displayResult/DisplayResult.vue'
@@ -15,7 +15,7 @@ import SectionSelector from '../SectionSelector.vue'
 import StoreCreation from './explanation/StoreCreation.vue'
 import SyntaxStoreSelector from '../SyntaxStoreSelector.vue'
 import UseStore from './explanation/UseStore.vue'
-import { ListsStoreMethods } from '../../../stores/lists'
+import { ListsStoreMethods } from '../../../stores/experiments/lists'
 
 
 const activeSection = ref<'explanation' | 'forms'>('explanation')

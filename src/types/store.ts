@@ -56,7 +56,7 @@ export interface PersistedState {
 }
 
 export interface PersistedStore {
-    persistState: () => void
+    persistState: () => Promise<void>
     remember: () => Promise<void>
     removePersistedState: () => void
     stateIsEmpty?: () => boolean

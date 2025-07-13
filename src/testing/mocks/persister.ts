@@ -1,9 +1,10 @@
 import Persister from "../../services/Persister";
 import { ClientStorage } from "../../types/storage";
+import { IndexedDB } from "./indexedDb";
 import { localStorageMock } from "./localStorage";
 
 export default class PersisterMock extends Persister {
     override defineDb(): ClientStorage {
-        return localStorageMock
+        return this.dbName === 'localStorage' ? localStorageMock : new IndexedDB()
     }
 }
