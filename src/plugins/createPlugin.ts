@@ -22,11 +22,6 @@ export function createPlugin(dbName?: string, cryptKey?: string, debug: boolean 
 
         if (typeof debug !== 'boolean') {
             debug = false
-
-            eppsLogError(
-                'Since version 0.2.00, the encryption service has been modified and requires all encrypted data in localStorage or IndexedDB to be deleted.',
-                ['Delete the keys corresponding to stores where one or more state data are encrypted, so that they can be correctly persisted again.']
-            )
         }
 
         const augmentPinia = new Epps(db, crypt, debug)

@@ -34,6 +34,7 @@ export interface CollectionState<T> {
 
 export interface CollectionStoreMethods {
     addItem: (item: AnyObject) => void
+    clear: () => void
     getItem: (criteria: SearchCollectionCriteria) => AnyObject | undefined
     getItems: (criteria?: SearchCollectionCriteria) => AnyObject[]
     removeItem: (item: AnyObject) => void

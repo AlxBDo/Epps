@@ -6,7 +6,7 @@ import { pluginName } from '../../utils/constantes'
     <div class="header">
         <div>
             <a href="/">
-                <img src="../../assets/pinia-extends-store-150.png" class="logo" alt="Extend store plugin logo" />
+                <img src="../../assets/epps-logo-head-125px.png" class="logo" alt="epps logo" />
             </a>
             <div>
                 <h1>{{ pluginName }}</h1>

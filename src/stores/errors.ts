@@ -1,7 +1,12 @@
-import { defineStore } from "pinia";
-import { ref, type Ref } from "vue";
+import { defineStore, Store } from "pinia";
+import { computed, ref, type Ref } from "vue";
 import { arrayObjectFindAllBy } from "../utils/object";
 import { isEmpty } from "../utils/validation";
+import { defineEppsStore } from "../utils/store";
+import { CollectionState, CollectionStoreMethods, EppsStore, SearchCollectionCriteria } from "../types";
+import { extendedState } from "../plugins/extendedState";
+import { useCollectionStore } from "./collection";
+import { getParentStore } from "../plugins/parentStore";
 
 
 export interface IError {
@@ -10,21 +15,25 @@ export interface IError {
     message: string
 }
 
-export interface ErrorState<TError extends IError = IError> {
+export interface ErrorsState<TError extends IError = IError> {
     errors: TError[]
 }
 
 export interface ErrorsStore<TError extends IError = IError> {
     addError: (error: TError) => void
+    clearErrors: () => void
     getError: (errorId: string) => TError | undefined
-    getErrors: (value: boolean | number | string, findBy?: string) => TError[]
+    getErrors: (value?: boolean | number | string, findBy?: string) => TError[]
     hasError: (level?: number) => boolean
+    removeError: (criteria: Partial<TError>) => void
 }
 
-export const useErrorsStore = <TError extends IError = IError>(id: string) => defineStore(
+export const useErrorsStore = <TError extends IError = IError>(id: string) => defineEppsStore<ErrorsStore, CollectionState<TError>>(
     `${id}Store`,
     () => {
-        const errors: Ref<TError[]> = ref([])
+        const { parentsStores } = extendedState([useCollectionStore(id)])
+
+        const errors = computed(() => getCollectionStore().items)
 
         function addError(error: TError): void {
             if (!error?.id) {
@@ -35,34 +44,57 @@ export const useErrorsStore = <TError extends IError = IError>(id: string) => de
                 error.level = 1
             }
 
-            !getError(error.id) && errors.value.push(error)
+            !getError(error.id) && getCollectionStore().addItem(error)
+        }
+
+        function clearErrors() {
+            getCollectionStore().clear()
+        }
+
+        function getCollectionStore() {
+
+            if (typeof parentsStores !== 'function') {
+                throw new Error('parentsStores must be a function')
+            }
+
+            return getParentStore(
+                0,
+                parentsStores && parentsStores()
+            ) as EppsStore<CollectionStoreMethods, CollectionState<TError>>
         }
 
         function getError(errorId: string): TError | undefined {
             if (!isEmpty(errorId)) {
-                return errors.value.find((error: TError) => error.id === errorId)
+                return getCollectionStore().getItem({ id: errorId }) as TError | undefined
             }
         }
 
-        function getErrors(value: boolean | number | string, findBy: string = 'level'): TError[] {
+        function getErrors(value?: boolean | number | string, findBy: string = 'level'): TError[] {
             if (typeof value !== 'number' && findBy === 'level') {
                 throw new Error(`${id}Store - getErrors - level is number but its value is : ${value}`)
             }
 
-            return arrayObjectFindAllBy(errors.value, { [findBy]: value } as Partial<TError>)
+            return getCollectionStore().getItems({ [findBy]: value } as SearchCollectionCriteria) as TError[]
         }
 
         function hasError(level: number = 0): boolean {
-            return !!errors.value.find((error: TError) => (error.level ?? 0) >= level)
+            return !!getCollectionStore().items.find((error: TError) => (error.level ?? 0) >= level)
+        }
+
+        function removeError(criteria: Partial<TError>): void {
+            getCollectionStore().removeItem(criteria)
         }
 
 
         return {
             addError,
+            clearErrors,
             errors,
             getError,
             getErrors,
-            hasError
+            hasError,
+            parentsStores,
+            removeError
         }
     }
 )()

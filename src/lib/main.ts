@@ -6,3 +6,6 @@ export { Epps } from "../plugins/epps"
 export { extendedState } from "../plugins/extendedState"
 export { getParentStoreMethod, getParentStorePropertyValue } from "../plugins/parentStore"
 export { useCollectionStore } from '../stores/collection'
+export { useErrorsStore } from '../stores/errors'
+export { useResourceIdStore } from '../stores/resourceId'
+export { useWebUserStore } from '../stores/webuser'

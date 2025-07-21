@@ -112,6 +112,14 @@ export default class StorePersister extends Store {
                     const value = this.getValue(state[property])
 
                     if (decrypt) {
+
+                        // TODO - remove soon 
+                        // Need for Crypt changing : remove crypto-js dependence
+                        if ((value as string).indexOf(':') < 1) {
+                            this.store.removePersistedState()
+                            return resolve({})
+                        }
+
                         encryptedState[property] = await Crypt.decrypt(value)
                     } else {
                         encryptedState[property] = await Crypt.encrypt(value)

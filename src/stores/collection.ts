@@ -34,6 +34,10 @@ export const useCollectionStore: AugmentingStore = (id: string) => defineStore(i
             this.items.push(item)
         },
 
+        clear() {
+            this.items = []
+        },
+
         getItem(criteria: Partial<AnyObject>): AnyObject | undefined {
             return arrayObjectFindBy<AnyObject>(
                 this.items as AnyObject[],

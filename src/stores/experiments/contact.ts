@@ -7,7 +7,7 @@ import { extendedState } from "../../plugins/extendedState";
 import { defineEppsStore } from "../../utils/store";
 import { computed, ref } from "vue";
 import { Store } from "pinia";
-import type { ErrorState, ErrorsStore, IError } from "../errors";
+import type { ErrorsState, ErrorsStore, IError } from "../errors";
 import { isEmpty } from "../../utils/validation";
 
 
@@ -16,7 +16,7 @@ export interface ContactStore extends ErrorsStore {
     contact: Contact
 }
 
-export interface ContactState extends Contact, ErrorState, IItemStoreState {
+export interface ContactState extends Contact, ErrorsState, IItemStoreState {
 }
 
 
