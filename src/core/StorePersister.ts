@@ -115,7 +115,7 @@ export default class StorePersister extends Store {
 
                         // TODO - remove soon 
                         // Need for Crypt changing : remove crypto-js dependence
-                        if ((value as string).indexOf(':') < 1) {
+                        if (value && (value as string).indexOf(':') < 1) {
                             this.store.removePersistedState()
                             return resolve({})
                         }

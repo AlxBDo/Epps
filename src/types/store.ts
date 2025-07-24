@@ -1,5 +1,5 @@
 import type { AnyObject, SearchCollectionCriteria } from ".";
-import type { _StoreWithGetters, PiniaCustomProperties, PiniaCustomStateProperties, Store, StoreDefinition, SubscriptionCallback } from "pinia";
+import type { _StoreWithGetters, PiniaCustomProperties, PiniaCustomStateProperties, Store, StoreDefinition, SubscriptionCallback, SubscriptionCallbackMutationPatchFunction, SubscriptionCallbackMutationPatchObject } from "pinia";
 import type { PersistOptions } from "../plugins/extendedState";
 import type { Ref } from "vue";
 
@@ -87,7 +87,11 @@ export interface ExtendedState extends PersistOptions {
     parentsStores?: () => Store[] | EppsStore<AnyObject, AnyObject>[]
 }
 
-export type ExtendedStore<TStore, TState> = TStore & TState & CustomStore
+export type ExtendedStore<TStore, TState> = TStore & TState & CustomStore & {
+    mutationCallback?: (
+        mutation: SubscriptionCallbackMutationPatchFunction | SubscriptionCallbackMutationPatchObject<TState>
+    ) => void
+}
 
 export type EppsStore<TStore, TState> = ExtendedStore<TStore, TState> & PersistedState & PersistedStore & StoreDefinition<string, AnyObject & TState & PersistedState, AnyObject, TStore & PersistedStore>
 

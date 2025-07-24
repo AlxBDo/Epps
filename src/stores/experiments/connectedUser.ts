@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { defineEppsStore } from "../../utils/store";
 import { extendedState } from "../../plugins/extendedState";
 import { useUserStore, type UserStore, type UserState } from "./user";
+import { SubscriptionCallbackMutationPatchObject } from "pinia";
 
 
 export const useConnectedUserStore = defineEppsStore<UserStore, UserState>(
@@ -16,7 +17,10 @@ export const useConnectedUserStore = defineEppsStore<UserStore, UserState>(
                     watchMutation: ref(true)
                 }
             }
-        )
+        ),
+        mutationCallback: (mutation: SubscriptionCallbackMutationPatchObject<UserState>) => {
+            console.log('connectedUserStore - mutationCallback', mutation)
+        }
     })
 )
 

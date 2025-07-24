@@ -13,6 +13,9 @@ dist
 dist-ssr
 *.local
 module-declaration.ts
+components
+stores/experiments
+
 
 # tests
 coverage/*

@@ -1,7 +1,7 @@
 import { defineStore, DefineStoreOptions, StateTree, StoreDefinition, StoreGetters } from "pinia"
 import type { Item } from "../models/item"
 import type { AnyObject } from "../types"
-import type { DefineEppsStore, DefineEppsStoreOptionApi, PersistedState } from "../types/store"
+import type { DefineEppsStore, PersistedState } from "../types/store"
 
 
 export const itemState: Item = {
