@@ -38,12 +38,11 @@ console.log('webuser', webUserStore, webUserStore.id)
 
 
 setTimeout(async () => {
-    connectedUser.setData({ email: 'mitchwee@mail.com' })
+    connectedUser.setData({ email: '' })
     console.log('connectedUser errors', connectedUser.errors)
 }, 6000)
 setTimeout(async () => {
     connectedUser.clearErrors()
-    connectedUser.setData({})
     console.log('connectedUser errors after clear', connectedUser.errors)
 }, 12000)
 </script>

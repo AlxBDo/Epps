@@ -8,13 +8,18 @@ import type { AnyObject, EppsStore } from "../types"
  * @param {Store[]} parentsStores 
  * @returns Store | undefined
  */
-export function getParentStore(
+export function getParentStore<TStore = AnyObject, TState = AnyObject>(
     parentStoreIdOrIndex: string | number,
-    parentsStores: Array<Store | EppsStore<AnyObject, AnyObject>>
-): Store | undefined {
-    let parentStore: Store | undefined
+    parentsStores: Array<Store | EppsStore<TStore, TState>> | (() => Array<Store | EppsStore<AnyObject, AnyObject>>)
+): EppsStore<TStore, TState> | undefined {
+    let parentStore: EppsStore<TStore, TState> | undefined
+
+    if (typeof parentsStores === 'function') {
+        parentsStores = parentsStores()
+    }
+
     if (typeof parentStoreIdOrIndex === 'string') {
-        parentStore = getParentStoreById(parentStoreIdOrIndex, parentsStores)
+        parentStore = getParentStoreById<TStore, TState>(parentStoreIdOrIndex, parentsStores)
     } else if (typeof parentStoreIdOrIndex === 'number') {
         parentStore = getParentStoreByIndex(parentStoreIdOrIndex, parentsStores)
     }
@@ -28,8 +33,11 @@ export function getParentStore(
  * @param {Store[]} parentsStores 
  * @returns Store | undefined
  */
-export function getParentStoreById(parentStoreId: string, parentsStores: Store[]): Store | undefined {
-    return parentsStores.find((store) => store.$id === parentStoreId)
+export function getParentStoreById<TStore = AnyObject, TState = AnyObject>(
+    parentStoreId: string,
+    parentsStores: Array<Store | EppsStore<TStore, TState>>
+): EppsStore<TStore, TState> | undefined {
+    return parentsStores.find((store) => store.$id === parentStoreId) as EppsStore<TStore, TState>
 }
 
 /**
@@ -38,8 +46,11 @@ export function getParentStoreById(parentStoreId: string, parentsStores: Store[]
  * @param {Store[]} parentsStores 
  * @returns Store | undefined
  */
-export function getParentStoreByIndex(parentStoreIndex: number, parentsStores: Store[]): Store | undefined {
-    return parentsStores[parentStoreIndex]
+export function getParentStoreByIndex<TStore = AnyObject, TState = AnyObject>(
+    parentStoreIndex: number,
+    parentsStores: Array<Store | EppsStore<TStore, TState>>
+): EppsStore<TStore, TState> | undefined {
+    return parentsStores[parentStoreIndex] as EppsStore<TStore, TState>
 }
 
 /**
