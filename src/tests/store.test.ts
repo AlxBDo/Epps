@@ -6,7 +6,7 @@ import type { Store as PiniaStore } from 'pinia'
 import { ref } from 'vue'
 
 describe('Store', () => {
-    const store = new Store({} as PiniaStore)
+    const store = new Store({} as PiniaStore, {})
     const initialState = { test: 'my string' }
 
     it('Store set pinia store state', async () => {

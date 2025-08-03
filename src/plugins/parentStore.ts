@@ -1,6 +1,6 @@
 import type { Store } from "pinia"
 import type { AnyObject, EppsStore } from "../types"
-import type { ParentStore as ParentStoreType, ParentStoreConstructor } from "../types/epps"
+import type { ParentStore as ParentStoreType } from "../types/epps"
 
 
 /**
