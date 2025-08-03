@@ -2,6 +2,7 @@ import type { AnyObject, SearchCollectionCriteria } from ".";
 import type { _StoreWithGetters, PiniaCustomProperties, PiniaCustomStateProperties, Store, StoreDefinition, SubscriptionCallback, SubscriptionCallbackMutationPatchFunction, SubscriptionCallbackMutationPatchObject } from "pinia";
 import type { PersistOptions } from "../plugins/extendedState";
 import type { Ref } from "vue";
+import ParentsStores from "../plugins/parentsStores";
 
 
 export type AugmentOptionApiStore<TStore, TState> = Store & TStore & TState & OptionApiStore<TState> & PiniaCustomProperties & PiniaCustomStateProperties & _StoreWithGetters<TState>
@@ -29,7 +30,7 @@ export type StatePropertyValue = StdStatePropertyValue
  */
 
 export interface CollectionState<T> {
-    items: T[];
+    items: T[]
 }
 
 export interface CollectionStoreMethods {
@@ -47,13 +48,8 @@ export interface CollectionStoreMethods {
  * - -- | Persit Store | -- -
  */
 
-export interface PersistedState {
-    excludedKeys?: string[]
-    isEncrypted?: boolean
+export interface PersistedState extends PersistedStoreOptions {
     isLoading?: boolean
-    persist: boolean
-    persistedPropertiesToEncrypt?: string[]
-    watchMutation?: boolean
 }
 
 export interface PersistedStore {
@@ -63,6 +59,14 @@ export interface PersistedStore {
     stateIsEmpty?: () => boolean
     stopWatch: () => void
     watch: () => void
+}
+
+export interface PersistedStoreOptions {
+    excludedKeys?: string[] | Ref<string[]>
+    isEncrypted?: boolean
+    persist?: boolean | Ref<boolean>
+    persistedPropertiesToEncrypt?: string[] | Ref<string[]>
+    watchMutation?: boolean | Ref<boolean>
 }
 
 type PartialPersistedStore<TStore, TState> = Partial<TStore>
@@ -75,10 +79,10 @@ type PartialPersistedStore<TStore, TState> = Partial<TStore>
  * - -- | Extends Store | -- -
  */
 
-export type DefineEppsStore<TStore, TState> = (args?: any) => PartialPersistedStore<TStore, TState> & CustomStore
-
-export type DefineEppsStoreOptionApi<TStore, TState> = (args?: any) => PartialPersistedStore<TStore, OptionApiStore<TState>>
-    & CustomStore
+export interface ExtendedStoreOptions {
+    actionsToExtends?: string[]
+    parentsStores?: ParentsStores | (() => Array<Store | EppsStore<AnyObject, AnyObject>>)
+}
 
 export interface ExtendedState extends PersistOptions {
     actionsToExtends?: string[] | Ref<string[] | undefined>
@@ -93,6 +97,23 @@ export type ExtendedStore<TStore, TState> = TStore & TState & CustomStore & {
     ) => void
 }
 
-export type EppsStore<TStore, TState> = ExtendedStore<TStore, TState> & PersistedState & PersistedStore & StoreDefinition<string, AnyObject & TState & PersistedState, AnyObject, TStore & PersistedStore>
+
+/**
+ * EPPS
+ */
+
+export type DefineEppsStore<TStore, TState> = (args?: any) => PartialPersistedStore<TStore, TState> & CustomStore
+
+export type DefineEppsStoreOptionApi<TStore, TState> = (args?: any) => PartialPersistedStore<TStore, OptionApiStore<TState>>
+    & CustomStore
+
+export type EppsStore<TStore, TState> = ExtendedStore<TStore, TState>
+    & PersistedState
+    & PersistedStore
+    & StoreDefinition<string, AnyObject & TState & PersistedState, AnyObject, TStore & PersistedStore>
+
+export interface EppsStoreOptions extends ExtendedStoreOptions {
+    persist?: PersistedStoreOptions
+}
 
 export type EppsStoreMethods = Store & PersistedStore & { parentsStores: () => Array<Store | EppsStore<AnyObject, AnyObject>> }

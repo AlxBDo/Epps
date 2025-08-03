@@ -1,73 +1,86 @@
-import Crypt from "../services/Crypt"
-import { eppsLogError } from "../utils/log"
-import Persister from "../services/Persister"
-import StoreExtension from "../core/StoreExtension"
-import StorePersister from "../core/StorePersister"
-
-import type { AllowedKeyPath } from "../types/storage"
-import type { PiniaPluginContext, StateTree, Store } from "pinia"
+import { PersistOptions } from "./extendedState"
+import type { AnyObject, EppsStore } from "../types"
+import type { EppsStoreOptions, PersistedStoreOptions } from "../types/store"
+import ParentStore, { getParentStoreById } from "./parentStore"
 
 
-export interface EppsConstructorProps {
-    dbName?: string
-    dbKeyPath?: AllowedKeyPath
-    cryptKey?: string
-    debug?: boolean
+export interface EppsContructor extends Omit<EppsStoreOptions, 'parentsStores'> {
+    parentsStores?: ParentStore[]
+    propertiesToRename?: Record<string, string>
 }
 
+
 export class Epps {
-    private _db?: Persister
-    private _debug: boolean = false
-    private _crypt?: Crypt
-    private _watchedStore: string[] = []
+    private _actionsToExtends?: string[]
+    private _childId?: string
+    private _persist?: PersistedStoreOptions
+    private _parentsStores?: ParentStore[]
+    private _parentsStoresBuilded?: EppsStore<AnyObject, AnyObject>[]
+    private _propertiesToRename?: Record<string, string>
 
-
-    get db(): Persister | undefined { return this._db }
-
-    get crypt(): Crypt | undefined { return this._crypt }
-
-    constructor(db?: Persister, crypt?: Crypt, debug: boolean = false) {
-        this._debug = debug
-
-        if (db instanceof Persister) {
-            this._db = db
-        }
-
-        if (crypt) { this._crypt = crypt }
+    constructor(options: EppsContructor) {
+        this._actionsToExtends = options.actionsToExtends
+        this._parentsStores = options.parentsStores
+        this._persist = options.persist
+        this._propertiesToRename = options.propertiesToRename
     }
 
-    plugin(context: PiniaPluginContext) {
-        try {
-            const { store } = context
 
-            new StoreExtension(store, this._debug)
+    get actionsToExtends(): string[] | undefined {
+        return this._actionsToExtends
+    }
 
-            if (this.db instanceof Persister) {
-                new StorePersister(store, this.db, this._watchedStore, this._crypt, this._debug)
-            }
+    get childId(): string | undefined {
+        return this._childId
+    }
 
-            this.rewriteResetStore(context, Object.assign({}, store.$state))
-        } catch (e) {
-            eppsLogError('plugin()', [e, context])
+    set childId(value: string | undefined) {
+        this._childId = value
+    }
+
+    get persist(): PersistOptions | undefined {
+        return this._persist
+    }
+
+    get propertiesToRename(): Record<string, string> | undefined {
+        return this._propertiesToRename
+    }
+
+    buildStores(childId?: string): void {
+        if (!this._childId && !childId) {
+            return
+        }
+
+        this._parentsStoresBuilded = this._parentsStores?.map(
+            store => store.build((childId ?? this.childId) as string) as EppsStore<AnyObject, AnyObject>
+        )
+    }
+
+    getStore<TStore, TState>(idOrIndex: number | string, childId?: string): EppsStore<TStore, TState> | undefined {
+        if (!this._parentsStores) {
+            return undefined
+        }
+
+        if (typeof idOrIndex === 'string') {
+            const store = this._parentsStores.find(store => store.id === idOrIndex)
+
+            if (!store) { return }
+
+            return store.build(childId as string) as EppsStore<TStore, TState>
+        }
+
+        if (typeof idOrIndex === 'number') {
+            return this._parentsStores[idOrIndex].build(childId as string) as EppsStore<TStore, TState>
         }
     }
 
-    rewriteResetStore({ store }: PiniaPluginContext, initState: StateTree): void {
+    getStores(childId?: string) {
+        return this.parentsStores(childId)
+    }
 
-        store.$reset = () => {
-            if (store.$state.persist) {
-                store.removePersistedState()
-            }
+    parentsStores(childId?: string): EppsStore<AnyObject, AnyObject>[] {
+        this.buildStores(childId)
 
-            const parentsStores = typeof store.parentsStores === 'function' && store.parentsStores()
-
-            if (Array.isArray(parentsStores) && parentsStores.length) {
-                parentsStores.forEach(
-                    (parentStore: Store) => parentStore.$reset()
-                )
-            }
-
-            store.$patch(Object.assign({}, initState))
-        }
+        return this._parentsStoresBuilded as EppsStore<AnyObject, AnyObject>[]
     }
 }

@@ -1,21 +1,40 @@
 import { ref, toRef, type Ref } from "vue"
+import { eppsLog } from "../utils/log"
+import { Epps } from "../plugins/epps"
+import { DefineEppsStoreOtions } from "../utils/store"
 
 import type { Store as PiniaStore, StateTree } from "pinia"
 import type { AnyObject, EppsStore } from "../types"
-import type { StatePropertyValue } from "../types/store"
-import { eppsLog } from "../utils/log"
+import type { EppsStoreOptions, StatePropertyValue } from "../types/store"
 
 
 export default class Store {
     private _debug: boolean = false
+    private _options?: DefineEppsStoreOtions | Epps
     private _store: PiniaStore
-
     protected _watchedStore?: string[]
 
     get debug(): boolean { return this._debug }
     set debug(debug: boolean) { this._debug = debug }
 
+    get options(): EppsStoreOptions | Epps | undefined { return this._options }
+
     get parentsStores(): EppsStore<AnyObject, AnyObject>[] | undefined {
+        this.debugLog(`Store.parentsStore - ${this.getStoreName()}`, this.options)
+
+        if (this.options instanceof Epps || typeof (this.options as Epps)?.buildStores === 'function') {
+            this._options = this.options as Epps
+            this._options.childId = this.store.$id
+
+            this.debugLog(`Store.parentsStore EppsOptions - ${this.getStoreName()}`, [
+                this._options.childId,
+                this._options.parentsStores(),
+                this.options
+            ])
+
+            return this._options.parentsStores()
+        }
+
         return typeof this.store.parentsStores === 'function' && this.store.parentsStores()
     }
 
@@ -26,8 +45,9 @@ export default class Store {
     get store(): AnyObject { return this._store }
 
 
-    constructor(store: PiniaStore, debug: boolean = false) {
+    constructor(store: PiniaStore, options: DefineEppsStoreOtions, debug: boolean = false) {
         this._debug = debug
+        this._options = options?.eppsOptions ?? options
         this._store = store
     }
 
@@ -64,6 +84,10 @@ export default class Store {
 
     debugLog(message: string, args: any): void {
         if (this._debug) { eppsLog(message, args) }
+    }
+
+    getOption(optionName: keyof EppsStoreOptions | keyof EppsStoreOptions['persist']) {
+        return this.options && this.options[optionName]
     }
 
     getStatePropertyValue(propertyName: string) {

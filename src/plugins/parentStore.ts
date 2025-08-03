@@ -1,5 +1,6 @@
 import type { Store } from "pinia"
 import type { AnyObject, EppsStore } from "../types"
+import type { ParentStore as ParentStoreType, ParentStoreConstructor } from "../types/epps"
 
 
 /**
@@ -10,8 +11,12 @@ import type { AnyObject, EppsStore } from "../types"
  */
 export function getParentStore<TStore = AnyObject, TState = AnyObject>(
     parentStoreIdOrIndex: string | number,
-    parentsStores: Array<Store | EppsStore<TStore, TState>> | (() => Array<Store | EppsStore<AnyObject, AnyObject>>)
+    parentsStores: Array<Store | EppsStore<TStore, TState>>
+        | (() => Array<Store | EppsStore<AnyObject, AnyObject>>)
+        | undefined
 ): EppsStore<TStore, TState> | undefined {
+    if (!parentsStores) { return }
+
     let parentStore: EppsStore<TStore, TState> | undefined
 
     if (typeof parentsStores === 'function') {
@@ -63,8 +68,10 @@ export function getParentStoreByIndex<TStore = AnyObject, TState = AnyObject>(
 export function getParentStorePropertyValue(
     propertyName: string,
     parentStore: AnyObject | string | number,
-    parentsStores?: Store[] | EppsStore<AnyObject, AnyObject>[]
+    parentsStores?: Store[] | EppsStore<AnyObject, AnyObject>[] | undefined
 ): any {
+    if (!parentsStores) { return }
+
     if (parentsStores && (typeof parentStore === 'string' || typeof parentStore === 'number')) {
         parentStore = getParentStore(parentStore, parentsStores) as AnyObject
     }
@@ -84,8 +91,13 @@ export function getParentStorePropertyValue(
 export function getParentStoreMethod(
     methodName: string,
     parentStore: AnyObject | string | number,
-    parentsStores?: Store[] | EppsStore<AnyObject, AnyObject>[]
+    parentsStores?: Store[] | EppsStore<AnyObject, AnyObject>[] | (() => Store[] | EppsStore<AnyObject, AnyObject>[]) | undefined
 ): Function {
+
+    if (typeof parentsStores === 'function') {
+        parentsStores = parentsStores()
+    }
+
     if (parentsStores && typeof parentStore === 'string' || typeof parentStore === 'number') {
         parentStore = getParentStore(parentStore, parentsStores as Store[]) as AnyObject
     }
@@ -99,4 +111,21 @@ export function getParentStoreMethod(
     }
 
     return () => { }
+}
+
+export default class ParentStore<TStore = AnyObject, TState = AnyObject> {
+    private _constructor: ParentStoreType
+    private _id: string
+
+    get id(): string { return this._id }
+
+    constructor(id: string, store: ParentStoreType) {
+        this._constructor = store
+        this._id = id
+    }
+
+    build(childId: string) {
+        childId = childId ? `${childId.substring(0, 1)}${childId.substring(1)}` : ''
+        return this._constructor<TStore, TState>(`${this._id}${childId}`)
+    }
 }

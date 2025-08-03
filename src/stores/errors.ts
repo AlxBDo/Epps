@@ -1,10 +1,12 @@
 import { computed } from "vue";
 import { isEmpty } from "../utils/validation";
 import { defineEppsStore } from "../utils/store";
-import { CollectionState, CollectionStoreMethods, SearchCollectionCriteria } from "../types";
+import { CollectionState, CollectionStoreMethods, DefineEppsStore, EppsStore, SearchCollectionCriteria } from "../types";
 import { extendedState } from "../plugins/extendedState";
 import { useCollectionStore } from "./collection";
-import { getParentStore } from "../plugins/parentStore";
+import ParentStore, { getParentStore } from "../plugins/parentStore";
+import ParentsStores from "../plugins/parentsStores";
+import { Epps } from "../plugins/epps";
 
 
 export interface IError {
@@ -26,14 +28,17 @@ export interface ErrorsStore<TError extends IError = IError> {
     removeError: (criteria: Partial<TError>) => void
 }
 
+const epps = new Epps({
+    parentsStores: [
+        new ParentStore<CollectionStoreMethods, CollectionState<IError>>('errorCollection', useCollectionStore)
+    ],
+    propertiesToRename: { items: 'errors' }
+})
+
 export const useErrorsStore = <TError extends IError = IError>(id: string) =>
     defineEppsStore<ErrorsStore, CollectionState<TError>>(
         `${id}Store`,
         () => {
-            const { parentsStores } = extendedState([useCollectionStore(id)])
-
-            const errors = computed(() => getCollectionStore()?.items)
-
             function addError(error: TError): void {
                 if (!error?.id) {
                     throw new Error(`${id}Store - addError - Error: id is required`)
@@ -51,15 +56,7 @@ export const useErrorsStore = <TError extends IError = IError>(id: string) =>
             }
 
             function getCollectionStore() {
-
-                if (typeof parentsStores !== 'function') {
-                    throw new Error('parentsStores must be a function')
-                }
-
-                return getParentStore<CollectionStoreMethods, CollectionState<TError>>(
-                    0,
-                    parentsStores
-                )
+                return epps.getStore<CollectionStoreMethods, CollectionState<IError>>(0, `${id}Store`)
             }
 
             function getError(errorId: string): TError | undefined {
@@ -77,7 +74,8 @@ export const useErrorsStore = <TError extends IError = IError>(id: string) =>
             }
 
             function hasError(level: number = 0): boolean {
-                return !!getCollectionStore()?.items.find((error: TError) => (error.level ?? 0) >= level)
+                const items = getCollectionStore()?.items
+                return !!(items && items.find((error: IError) => (error.level ?? 0) >= level))
             }
 
             function removeError(criteria: Partial<TError>): void {
@@ -88,12 +86,11 @@ export const useErrorsStore = <TError extends IError = IError>(id: string) =>
             return {
                 addError,
                 clearErrors,
-                errors,
                 getError,
                 getErrors,
                 hasError,
-                parentsStores,
                 removeError
             }
-        }
+        },
+        epps
     )()

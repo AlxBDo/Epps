@@ -1,11 +1,12 @@
 import { PiniaPlugin } from "pinia"
 import Crypt from "../services/Crypt"
-import { Epps } from "./epps"
+import { EppsPlugin } from "./eppsPlugin"
 import { eppsLogError } from "../utils/log"
 import { isEmpty } from "../utils/validation"
 import Persister from "../services/Persister"
 
 import type { PersistedStore } from "../types"
+import { EppsStoreOptions } from "../types/store"
 
 
 export function createPlugin(dbName?: string, cryptKey?: string, debug: boolean = false): PiniaPlugin {
@@ -24,7 +25,7 @@ export function createPlugin(dbName?: string, cryptKey?: string, debug: boolean 
             debug = false
         }
 
-        const augmentPinia = new Epps(db, crypt, debug)
+        const augmentPinia = new EppsPlugin(db, crypt, debug)
 
         return augmentPinia.plugin.bind(augmentPinia)
     }
@@ -34,5 +35,8 @@ export function createPlugin(dbName?: string, cryptKey?: string, debug: boolean 
 
 declare module 'pinia' {
     export interface PiniaCustomProperties extends PersistedStore {
+    }
+
+    export interface DefineStoreOptionsBase<S, Store> extends EppsStoreOptions {
     }
 }

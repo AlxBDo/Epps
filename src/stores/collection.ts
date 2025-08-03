@@ -4,14 +4,14 @@ import type { AugmentOptionApiStore, CollectionState, CollectionStoreMethods } f
 import { arrayObjectFindAllBy, arrayObjectFindBy } from '../utils/object'
 
 
-type AugmentingStore = (id: string) => AugmentOptionApiStore<CollectionStoreMethods, CollectionState<AnyObject>>
+type AugmentingStore = (id?: string) => AugmentOptionApiStore<CollectionStoreMethods, CollectionState<AnyObject>>
 
 function getItemCriteria(item: AnyObject): SearchCollectionCriteria {
     return item.id ? { id: item.id } : { '@id': item['@id'] }
 }
 
 
-export const useCollectionStore: AugmentingStore = (id: string) => defineStore(id, {
+export const useCollectionStore: AugmentingStore = (id?: string) => defineStore(id ?? 'collectionStore', {
     state: (): CollectionState<AnyObject> => ({
         items: []
     }),
@@ -64,13 +64,6 @@ export const useCollectionStore: AugmentingStore = (id: string) => defineStore(i
             if (Array.isArray(items)) {
                 this.items = items as AnyObject[]
             }
-        },
-
-        stateIsEmpty(state?: CollectionState<AnyObject>) {
-            if (state) {
-                return !state?.items?.length
-            }
-            return !this.items.length
         },
 
         updateItem(updatedItem: AnyObject, oldItem?: AnyObject) {

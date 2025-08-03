@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
 import Crypt from "../services/Crypt";
-import { Epps } from "../plugins/epps";
+import { EppsPlugin } from "../plugins/eppsPlugin";
 import PersisterMock from '../testing/mocks/persister'
 
-describe('Epps class', () => {
+describe('EppsPlugin class', async () => {
     const crypt = new Crypt('HrN2t2nCr6pTiV22')
+    await crypt.init()
     const persister = new PersisterMock({ name: 'localStorage' })
-    const epps = new Epps(persister, crypt)
+    const epps = new EppsPlugin(persister, crypt)
 
     it('Epps get Crypt', () => {
         expect(epps.crypt).toBeInstanceOf(Crypt)

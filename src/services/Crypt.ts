@@ -1,12 +1,13 @@
 export default class Crypt {
     private _encoder: TextEncoder = new TextEncoder()
-    private _key: any;
+    private _key: string;
+    private _materialKey: any;
 
     private static DECRYPT: 'decrypt' = 'decrypt'
     private static ENCRYPT: 'encrypt' = 'encrypt'
 
     constructor(key: string) {
-        this.setKeyMaterial(key)
+        this._key = key
     }
 
     async getKey(mode: 'decrypt' | 'encrypt') {
@@ -17,19 +18,15 @@ export default class Crypt {
                 iterations: 100000,
                 hash: 'SHA-256'
             },
-            this.getKeyMaterial(),
+            this._materialKey,
             { name: 'AES-GCM', length: 256 },
             false,
             [mode]
         )
     }
 
-    getKeyMaterial() {
-        return this._key
-    }
-
     async setKeyMaterial(key: string) {
-        this._key = await crypto.subtle.importKey(
+        this._materialKey = await crypto.subtle.importKey(
             'raw',
             this._encoder.encode(key),
             { name: 'PBKDF2' },
@@ -75,5 +72,11 @@ export default class Crypt {
         return btoa(String.fromCharCode(...new Uint8Array(iv)))
             + ':'
             + btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+    }
+
+    async init(): Promise<void> {
+        if (!this._materialKey) {
+            await this.setKeyMaterial(this._key)
+        }
     }
 }

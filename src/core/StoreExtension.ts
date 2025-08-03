@@ -1,24 +1,29 @@
 import { computed, toRef } from "vue";
+import { Epps } from "../plugins/epps";
+import { EppsStoreOptions } from "../types/store";
 import Store from "./Store";
 
 import type { AnyObject } from "../types";
 import type { Store as PiniaStore } from "pinia";
-import { log } from "../utils/log";
 
 
 export default class StoreExtension extends Store {
     private _extendedActions: string[] = ['removePersistedState', 'watch', '$reset']
 
 
-    constructor(store: PiniaStore, debug: boolean = false) {
-        super(store, debug)
+    constructor(store: PiniaStore, options: EppsStoreOptions, debug: boolean = false) {
+        super(store, options, debug)
 
         this.extendsStore()
     }
 
 
     get extendedActions(): string[] {
-        return [...this._extendedActions, ...(this.getStatePropertyValue('actionsToExtends') ?? [])]
+        return [...this._extendedActions, ...(this.options?.actionsToExtends ?? this.getStatePropertyValue('actionsToExtends') ?? [])]
+    }
+
+    get propertiesToRename(): Record<string, string> | undefined {
+        return (this.options as Epps).propertiesToRename
     }
 
     private addToCustomProperties(propertyName: string): void {
@@ -93,8 +98,9 @@ export default class StoreExtension extends Store {
     private extendsState(storeToExtend: AnyObject) {
         Object.keys(storeToExtend.$state).forEach((key: string) => {
             if (!this.stateHas(key)) {
-                this.store[key] = this.state[key] = toRef(storeToExtend.$state, key)
-                this.addToCustomProperties(key)
+                const childStoreKey = this.getPropertyNameForChildState(key)
+                this.store[childStoreKey] = this.state[childStoreKey] = toRef(storeToExtend.$state, key)
+                this.addToCustomProperties(childStoreKey)
             }
         })
     }
@@ -103,7 +109,7 @@ export default class StoreExtension extends Store {
      * Extends to store stores list in parentsStores property
      */
     private extendsStore(): void {
-        if (this.storeHas('parentsStores')) {
+        if (this.parentsStores) {
             const storeToExtend = this.parentsStores
 
             if (!storeToExtend || !storeToExtend.length) { return }
@@ -114,8 +120,10 @@ export default class StoreExtension extends Store {
                     this.extendsState(ste)
                 }
             })
-
-            this.addToState('isExtended', true)
         }
+    }
+
+    private getPropertyNameForChildState(property: string): string {
+        return (this.propertiesToRename && this.propertiesToRename[property]) ?? property
     }
 }

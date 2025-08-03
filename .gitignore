@@ -13,8 +13,11 @@ dist
 dist-ssr
 *.local
 module-declaration.ts
-components
-stores/experiments
+src/components
+src/stores/experiments
+src/models/contact.ts
+src/models/liste.ts
+src/models/user.ts
 
 
 # tests

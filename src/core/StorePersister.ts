@@ -2,12 +2,13 @@ import { toRaw } from "vue"
 import { areIdentical } from "../utils/validation/object"
 import Crypt from "../services/Crypt"
 import { isEmpty } from "../utils/validation"
-import { log, eppsLogError } from "../utils/log"
+import { eppsLogError } from "../utils/log"
 import Persister from "../services/Persister"
 import Store from "./Store"
 
 import type { Store as PiniaStore, StateTree, SubscriptionCallbackMutation } from "pinia"
 import type { AnyObject } from "../types"
+import type { EppsStoreOptions } from "../types/store"
 
 
 export default class StorePersister extends Store {
@@ -33,28 +34,30 @@ export default class StorePersister extends Store {
 
     constructor(
         store: PiniaStore,
+        options: EppsStoreOptions,
         persister: Persister,
         watchedStore: string[],
         crypt?: Crypt,
         debug: boolean = false
     ) {
-        if (!(persister instanceof Persister)) {
-            throw new Error('StorePersister must be instanciated with a Persister')
-        }
-
-        super(store, debug)
+        super(store, options, debug)
 
         this._persister = persister
         this._watchedStore = watchedStore ?? []
 
-        if (crypt) { this._crypt = crypt }
+        if (crypt) {
+            this._crypt = crypt
 
+            if (this.options?.persist) {
+                this.options.persist.isEncrypted = false
+            }
+        }
         if (this.hasPersistProperty()) {
             this.augmentStore()
             this.remember()
 
             this.debugLog('StorePersister constructor', [
-                this.toBeWatched(), watchedStore, persister, store
+                this.toBeWatched(), watchedStore, persister, this.options, store
             ])
 
             if (this.toBeWatched()) {
@@ -66,10 +69,18 @@ export default class StorePersister extends Store {
 
     augmentStore() {
         // Augment state
-        if (!this.stateHas('isEncrypted')) { this.addToState('isEncrypted', false) }
-        if (!this.stateHas('persist')) { this.addToState('persist', false) }
-        if (!this.stateHas('persistedPropertiesToEncrypt')) { this.addToState('persistedPropertiesToEncrypt', []) }
-        if (!this.stateHas('watchMutation')) { this.addToState('watchMutation', false) }
+        if (this.options?.persist) {
+            const { isEncrypted, persist, persistedPropertiesToEncrypt, watchMutation } = this.options.persist
+            if (isEncrypted === undefined) { this.options.persist.isEncrypted = false }
+            if (persist === undefined) { this.options.persist.persist = !!this.options.persist.watchMutation }
+            if (persistedPropertiesToEncrypt === undefined) { this.options.persist.persistedPropertiesToEncrypt = [] }
+            if (watchMutation === undefined) { this.options.persist.watchMutation = false }
+        } else {
+            if (!this.stateHas('persist')) { this.addToState('persist', false) }
+            if (!this.stateHas('persistedPropertiesToEncrypt')) { this.addToState('persistedPropertiesToEncrypt', []) }
+            if (!this.stateHas('watchMutation')) { this.addToState('watchMutation', false) }
+            if (!this.stateHas('isEncrypted')) { this.addToState('isEncrypted', false) }
+        }
 
 
         // Augment Store
@@ -78,7 +89,12 @@ export default class StorePersister extends Store {
         this.store.removePersistedState = () => (this._persister as Persister).removeItem(this.getStoreName())
         this.store.watch = () => {
             if (this.toBeWatched()) {
-                this.addToState('watchMutation', true)
+                if (this.options?.persist) {
+                    this.options.persist.watchMutation = true
+                } else {
+                    this.addToState('watchMutation', true)
+                }
+
                 this.storeSubscription()
             }
         }
@@ -88,8 +104,8 @@ export default class StorePersister extends Store {
     async cryptState(state: StateTree, decrypt: boolean = false): Promise<StateTree> {
         return await new Promise(async (resolve) => {
             const Crypt = this._crypt as Crypt
-            const persistedPropertiesToEncrypt = this.getValue(state.persistedPropertiesToEncrypt)
-            const isEncrypted = this.getValue(state.isEncrypted)
+            const persistedPropertiesToEncrypt = this.getPropertiesToEncrypt()
+            const isEncrypted = this.isEncrypted(state)
 
             this.debugLog(`cryptState - ${this.getStoreName()} ${decrypt ? 'decrypt' : 'crypt'}`, [
                 'can',
@@ -111,18 +127,20 @@ export default class StorePersister extends Store {
                 for (const property of persistedPropertiesToEncrypt) {
                     const value = this.getValue(state[property])
 
-                    if (decrypt) {
+                    if (value) {
+                        if (decrypt) {
 
-                        // TODO - remove soon 
-                        // Need for Crypt changing : remove crypto-js dependence
-                        if (value && (value as string).indexOf(':') < 1) {
-                            this.store.removePersistedState()
-                            return resolve({})
+                            // TODO - remove soon 
+                            // Need for Crypt changing : remove crypto-js dependence
+                            if ((value as string).indexOf(':') < 1) {
+                                this.store.removePersistedState()
+                                return resolve({})
+                            }
+
+                            encryptedState[property] = await Crypt.decrypt(value)
+                        } else {
+                            encryptedState[property] = await Crypt.encrypt(value)
                         }
-
-                        encryptedState[property] = await Crypt.decrypt(value)
-                    } else {
-                        encryptedState[property] = await Crypt.encrypt(value)
                     }
                 }
 
@@ -132,12 +150,28 @@ export default class StorePersister extends Store {
                 ])
 
                 if (!isEmpty(encryptedState)) {
-                    state = { ...state, ...encryptedState, isEncrypted: !decrypt }
+                    state = { ...state, ...encryptedState }
+
+                    if (this.options?.persist) {
+                        this.options.persist.isEncrypted = !decrypt
+                    } else {
+                        state.isEncrypted = !decrypt
+                    }
                 }
             }
 
             resolve(state)
         })
+    }
+
+    private isEncrypted(state?: AnyObject) {
+        return (this.options?.persist && this.options.persist.isEncrypted)
+            ?? this.getValue(state ? state.isEncrypted : this.state.isEncrypted)
+    }
+
+    private getPropertiesToEncrypt() {
+        return (this.options?.persist && this.options.persist?.persistedPropertiesToEncrypt)
+            ?? this.state.hasOwnProperty('persistedPropertiesToEncrypt')
     }
 
     async getPersistedState(): Promise<StateTree | undefined> {
@@ -147,6 +181,7 @@ export default class StorePersister extends Store {
             let persistedState = await (this._persister as Persister).getItem(storeName) as StateTree
 
             if (this.toBeCrypted() && persistedState) {
+                await this._crypt?.init()
                 persistedState = await this.cryptState({ ...toRaw(this.state), ...persistedState }, true)
             }
 
@@ -161,18 +196,28 @@ export default class StorePersister extends Store {
     getStatePropertyToNotPersist(): string[] {
         return [
             ...this._statePropertiesNotToPersist,
-            ...(this.getStatePropertyValue('excludedKeys') ?? [])
+            ...(
+                (this.options?.persist && this.options.persist.excludedKeys)
+                ?? this.getStatePropertyValue('excludedKeys')
+                ?? []
+            )
         ]
     }
 
-    hasPersistProperty(): boolean { return this.state.hasOwnProperty('persist') }
+    private getWatchMutation() {
+        return (this.options?.persist && this.options.persist.watchMutation) ?? this.getStatePropertyValue('watchMutation')
+    }
+
+    hasPersistProperty(): boolean { return !!(this.options && this.options.persist) || this.state.hasOwnProperty('persist') }
 
     async persist() {
         let persistedState = await this.getPersistedState()
         let state = this.state
 
-        if (this.toBeCrypted()) { state = await this.cryptState(state) }
-
+        if (this.toBeCrypted()) {
+            await this._crypt?.init()
+            state = await this.cryptState(state)
+        }
 
         const newState = this.populateState(state, persistedState)
 
@@ -196,7 +241,7 @@ export default class StorePersister extends Store {
             ]
         )
 
-        if (isEmpty(newState) || this.stateIsEmpty(newState)) { return }
+        if (isEmpty(newState) || (this.stateIsEmpty && this.stateIsEmpty(newState))) { return }
 
         if (!persistedState || !areIdentical(newState, persistedState, this.getStatePropertyToNotPersist())) {
 
@@ -250,7 +295,7 @@ export default class StorePersister extends Store {
     }
 
     shouldBePersisted(): boolean {
-        return this.hasPersistProperty() && this.getStatePropertyValue('persist')
+        return this.hasPersistProperty() && (this.options?.persist?.persist ?? this.getStatePropertyValue('persist'))
     }
 
     private stateIsEmpty(state: AnyObject): boolean {
@@ -258,7 +303,9 @@ export default class StorePersister extends Store {
     }
 
     private stopWatch() {
-        if (this.getStatePropertyValue('watchMutation')) {
+        if (this.options?.persist && this.options.persist?.watchMutation) {
+            this.options.persist.watchMutation = false
+        } else if (this.getStatePropertyValue('watchMutation')) {
             this.addToState('watchMutation', false)
         }
     }
@@ -275,11 +322,11 @@ export default class StorePersister extends Store {
         this.store.$subscribe((mutation: SubscriptionCallbackMutation<StateTree>, state: StateTree) => {
 
             this.debugLog(`store.$subscribe ${this.getStoreName()}`, [
-                mutation.type !== 'patch object', this.getStatePropertyValue('watchMutation'),
+                mutation.type !== 'patch object', this.getWatchMutation(),
                 mutation, this.state, this.store
             ])
 
-            if (mutation.type !== 'patch object' && this.getStatePropertyValue('watchMutation')) {
+            if (mutation.type !== 'patch object' && this.getWatchMutation()) {
 
                 this.persist()
 
@@ -302,7 +349,7 @@ export default class StorePersister extends Store {
     }
 
     toBeCrypted(): boolean {
-        return !!(this._crypt && this.state.hasOwnProperty('persistedPropertiesToEncrypt'))
+        return !!(this._crypt && this.getPropertiesToEncrypt())
     }
 
     toBeWatched(): boolean {
