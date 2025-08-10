@@ -1,11 +1,8 @@
-import { computed } from "vue";
 import { isEmpty } from "../utils/validation";
 import { defineEppsStore } from "../utils/store";
-import { CollectionState, CollectionStoreMethods, DefineEppsStore, EppsStore, SearchCollectionCriteria } from "../types";
-import { extendedState } from "../plugins/extendedState";
+import { CollectionState, CollectionStoreMethods, SearchCollectionCriteria } from "../types";
 import { useCollectionStore } from "./collection";
-import ParentStore, { getParentStore } from "../plugins/parentStore";
-import ParentsStores from "../plugins/parentsStores";
+import ParentStore from "../plugins/parentStore";
 import { Epps } from "../plugins/epps";
 
 
@@ -30,7 +27,7 @@ export interface ErrorsStore<TError extends IError = IError> {
 
 const epps = new Epps({
     parentsStores: [
-        new ParentStore<CollectionStoreMethods, CollectionState<IError>>('errorCollection', useCollectionStore)
+        new ParentStore('errorCollection', useCollectionStore)
     ],
     propertiesToRename: { items: 'errors' }
 })

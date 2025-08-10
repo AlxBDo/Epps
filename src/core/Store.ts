@@ -22,17 +22,16 @@ export default class Store {
     get parentsStores(): EppsStore<AnyObject, AnyObject>[] | undefined {
         this.debugLog(`Store.parentsStore - ${this.getStoreName()}`, this.options)
 
-        if (this.options instanceof Epps || typeof (this.options as Epps)?.buildStores === 'function') {
-            this._options = this.options as Epps
-            this._options.childId = this.store.$id
+        if (this.options instanceof Epps || typeof (this.options as unknown as Epps)?.buildStores === 'function') {
+            (this.options as Epps).childId = this.store.$id
 
             this.debugLog(`Store.parentsStore EppsOptions - ${this.getStoreName()}`, [
-                this._options.childId,
-                this._options.parentsStores(),
+                (this.options as Epps).childId,
+                (this.options as Epps).parentsStores(),
                 this.options
             ])
 
-            return this._options.parentsStores()
+            return (this.options as Epps).parentsStores()
         }
 
         return typeof this.store.parentsStores === 'function' && this.store.parentsStores()

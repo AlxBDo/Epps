@@ -1,11 +1,10 @@
-import { PersistOptions } from "./extendedState"
 import type { AnyObject, EppsStore } from "../types"
 import type { EppsStoreOptions, PersistedStoreOptions } from "../types/store"
-import ParentStore, { getParentStoreById } from "./parentStore"
+import { ParentStoreInterface } from "../types/epps"
 
 
 export interface EppsContructor extends Omit<EppsStoreOptions, 'parentsStores'> {
-    parentsStores?: ParentStore[]
+    parentsStores?: ParentStoreInterface[]
     propertiesToRename?: Record<string, string>
 }
 
@@ -14,7 +13,7 @@ export class Epps {
     private _actionsToExtends?: string[]
     private _childId?: string
     private _persist?: PersistedStoreOptions
-    private _parentsStores?: ParentStore[]
+    private _parentsStores?: ParentStoreInterface[]
     private _parentsStoresBuilded?: EppsStore<AnyObject, AnyObject>[]
     private _propertiesToRename?: Record<string, string>
 
@@ -38,7 +37,7 @@ export class Epps {
         this._childId = value
     }
 
-    get persist(): PersistOptions | undefined {
+    get persist(): PersistedStoreOptions | undefined {
         return this._persist
     }
 

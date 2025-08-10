@@ -20,7 +20,7 @@
     "type": "git",
     "url": "https://github.com/AlxBDo/Epps"
   },
-  "version": "0.3.0-beta.1",
+  "version": "0.3.0-beta.8",
   "type": "module",
   "main": "./dist/epps.umd.cjs",
   "module": "./dist/epps.js",
@@ -34,7 +34,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc --emitDeclarationOnly --outDir dist",
+    "build": "vitest && vite build && tsc --emitDeclarationOnly --outDir dist",
     "preview": "vite preview",
     "test": "vitest",
     "coverage": "vitest run --coverage"

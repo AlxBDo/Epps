@@ -1,15 +1,3 @@
-import { PiniaPlugin, PiniaPluginContext, Store } from 'pinia';
-import { EppsContructor } from '../plugins/epps';
-import { EppsConstructorProps } from '../plugins/eppsPlugin';
-import { ExtendedStateOptions } from '../plugins/extendedState';
-import { CollectionState, CollectionStoreMethods, DefineEppsStore, EppsStore as EppsStoreInterface, ExtendedState } from './store';
-import { ErrorsState, ErrorsStore } from '../stores/errors'
-import { Item } from '../models/item';
-import type { ParentStore as ParentStoreType } from "../types/epps"
-import { ResourceIdStore } from '../stores/resourceId'
-import { WebUserState, WebUserStore } from '../stores/webuser'
-
-
 export interface AnyObject {
     [key: number | string | symbol]: any;
 }

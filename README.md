@@ -91,9 +91,11 @@ export default defineNuxtPlugin({
 
 The `useListsStore` store demonstrates how to create a collection-based store using the `useCollectionStore` store, which is integrated into the Epps plugin. This allows you to manage collections of items in your project seamlessly.
 
+#### Version <= 0.2.8
+
 ```typeScript
 import { ref } from "vue";
-import { defineEppsStore, extendedState, useCollectionStore } from 'epps';
+import { defineEppsStore, extendedState, getParentStoreMethod, useCollectionStore } from 'epps';
 import type { CollectionState, CollectionStoreMethods } from "epps";
 import type { List } from "../models/list";
 
@@ -101,12 +103,48 @@ const defaultStoreId: string = 'lists';
 
 export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(
     id ?? defaultStoreId,
-    () => ({
-        ...extendedState(
+    () => {
+        const { parentsStores } = extendedState(
             [useCollectionStore('listsCollection')],
             { persist: { persist: ref(true) } } // Store persisted manually. Use “watchMutation” to persist each time the State is modified.
         )
-    })
+
+        function getLists() {
+          return getParentStoreMethod('getItems', 0, parentsStores)()
+        }
+
+        return {
+          getLists,
+          parentsStores
+        }
+    }
+)();
+```
+
+#### Version >= 0.3.0
+
+```typeScript
+import { ref } from "vue";
+import { defineEppsStore, Epps, useCollectionStore } from 'epps';
+import type { CollectionState, CollectionStoreMethods } from "epps";
+import type { List } from "../models/list";
+
+const defaultStoreId: string = 'lists';
+
+const epps = new Epps({
+    parentsStores: [ new ParentStore('listsCollection', useCollectionStore) ], 
+    persist: { persist: true } // Store persisted manually. Use “watchMutation” to persist each time the State is modified.
+})
+
+export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(
+    id ?? defaultStoreId,
+    () => ({
+        getLists: () => {
+          const collectionStore = epps.getStore<CollectionStoreMethods, CollectionState<List>>(0, id ?? defaultStoreId)
+          return collectionStore()?.getItems()
+        }
+    }), 
+    epps
 )();
 ```
 

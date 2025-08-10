@@ -6,8 +6,6 @@ export { defineEppsStore, persistedState } from "../utils/store"
 export { defineStoreId } from "../utils/defineStoreId"
 export { Epps } from "../plugins/epps"
 export { EppsPlugin } from "../plugins/eppsPlugin"
-export { extendedState } from "../plugins/extendedState"
-export { getParentStore, getParentStoreMethod, getParentStorePropertyValue } from "../plugins/parentStore"
 export { ParentStore }
 export { useCollectionStore } from '../stores/collection'
 export { useErrorsStore } from '../stores/errors'

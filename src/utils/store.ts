@@ -1,8 +1,7 @@
-import { DefineSetupStoreOptions, defineStore, DefineStoreOptions, StateTree, Store, StoreDefinition, StoreGetters } from "pinia"
+import { defineStore, DefineStoreOptions, StateTree } from "pinia"
 import type { Item } from "../models/item"
-import type { AnyObject, EppsStore } from "../types"
+import type { AnyObject } from "../types"
 import type { DefineEppsStore, EppsStoreOptions, PersistedState } from "../types/store"
-import { PersistOptions } from "../plugins/extendedState"
 import { Epps } from "../plugins/epps"
 
 

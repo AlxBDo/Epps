@@ -1,8 +1,7 @@
 import type { AnyObject, SearchCollectionCriteria } from ".";
 import type { _StoreWithGetters, PiniaCustomProperties, PiniaCustomStateProperties, Store, StoreDefinition, SubscriptionCallback, SubscriptionCallbackMutationPatchFunction, SubscriptionCallbackMutationPatchObject } from "pinia";
-import type { PersistOptions } from "../plugins/extendedState";
 import type { Ref } from "vue";
-import ParentsStores from "../plugins/parentsStores";
+import ParentStore from "../plugins/parentStore";
 
 
 export type AugmentOptionApiStore<TStore, TState> = Store & TStore & TState & OptionApiStore<TState> & PiniaCustomProperties & PiniaCustomStateProperties & _StoreWithGetters<TState>
@@ -62,11 +61,11 @@ export interface PersistedStore {
 }
 
 export interface PersistedStoreOptions {
-    excludedKeys?: string[] | Ref<string[]>
+    excludedKeys?: string[]
     isEncrypted?: boolean
-    persist?: boolean | Ref<boolean>
-    persistedPropertiesToEncrypt?: string[] | Ref<string[]>
-    watchMutation?: boolean | Ref<boolean>
+    persist?: boolean
+    persistedPropertiesToEncrypt?: string[]
+    watchMutation?: boolean
 }
 
 type PartialPersistedStore<TStore, TState> = Partial<TStore>
@@ -81,14 +80,13 @@ type PartialPersistedStore<TStore, TState> = Partial<TStore>
 
 export interface ExtendedStoreOptions {
     actionsToExtends?: string[]
-    parentsStores?: ParentsStores | (() => Array<Store | EppsStore<AnyObject, AnyObject>>)
+    parentsStores?: ParentStore[]
 }
 
-export interface ExtendedState extends PersistOptions {
+export interface ExtendedState extends PersistedStoreOptions {
     actionsToExtends?: string[] | Ref<string[] | undefined>
     isExtended?: boolean | Ref<boolean | undefined>
     isOptionApi?: boolean | Ref<boolean | undefined>
-    parentsStores?: () => Store[] | EppsStore<AnyObject, AnyObject>[]
 }
 
 export type ExtendedStore<TStore, TState> = TStore & TState & CustomStore & {
@@ -115,5 +113,3 @@ export type EppsStore<TStore, TState> = ExtendedStore<TStore, TState>
 export interface EppsStoreOptions extends ExtendedStoreOptions {
     persist?: PersistedStoreOptions
 }
-
-export type EppsStoreMethods = Store & PersistedStore & { parentsStores: () => Array<Store | EppsStore<AnyObject, AnyObject>> }

@@ -18,6 +18,7 @@ export default class StorePersister extends Store {
 
     private _statePropertiesNotToPersist: string[] = [
         '@context',
+        'actionsToExtends',
         'activeLink',
         'computed',
         'dep',
@@ -327,23 +328,7 @@ export default class StorePersister extends Store {
             ])
 
             if (mutation.type !== 'patch object' && this.getWatchMutation()) {
-
                 this.persist()
-
-                if (mutation?.events) {
-                    const { newValue, oldValue } = mutation.events as AnyObject
-
-                    if (!newValue || typeof newValue === 'function' || newValue === 'excludedKeys') {
-                        return
-                    }
-
-                    if (
-                        (typeof newValue === 'object' ? !areIdentical(newValue, oldValue) : newValue !== oldValue)
-                        && typeof this.store.mutationCallback === 'function'
-                    ) {
-                        this.store.mutationCallback(mutation)
-                    }
-                }
             }
         })
     }

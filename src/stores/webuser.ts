@@ -2,7 +2,8 @@ import { ref } from "vue"
 import { defineEppsStore } from "../utils/store"
 import { ResourceIdStore, useResourceIdStore } from "./resourceId"
 import { Item } from "../models/item"
-import { extendedState } from "../plugins/extendedState"
+import { Epps } from "../plugins/epps"
+import ParentStore from "../plugins/parentStore"
 
 
 export interface WebUserStore extends ResourceIdStore {
@@ -15,15 +16,18 @@ export interface WebUserState extends Item {
     username?: string
 }
 
+
+const epps = new Epps({
+    actionsToExtends: ['setData'],
+    parentsStores: [new ParentStore('resourceId', useResourceIdStore)]
+})
+
+
 export const useWebUserStore = (id?: string) => defineEppsStore<WebUserStore, WebUserState>(
     id ?? 'webuserStore',
     () => {
         const password = ref<string>()
         const username = ref<string>()
-        const { actionsToExtends, parentsStores } = extendedState(
-            [useResourceIdStore('webUserIdStore')],
-            { actionsToExtends: ['setData'] }
-        )
 
         function updatePassword(newPassword: string, oldPassword: string): void {
             if (oldPassword.trim() === password.value) {
@@ -37,12 +41,11 @@ export const useWebUserStore = (id?: string) => defineEppsStore<WebUserStore, We
         }
 
         return {
-            actionsToExtends,
-            parentsStores,
             password,
             setData,
             updatePassword,
             username
         }
-    }
+    },
+    epps
 )()
