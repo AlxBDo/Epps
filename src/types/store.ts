@@ -61,11 +61,11 @@ export interface PersistedStore {
 }
 
 export interface PersistedStoreOptions {
-    excludedKeys?: string[]
-    isEncrypted?: boolean
-    persist?: boolean
-    persistedPropertiesToEncrypt?: string[]
-    watchMutation?: boolean
+    excludedKeys?: string[] | Ref<string[]>
+    isEncrypted?: boolean | Ref<boolean>
+    persist?: boolean | Ref<boolean>
+    persistedPropertiesToEncrypt?: string[] | Ref<string[]>
+    watchMutation?: boolean | Ref<boolean>
 }
 
 type PartialPersistedStore<TStore, TState> = Partial<TStore>
@@ -87,6 +87,7 @@ export interface ExtendedState extends PersistedStoreOptions {
     actionsToExtends?: string[] | Ref<string[] | undefined>
     isExtended?: boolean | Ref<boolean | undefined>
     isOptionApi?: boolean | Ref<boolean | undefined>
+    parentsStores?: () => Store[] | EppsStore<AnyObject, AnyObject>[]
 }
 
 export type ExtendedStore<TStore, TState> = TStore & TState & CustomStore & {

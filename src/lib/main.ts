@@ -11,3 +11,5 @@ export { useCollectionStore } from '../stores/collection'
 export { useErrorsStore } from '../stores/errors'
 export { useResourceIdStore } from '../stores/resourceId'
 export { useWebUserStore } from '../stores/webuser'
+export { extendedState } from "../plugins/extendedState"
+export { getParentStore, getParentStoreMethod, getParentStorePropertyValue } from "../plugins/parentStore"

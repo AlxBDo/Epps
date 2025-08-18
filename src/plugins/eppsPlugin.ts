@@ -43,7 +43,7 @@ export class EppsPlugin {
             eppsLogError(
                 `Coming soon not maintained : 
 ${store.$id} use state to define epps store options.`,
-                'The configuration of the epps stores has been changed, see documentation : https://main.d1f2uye6dxmhh3.amplifyapp.com/docs/usage'
+                'Configuration of Epps stores has been changed, see documentation : https://main.d1f2uye6dxmhh3.amplifyapp.com/docs/usage'
             )
         }
     }

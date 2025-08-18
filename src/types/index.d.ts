@@ -1,13 +1,13 @@
 import { PiniaPlugin, PiniaPluginContext, Store } from 'pinia';
 import { EppsContructor } from '../plugins/epps';
 import { EppsConstructorProps } from '../plugins/eppsPlugin';
-import { CollectionState, CollectionStoreMethods, DefineEppsStore, EppsStore as EppsStoreInterface } from './store';
+import { CollectionState, CollectionStoreMethods, DefineEppsStore, EppsStore as EppsStoreInterface, ExtendedState } from './store';
 import { ErrorsState, ErrorsStore } from '../stores/errors'
 import { Item } from '../models/item';
 import type { ParentStore as ParentStoreType } from "../types/epps"
 import { ResourceIdStore } from '../stores/resourceId'
 import { WebUserState, WebUserStore } from '../stores/webuser'
-
+import type { ExtendedStateOptions } from '../plugins/extendedState'
 
 export interface AnyObject {
     [key: number | string | symbol]: any;
@@ -58,6 +58,30 @@ declare module 'epps' {
 
         parentsStores(childId?: string): EppsStoreInterface<AnyObject, AnyObject>[]
     }
+
+    export function extendedState(
+        parentsStores: Store[],
+        options?: ExtendedStateOptions
+    ): ExtendedState;
+
+    export function getParentStorePropertyValue(
+        propertyName: string,
+        parentStore: AnyObject | string | number | undefined,
+        parentsStores?: Store[]
+    ): any;
+
+    export function getParentStore<TStore = AnyObject, TState = AnyObject>(
+        parentStoreIdOrIndex: string | number,
+        parentsStores?: Array<Store | EppsStoreInterface<TStore, TState>>
+            | (() => Array<Store | EppsStoreInterface<TStore, TState>>)
+            | undefined
+    ): EppsStoreInterface<TStore, TState> | undefined
+
+    export function getParentStoreMethod(
+        methodName: string,
+        parentStore: AnyObject | string | number | undefined,
+        parentsStores?: Store[] | EppsStoreInterface<AnyObject, AnyObject>[]
+    ): Function
 
     class ParentStore<TStore = AnyObject, TState = AnyObject> {
         _id: string
