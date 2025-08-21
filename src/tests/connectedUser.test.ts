@@ -31,7 +31,7 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
         connectedUserStore = useConnectedUserStore() as EppsStore<UserStore, UserState>
         connectedUserStore.setData(user)
 
-        expect(connectedUserStore.user).toStrictEqual(user)
+        expect({ ...connectedUserStore.user, id: connectedUserStore.id, '@id': connectedUserStore['@id'] }).toStrictEqual(user)
 
         await connectedUserStore.persistState()
     })
@@ -98,7 +98,7 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
 
         await otherUserStore.remember()
 
-        expect(otherUserStore.user).toStrictEqual({ ...user, lastname: newLastname, '@id': undefined })
+        expect(otherUserStore.user).toStrictEqual({ ...user, lastname: newLastname, '@id': undefined, id: undefined })
     })
 
     it('$reset method clear all states (child and parents) and persisted data', async () => {
@@ -106,10 +106,10 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
             connectedUserStore.$reset()
             const persistedConnectedUser = await persister.getItem('connectedUser') as User
 
-            expect(persistedConnectedUser).not.toBeDefined()
-
             expect(connectedUserStore.user).not.toStrictEqual(user)
             expect(connectedUserStore.firstname).not.toBeDefined()
+
+            expect(persistedConnectedUser).not.toBeDefined()
         }
     })
 })

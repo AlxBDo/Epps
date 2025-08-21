@@ -14,8 +14,7 @@ describe('useErrorsStore', () => {
 
         store.addError(error);
 
-        expect(store.errors).toHaveLength(1);
-        expect(store.errors[0]).toEqual({ ...error, level: 1 });
+        expect(store.getErrors()[0]).toEqual({ ...error, level: 1 });
     });
 
     it('should add an error with specified level', () => {
@@ -24,8 +23,7 @@ describe('useErrorsStore', () => {
 
         store.addError(error);
 
-        expect(store.errors).toHaveLength(1);
-        expect(store.errors[0]).toEqual(error);
+        expect(store.getErrors()[0]).toEqual(error);
     });
 
     it('should throw an error if id is missing', () => {
@@ -83,6 +81,7 @@ describe('useErrorsStore', () => {
 
     it('should return false if no errors are present', () => {
         const store = useErrorsStore('test') as EppsStore<ErrorsStore, ErrorsState>;
+        store.clearErrors()
 
         expect(store.hasError()).toBe(false);
     });

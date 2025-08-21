@@ -70,9 +70,7 @@ ${store.$id} use state to define epps store options.`,
     rewriteResetStore({ store }: PiniaPluginContext, initState: StateTree): void {
 
         store.$reset = () => {
-            if (store.$state.persist) {
-                store.removePersistedState()
-            }
+            store?.removePersistedState()
 
             const parentsStores = typeof store.parentsStores === 'function' && store.parentsStores()
 

@@ -34,7 +34,7 @@ const epps = new Epps({
 
 export const useErrorsStore = <TError extends IError = IError>(id: string) =>
     defineEppsStore<ErrorsStore, CollectionState<TError>>(
-        `${id}Store`,
+        id,
         () => {
             function addError(error: TError): void {
                 if (!error?.id) {
@@ -63,6 +63,10 @@ export const useErrorsStore = <TError extends IError = IError>(id: string) =>
             }
 
             function getErrors(value?: boolean | number | string, findBy: string = 'level'): TError[] {
+                if (value === undefined) {
+                    return getCollectionStore()?.getItems() as TError[]
+                }
+
                 if (typeof value !== 'number' && findBy === 'level') {
                     throw new Error(`${id}Store - getErrors - level is number but its value is : ${value}`)
                 }
