@@ -1,4 +1,4 @@
-export interface Item {
+export interface ResourceId {
   "@id"?: string;
   id?: number;
 }

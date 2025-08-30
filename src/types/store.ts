@@ -61,6 +61,7 @@ export interface PersistedStore {
 }
 
 export interface PersistedStoreOptions {
+    dbName?: string
     excludedKeys?: string[] | Ref<string[]>
     isEncrypted?: boolean | Ref<boolean>
     persist?: boolean | Ref<boolean>

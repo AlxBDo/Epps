@@ -5,15 +5,16 @@ import { createApp } from "vue"
 
 
 export function beforeEachPiniaPlugin() {
+    beforeEach(createAppAndPinia)
+}
 
-    beforeEach(() => {
-        const app = createApp({})
+export function createAppAndPinia() {
+    const app = createApp({})
 
-        const pinia = createPinia().use(
-            createPluginMock('localStorage', 'HrN2t2nCr6pTkEy20221l2B3dOcPr4j2')
-        )
+    const pinia = createPinia().use(
+        createPluginMock('localStorage', 'HrN2t2nCr6pTkEy20221l2B3dOcPr4j2')
+    )
 
-        app.use(pinia)
-        setActivePinia(pinia)
-    })
+    app.use(pinia)
+    setActivePinia(pinia)
 }

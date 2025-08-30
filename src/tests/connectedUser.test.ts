@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { beforeEachPiniaPlugin } from './utils/beforeEach'
+import { beforeEachPiniaPlugin, createAppAndPinia } from './utils/beforeEach'
 import PersisterMock from '../testing/mocks/persister'
 import { useConnectedUserStore } from '../stores/experiments/connectedUser'
 
@@ -23,12 +23,17 @@ const newLastname = 'Testte'
 describe('connectedUserStore extends userStore, contactStore and itemStore', () => {
     const persister = new PersisterMock({ name: 'localStorage' })
 
-    beforeEachPiniaPlugin()
+    let connectedUserStore: EppsStore<UserStore, UserState>
 
-    let connectedUserStore: EppsStore<UserStore, UserState> | undefined
+    beforeEach(() => {
+        createAppAndPinia()
+
+        if (!connectedUserStore) {
+            connectedUserStore = useConnectedUserStore() as EppsStore<UserStore, UserState>
+        }
+    })
 
     it('Has setData method and methods defined in actionsToExtends are extends', async () => {
-        connectedUserStore = useConnectedUserStore() as EppsStore<UserStore, UserState>
         connectedUserStore.setData(user)
 
         expect({ ...connectedUserStore.user, id: connectedUserStore.id, '@id': connectedUserStore['@id'] }).toStrictEqual(user)
@@ -55,38 +60,30 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
     })
 
     it('Has access to parent state property and modify it', async () => {
-        if (connectedUserStore) {
-            connectedUserStore.lastname = newLastname
-            await new Promise(resolve => setTimeout(resolve, 500)) // wait for state mutation
-            expect(connectedUserStore.lastname).toStrictEqual(newLastname)
-        }
+        connectedUserStore.lastname = newLastname
+        await new Promise(resolve => setTimeout(resolve, 500)) // wait for state mutation
+        expect(connectedUserStore.lastname).toStrictEqual(newLastname)
     })
 
     it('Watch and persist state mutation', async () => {
-        if (connectedUserStore) {
-            const persistedContact = await persister.getItem('connectedUser') as User
-            expect(persistedContact?.lastname).toStrictEqual(newLastname)
-        }
+        const persistedContact = await persister.getItem('connectedUser') as User
+        expect(persistedContact?.lastname).toStrictEqual(newLastname)
     })
 
     it('ExcludedKeys are not persist', async () => {
-        if (connectedUserStore) {
-            const persistedContactItem = await persister.getItem('connectedUser') as User
-            expect(persistedContactItem['@id']).toBeUndefined()
-        }
+        const persistedContactItem = await persister.getItem('connectedUser') as User
+        expect(persistedContactItem['@id']).toBeUndefined()
     })
 
     it('Stop watch and persist state mutation', async () => {
-        if (connectedUserStore) {
-            connectedUserStore.stopWatch()
+        connectedUserStore.stopWatch()
+        connectedUserStore.lastname = undefined
 
-            connectedUserStore.lastname = undefined
-            expect(connectedUserStore.lastname).toBeUndefined()
+        expect(connectedUserStore.lastname).toBeUndefined()
 
-            const persistedContact = await persister.getItem('connectedUser') as User
+        const persistedContact = await persister.getItem('connectedUser') as User
 
-            expect(persistedContact.lastname).toStrictEqual(newLastname)
-        }
+        expect(persistedContact.lastname).toStrictEqual(newLastname)
     })
 
     it('Remember state with decrypted properties', async () => {
@@ -102,14 +99,12 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
     })
 
     it('$reset method clear all states (child and parents) and persisted data', async () => {
-        if (connectedUserStore) {
-            connectedUserStore.$reset()
-            const persistedConnectedUser = await persister.getItem('connectedUser') as User
+        connectedUserStore.$reset()
+        const persistedConnectedUser = await persister.getItem('connectedUser') as User
 
-            expect(connectedUserStore.user).not.toStrictEqual(user)
-            expect(connectedUserStore.firstname).not.toBeDefined()
+        expect(connectedUserStore.user).not.toStrictEqual(user)
+        expect(connectedUserStore.firstname).not.toBeDefined()
 
-            expect(persistedConnectedUser).not.toBeDefined()
-        }
+        expect(persistedConnectedUser).not.toBeDefined()
     })
 })

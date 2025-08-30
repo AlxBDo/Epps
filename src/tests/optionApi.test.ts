@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { beforeEachPiniaPlugin } from './utils/beforeEach'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEachPiniaPlugin, createAppAndPinia } from './utils/beforeEach'
 import { useOptionApiStore, type OptionApiState, type OptionApiStore } from '../stores/experiments/optionApi'
 import { EppsStore } from '../types'
 
@@ -8,12 +8,17 @@ const declaration = { id: 1, test: 'my test string' }
 const newTestStr = 'An another test string'
 
 describe('Option Api store extends correctly store', () => {
-    beforeEachPiniaPlugin()
+    let optionApiStore: EppsStore<OptionApiStore, OptionApiState>
 
-    let optionApiStore: EppsStore<OptionApiStore, OptionApiState> | undefined
+    beforeEach(() => {
+        createAppAndPinia()
+
+        if (!optionApiStore) {
+            optionApiStore = useOptionApiStore() as EppsStore<OptionApiStore, OptionApiState>
+        }
+    })
 
     it('Has setData method and methods defined in actionsToExtends are extended', async () => {
-        optionApiStore = useOptionApiStore() as EppsStore<OptionApiStore, OptionApiState>
         optionApiStore.setTest(declaration)
 
         expect(optionApiStore.id).toStrictEqual(declaration.id)

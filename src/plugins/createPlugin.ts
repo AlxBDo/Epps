@@ -1,7 +1,6 @@
 import { PiniaPlugin } from "pinia"
 import Crypt from "../services/Crypt"
 import { EppsPlugin } from "./eppsPlugin"
-import { eppsLogError } from "../utils/log"
 import { isEmpty } from "../utils/validation"
 import Persister from "../services/Persister"
 

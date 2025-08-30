@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.4] - 2025-08-28
+
+You can define a custom database for a Store using the persist.dbName parameter of the Epps class.
+
+- added Epps constructor parameter persist.dbName
+
 ## [0.3.2] - 2025-08-21
 
 Improved the getErrors method of useErrorStore, fixed the issue of persistent data being deleted when calling the $reset method, and added tests.

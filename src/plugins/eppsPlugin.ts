@@ -6,6 +6,8 @@ import StorePersister from "../core/StorePersister"
 
 import type { AllowedKeyPath } from "../types/storage"
 import type { PiniaPluginContext, StateTree, Store } from "pinia"
+import { AnyObject, EppsStore } from "../types"
+import { Epps } from "./epps"
 
 
 export interface EppsConstructorProps {
@@ -36,7 +38,7 @@ export class EppsPlugin {
         if (crypt) { this._crypt = crypt }
     }
 
-    private eppsStoreNotDefinedByOptions({ store, options }: PiniaPluginContext) {
+    private eppsStoreNotDefinedByOptions({ store }: PiniaPluginContext) {
         if (Object.keys(store.$state).find(
             key => ['actionsToExtends', 'isExtended', 'parentsStores', 'persist', 'watchMutation'].includes(key)
         )) {
@@ -48,31 +50,57 @@ ${store.$id} use state to define epps store options.`,
         }
     }
 
-    plugin(context: PiniaPluginContext) {
-        try {
-            // TODO - à supprimer
-            this.eppsStoreNotDefinedByOptions(context)
+    private getEppsOptions(storeOptions: AnyObject): Epps | undefined {
+        return storeOptions?.eppsOptions
+    }
 
-            const { store, options } = context
-
-            new StoreExtension(store, options, this._debug)
-
-            if (this.db instanceof Persister) {
-                new StorePersister(store, options, this.db, this._watchedStore, this._crypt, this._debug)
-            }
-
-            this.rewriteResetStore(context, Object.assign({}, store.$state))
-        } catch (e) {
-            eppsLogError('plugin()', [e, context])
+    private getParentsStores({ store, options }: PiniaPluginContext): EppsStore<AnyObject, AnyObject>[] | undefined {
+        const eppsOptions = this.getEppsOptions(options)
+        if (eppsOptions?.parentsStores) {
+            return eppsOptions.getStores(store.$id)
         }
     }
 
-    rewriteResetStore({ store }: PiniaPluginContext, initState: StateTree): void {
+    private getStoreDb(storeOptions: AnyObject): Persister | undefined {
+        const eppsOptions = this.getEppsOptions(storeOptions)
+        if (eppsOptions?.persist?.dbName) {
+            return new Persister({ name: eppsOptions.persist.dbName as string, keyPath: 'storeName' })
+        }
+    }
 
+    plugin({ store, options }: PiniaPluginContext) {
+        try {
+            // TODO - à supprimer
+            this.eppsStoreNotDefinedByOptions({ store } as PiniaPluginContext)
+
+            new StoreExtension(store, options, this._debug)
+
+            const storeDb = this.getStoreDb(options)
+
+            if (this.db instanceof Persister || storeDb instanceof Persister) {
+                new StorePersister(
+                    store,
+                    options,
+                    (storeDb ?? this.db) as Persister,
+                    this._watchedStore,
+                    this._crypt,
+                    this._debug
+                )
+            }
+
+            this.rewriteResetStore({ store, options } as PiniaPluginContext, Object.assign({}, store.$state))
+        } catch (e) {
+            eppsLogError('plugin()', [e, store, options])
+        }
+    }
+
+    rewriteResetStore({ store, options }: PiniaPluginContext, initState: StateTree): void {
         store.$reset = () => {
-            store?.removePersistedState()
+            if (typeof store?.removePersistedState === 'function') {
+                store.removePersistedState()
+            }
 
-            const parentsStores = typeof store.parentsStores === 'function' && store.parentsStores()
+            const parentsStores = this.getParentsStores({ store, options } as PiniaPluginContext)
 
             if (Array.isArray(parentsStores) && parentsStores.length) {
                 parentsStores.forEach(

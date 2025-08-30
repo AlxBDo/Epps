@@ -1,5 +1,5 @@
 import { ClientStorage, StorageItem } from "../types/storage";
-import { log } from "../utils/log";
+
 
 export default class WindowStorage implements ClientStorage {
     private _storage: Storage;

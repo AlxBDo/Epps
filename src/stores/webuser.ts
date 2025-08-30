@@ -1,9 +1,9 @@
 import { ref } from "vue"
 import { defineEppsStore } from "../utils/store"
 import { ResourceIdStore, useResourceIdStore } from "./resourceId"
-import { Item } from "../models/item"
 import { Epps } from "../plugins/epps"
 import ParentStore from "../plugins/parentStore"
+import type { ResourceId } from "../types/resourceId"
 
 
 export interface WebUserStore extends ResourceIdStore {
@@ -11,7 +11,7 @@ export interface WebUserStore extends ResourceIdStore {
     updatePassword: (newPassword: string, oldPassword: string) => void
 }
 
-export interface WebUserState extends Item {
+export interface WebUserState extends ResourceId {
     password?: string
     username?: string
 }

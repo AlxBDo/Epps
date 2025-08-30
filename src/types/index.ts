@@ -20,6 +20,6 @@ export type { ErrorsState, ErrorsStore } from '../stores/errors'
 
 export type { ResourceIdStore } from '../stores/resourceId'
 
-export type { Item as ResourceIdState } from '../models/item'
+export type { ResourceId as ResourceIdState } from '../types/resourceId'
 
 export type { WebUserState, WebUserStore } from '../stores/webuser'

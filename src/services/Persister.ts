@@ -1,8 +1,7 @@
 import WindowStorage from './WindowStorage'
 import { AllowedKeyPath, ClientStorage, StorageItem } from '../types/storage'
 import IndexedDB from './IndexedDB'
-import { log, eppsLogError } from '../utils/log'
-import { localStorageMock } from '../testing/mocks/localStorage'
+import { eppsLogError } from '../utils/log'
 
 export type DbOptions = {
     keyPath?: AllowedKeyPath
@@ -27,26 +26,17 @@ export default class Persister {
     }
 
     defineDb(): ClientStorage {
-        let { keyPath, name } = this._db_options
-        let db: ClientStorage
+        const { keyPath, name } = this._db_options
 
-        switch (name) {
-            case 'localStorage': case 'sessionStorage':
-                db = new WindowStorage(name)
-                break;
-            default:
-                if (!keyPath) {
-                    keyPath = 'storeName'
-                }
-                db = new IndexedDB(name, { keyPath })
+        if (name === 'localStorage' || name === 'sessionStorage') {
+            return new WindowStorage(name)
         }
-        return db
+
+        return new IndexedDB(name, { keyPath })
     }
 
     getItem(itemKey: string): Promise<StorageItem | undefined> {
         return new Promise((resolve, reject) => {
-            if (!this._db) { return reject('No db found') }
-
             try {
                 return this._db.getItem(itemKey).then(item => resolve(item))
             } catch (e) {

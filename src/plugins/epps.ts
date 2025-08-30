@@ -55,6 +55,10 @@ export class Epps {
         )
     }
 
+    hasCustomDb(): boolean {
+        return !!this._persist?.dbName
+    }
+
     getStore<TStore, TState>(idOrIndex: number | string, childId?: string): EppsStore<TStore, TState> | undefined {
         if (!this._parentsStores) {
             return undefined

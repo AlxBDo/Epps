@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { beforeEachPiniaPlugin } from './utils/beforeEach'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEachPiniaPlugin, createAppAndPinia } from './utils/beforeEach'
 import { useWebUserStore } from '../stores/webuser'
 import type { WebUserStore, WebUserState } from '../stores/webuser'
 import { EppsStore } from '../types'
@@ -14,12 +14,17 @@ const webUser = {
 const newPassword = 'new-p@ssw0rd_72941'
 
 describe('webUserStore extends resourceIdStore', () => {
-    beforeEachPiniaPlugin()
+    let webUserStore: EppsStore<WebUserStore, WebUserState>
 
-    let webUserStore: EppsStore<WebUserStore, WebUserState> | undefined
+    beforeEach(() => {
+        createAppAndPinia()
+
+        if (!webUserStore) {
+            webUserStore = useWebUserStore() as EppsStore<WebUserStore, WebUserState>
+        }
+    })
 
     it('Has setData method and methods defined in actionsToExtends are extended', async () => {
-        webUserStore = useWebUserStore() as EppsStore<WebUserStore, WebUserState>
         webUserStore.setData(webUser)
 
         expect(webUserStore.username).toStrictEqual(webUser.username)
@@ -29,16 +34,12 @@ describe('webUserStore extends resourceIdStore', () => {
     })
 
     it('Update password', async () => {
-        if (webUserStore) {
-            webUserStore.updatePassword(newPassword, webUser.password)
-            expect(webUserStore.password).toStrictEqual(newPassword)
-        }
+        webUserStore.updatePassword(newPassword, webUser.password)
+        expect(webUserStore.password).toStrictEqual(newPassword)
     })
 
     it('Has access to parent state property and modify it', async () => {
-        if (webUserStore) {
-            webUserStore.id = 2
-            expect(webUserStore.id).toStrictEqual(2)
-        }
+        webUserStore.id = 2
+        expect(webUserStore.id).toStrictEqual(2)
     })
 })

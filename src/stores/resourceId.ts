@@ -1,18 +1,18 @@
 import { defineStore } from "pinia";
-import type { Item } from "../models/item";
+import type { ResourceId } from "../types/resourceId";
 
 export interface ResourceIdStore {
-    setData: (data: Item) => void
+    setData: (data: ResourceId) => void
 }
 
-export const useResourceIdStore = (id?: string) => defineStore(id ?? 'item', {
-    state: (): Item => ({
+export const useResourceIdStore = (id: string) => defineStore(id, {
+    state: (): ResourceId => ({
         "@id": undefined,
         id: undefined
     }),
 
     actions: {
-        setData(data: Partial<Item>) {
+        setData(data: Partial<ResourceId>) {
             if (data['@id']) { this['@id'] = data['@id'] }
             if (data.id) { this.id = data.id }
         }
