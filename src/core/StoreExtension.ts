@@ -22,6 +22,10 @@ export default class StoreExtension extends Store {
         return [...this._extendedActions, ...(this.options?.actionsToExtends ?? this.getStatePropertyValue('actionsToExtends') ?? [])]
     }
 
+    get actionsToRename(): Record<string, string> | undefined {
+        return (this.options as Epps).actionsToRename
+    }
+
     get propertiesToRename(): Record<string, string> | undefined {
         return (this.options as Epps).propertiesToRename
     }
@@ -64,8 +68,9 @@ export default class StoreExtension extends Store {
                 if (this.storeHas(key)) {
                     if (this.extendedActions.includes(key)) { this.extendsAction(storeToExtend, key) }
                 } else {
-                    this.store[key] = storeToExtend[key]
-                    this.addToCustomProperties(key)
+                    const childStoreActionName = this.getActionNameForChildStore(key)
+                    this.store[childStoreActionName] = storeToExtend[key]
+                    this.addToCustomProperties(childStoreActionName)
                 }
             } else if (!this.storeHas(key) && (typeOfProperty === 'undefined' || typeOfProperty === 'object')) {
                 this.store[key] = this.createComputed(storeToExtend, key)
@@ -121,6 +126,10 @@ export default class StoreExtension extends Store {
                 }
             })
         }
+    }
+
+    private getActionNameForChildStore(parentStoreActionName: string): string {
+        return (this.actionsToRename && this.actionsToRename[parentStoreActionName]) ?? parentStoreActionName
     }
 
     private getPropertyNameForChildState(property: string): string {

@@ -1,35 +1,31 @@
-import { PiniaPlugin } from "pinia"
 import Crypt from "../services/Crypt"
 import { EppsPlugin } from "./eppsPlugin"
 import { isEmpty } from "../utils/validation"
 import Persister from "../services/Persister"
 
+import type { PiniaPlugin } from "pinia"
+import type { EppsStoreOptions } from "../types/store"
 import type { PersistedStore } from "../types"
-import { EppsStoreOptions } from "../types/store"
 
 
 export function createPlugin(dbName?: string, cryptKey?: string, debug: boolean = false): PiniaPlugin {
-    if (window) {
-        const db = (!isEmpty(dbName) && dbName)
-            ? new Persister({ name: dbName, keyPath: 'storeName' })
-            : undefined
+    const db = (!isEmpty(dbName) && dbName)
+        ? new Persister({ name: dbName, keyPath: 'storeName' })
+        : undefined
 
-        let crypt: Crypt | undefined
+    let crypt: Crypt | undefined
 
-        if (cryptKey) {
-            crypt = new Crypt(cryptKey)
-        }
-
-        if (typeof debug !== 'boolean') {
-            debug = false
-        }
-
-        const augmentPinia = new EppsPlugin(db, crypt, debug)
-
-        return augmentPinia.plugin.bind(augmentPinia)
+    if (cryptKey) {
+        crypt = new Crypt(cryptKey)
     }
 
-    return () => ({})
+    if (typeof debug !== 'boolean') {
+        debug = false
+    }
+
+    const eppsPlugin = new EppsPlugin(db, crypt, debug)
+
+    return eppsPlugin.plugin.bind(eppsPlugin)
 }
 
 declare module 'pinia' {

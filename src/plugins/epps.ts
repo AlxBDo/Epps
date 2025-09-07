@@ -11,6 +11,7 @@ export interface EppsContructor extends Omit<EppsStoreOptions, 'parentsStores'> 
 
 export class Epps {
     private _actionsToExtends?: string[]
+    private _actionsToRename?: Record<string, string>
     private _childId?: string
     private _persist?: PersistedStoreOptions
     private _parentsStores?: ParentStoreInterface[]
@@ -19,6 +20,7 @@ export class Epps {
 
     constructor(options: EppsContructor) {
         this._actionsToExtends = options.actionsToExtends
+        this._actionsToRename = options.actionsToRename
         this._parentsStores = options.parentsStores
         this._persist = options.persist
         this._propertiesToRename = options.propertiesToRename
@@ -27,6 +29,10 @@ export class Epps {
 
     get actionsToExtends(): string[] | undefined {
         return this._actionsToExtends
+    }
+
+    get actionsToRename(): Record<string, string> | undefined {
+        return this._actionsToRename
     }
 
     get childId(): string | undefined {
@@ -57,28 +63,6 @@ export class Epps {
 
     hasCustomDb(): boolean {
         return !!this._persist?.dbName
-    }
-
-    getStore<TStore, TState>(idOrIndex: number | string, childId?: string): EppsStore<TStore, TState> | undefined {
-        if (!this._parentsStores) {
-            return undefined
-        }
-
-        if (typeof idOrIndex === 'string') {
-            const store = this._parentsStores.find(store => store.id === idOrIndex)
-
-            if (!store) { return }
-
-            return store.build(childId as string) as EppsStore<TStore, TState>
-        }
-
-        if (typeof idOrIndex === 'number') {
-            return this._parentsStores[idOrIndex].build(childId as string) as EppsStore<TStore, TState>
-        }
-    }
-
-    getStores(childId?: string) {
-        return this.parentsStores(childId)
     }
 
     parentsStores(childId?: string): EppsStore<AnyObject, AnyObject>[] {

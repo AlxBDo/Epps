@@ -8,6 +8,7 @@ export interface ParentStoreInterface {
     build: (childId: string) => EppsStore<AnyObject, AnyObject>
 }
 
+
 export type ParentStore = (
     <TStore = AnyObject, TState = AnyObject>(id: string) => (DefineEppsStore<TStore, TState> | Store)
 )

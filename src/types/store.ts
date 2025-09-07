@@ -2,6 +2,7 @@ import type { AnyObject, SearchCollectionCriteria } from ".";
 import type { _StoreWithGetters, PiniaCustomProperties, PiniaCustomStateProperties, Store, StoreDefinition, SubscriptionCallback, SubscriptionCallbackMutationPatchFunction, SubscriptionCallbackMutationPatchObject } from "pinia";
 import type { Ref } from "vue";
 import ParentStore from "../plugins/parentStore";
+import { Comparison } from "./comparison";
 
 
 export type AugmentOptionApiStore<TStore, TState> = Store & TStore & TState & OptionApiStore<TState> & PiniaCustomProperties & PiniaCustomStateProperties & _StoreWithGetters<TState>
@@ -36,7 +37,7 @@ export interface CollectionStoreMethods {
     addItem: (item: AnyObject) => void
     clear: () => void
     getItem: (criteria: SearchCollectionCriteria) => AnyObject | undefined
-    getItems: (criteria?: SearchCollectionCriteria) => AnyObject[]
+    getItems: (criteria?: SearchCollectionCriteria, comparisonMode?: Comparison) => AnyObject[]
     removeItem: (item: AnyObject) => void
     setItems: <T>(items: T[]) => void
     updateItem: (updatedItem: AnyObject, oldItem?: AnyObject) => void
@@ -81,6 +82,7 @@ type PartialPersistedStore<TStore, TState> = Partial<TStore>
 
 export interface ExtendedStoreOptions {
     actionsToExtends?: string[]
+    actionsToRename?: Record<string, string>
     parentsStores?: ParentStore[]
 }
 

@@ -43,35 +43,4 @@ describe('Epps', () => {
             expect(store.$id).toBe(`${parentStores[index].id}${childId}`);
         });
     });
-
-    it('should get a store by id', () => {
-        const childId = 'testChild';
-        const store = epps.getStore('webuser', childId) as EppsStore<WebUserStore, WebUserState>;
-        expect(store).toBeDefined();
-        expect(store?.$id).toBe(`webuser${childId}`);
-    });
-
-    it('should get a store by index', () => {
-        const childId = 'testChild';
-        const store = epps.getStore(0, childId) as EppsStore<WebUserStore, WebUserState>;
-
-        expect(store).toBeDefined();
-        expect(store?.$id).toBe(`webuser${childId}`);
-    });
-
-    it('should return undefined if the store is not found', () => {
-        const childId = 'testChild';
-        const store = epps.getStore('nonexistent', childId);
-        expect(store).toBeUndefined();
-    });
-
-    it('should return all stores', () => {
-        const childId = 'testChild';
-        const stores = epps.getStores(childId);
-        expect(stores).toHaveLength(parentStores.length);
-        stores.forEach((store, index) => {
-            expect(store).toBeDefined();
-            expect(store.$id).toBe(`${parentStores[index].id}${childId}`);
-        });
-    });
 });

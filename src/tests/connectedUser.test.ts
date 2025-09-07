@@ -61,11 +61,11 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
 
     it('Has access to parent state property and modify it', async () => {
         connectedUserStore.lastname = newLastname
-        await new Promise(resolve => setTimeout(resolve, 500)) // wait for state mutation
         expect(connectedUserStore.lastname).toStrictEqual(newLastname)
     })
 
     it('Watch and persist state mutation', async () => {
+        await new Promise(resolve => setTimeout(resolve, 500)) // wait for state mutation
         const persistedContact = await persister.getItem('connectedUser') as User
         expect(persistedContact?.lastname).toStrictEqual(newLastname)
     })
@@ -95,7 +95,7 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
 
         await otherUserStore.remember()
 
-        expect(otherUserStore.user).toStrictEqual({ ...user, lastname: newLastname, '@id': undefined, id: undefined })
+        expect(otherUserStore.user).toStrictEqual({ ...user, lastname: newLastname, '@id': undefined })
     })
 
     it('$reset method clear all states (child and parents) and persisted data', async () => {

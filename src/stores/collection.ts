@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import type { AnyObject, SearchCollectionCriteria } from "../types";
 import type { AugmentOptionApiStore, CollectionState, CollectionStoreMethods } from "../types/store";
 import { arrayObjectFindAllBy, arrayObjectFindBy } from '../utils/object'
+import { Comparison } from "../types/comparison";
 
 
 type AugmentingStore = (id?: string) => AugmentOptionApiStore<CollectionStoreMethods, CollectionState<AnyObject>>
@@ -45,14 +46,15 @@ export const useCollectionStore: AugmentingStore = (id?: string) => defineStore(
             )
         },
 
-        getItems(criteria?: Partial<AnyObject>): AnyObject[] {
+        getItems(criteria?: Partial<AnyObject>, comparisonMode: Comparison = 'strict'): AnyObject[] {
             if (!criteria) {
                 return this.items
             }
 
             return arrayObjectFindAllBy<AnyObject>(
                 this.items as AnyObject[],
-                criteria as Partial<AnyObject> & SearchCollectionCriteria
+                criteria as Partial<AnyObject> & SearchCollectionCriteria,
+                comparisonMode
             )
         },
 

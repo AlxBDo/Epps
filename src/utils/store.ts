@@ -32,8 +32,8 @@ export function defineEppsStore<Sto, Sta>(
     storeDefinition: Omit<DefineStoreOptions<string, StateTree & Sta, AnyObject, Partial<Sto>>, 'id'> | (() => AnyObject),
     options?: DefineEppsStoreOtions | Epps
 ): DefineEppsStore<Sto, Sta> {
-    if (options instanceof Epps) {
-        options = { eppsOptions: options }
+    if (options) {
+        options = { eppsOptions: options instanceof Epps ? options : new Epps(options) }
     }
 
     return typeof storeDefinition === 'function'

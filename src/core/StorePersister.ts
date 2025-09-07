@@ -82,6 +82,7 @@ export default class StorePersister extends Store {
             if (!this.stateHas('watchMutation')) { this.addToState('watchMutation', false) }
             if (!this.stateHas('isEncrypted')) { this.addToState('isEncrypted', false) }
         }
+        if (!this.stateHas('isLoading')) { this.addToState('isLoading', false) }
 
 
         // Augment Store
@@ -175,13 +176,13 @@ export default class StorePersister extends Store {
             ?? this.state.hasOwnProperty('persistedPropertiesToEncrypt')
     }
 
-    async getPersistedState(): Promise<StateTree | undefined> {
+    async getPersistedState(decrypt: boolean = true): Promise<StateTree | undefined> {
         const storeName = this.getStoreName()
 
         try {
             let persistedState = await (this._persister as Persister).getItem(storeName) as StateTree
 
-            if (this.toBeCrypted() && persistedState) {
+            if (decrypt && this.toBeCrypted() && persistedState) {
                 await this._crypt?.init()
                 persistedState = await this.cryptState({ ...toRaw(this.state), ...persistedState }, true)
             }
@@ -245,7 +246,6 @@ export default class StorePersister extends Store {
         if (isEmpty(newState) || (this.stateIsEmpty && this.stateIsEmpty(newState))) { return }
 
         if (!persistedState || !areIdentical(newState, persistedState, this.getStatePropertyToNotPersist())) {
-
             (this._persister as Persister).setItem(this.getStoreName(), newState)
         }
     }
@@ -284,12 +284,15 @@ export default class StorePersister extends Store {
     }
 
     private async remember() {
+        this.state.isLoading = true
         return new Promise(async (resolve) => {
             let persistedState = await this.getPersistedState()
 
             if (persistedState && !this.stateIsEmpty(persistedState)) {
                 this.store.$patch(persistedState)
             }
+
+            this.state.isLoading = false
 
             return resolve(true)
         })
@@ -320,8 +323,7 @@ export default class StorePersister extends Store {
 
         (this._watchedStore as string[]).push(this.getStoreName())
 
-        this.store.$subscribe((mutation: SubscriptionCallbackMutation<StateTree>, state: StateTree) => {
-
+        this.store.$subscribe((mutation: SubscriptionCallbackMutation<StateTree>) => {
             this.debugLog(`store.$subscribe ${this.getStoreName()}`, [
                 mutation.type !== 'patch object', this.getWatchMutation(),
                 mutation, this.state, this.store

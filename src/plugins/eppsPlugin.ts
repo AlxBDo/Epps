@@ -1,13 +1,14 @@
 import Crypt from "../services/Crypt"
-import { eppsLog, eppsLogError } from "../utils/log"
+import { Epps } from "./epps"
+import { eppsLogError } from "../utils/log"
 import Persister from "../services/Persister"
 import StoreExtension from "../core/StoreExtension"
 import StorePersister from "../core/StorePersister"
+import { addEppsStore } from "./eppsStores"
 
-import type { AllowedKeyPath } from "../types/storage"
 import type { PiniaPluginContext, StateTree, Store } from "pinia"
-import { AnyObject, EppsStore } from "../types"
-import { Epps } from "./epps"
+import type { AllowedKeyPath } from "../types/storage"
+import type { AnyObject, EppsStore } from "../types"
 
 
 export interface EppsConstructorProps {
@@ -57,7 +58,7 @@ ${store.$id} use state to define epps store options.`,
     private getParentsStores({ store, options }: PiniaPluginContext): EppsStore<AnyObject, AnyObject>[] | undefined {
         const eppsOptions = this.getEppsOptions(options)
         if (eppsOptions?.parentsStores) {
-            return eppsOptions.getStores(store.$id)
+            return eppsOptions.parentsStores(store.$id)
         }
     }
 
@@ -89,6 +90,8 @@ ${store.$id} use state to define epps store options.`,
             }
 
             this.rewriteResetStore({ store, options } as PiniaPluginContext, Object.assign({}, store.$state))
+
+            addEppsStore(store)
         } catch (e) {
             eppsLogError('plugin()', [e, store, options])
         }

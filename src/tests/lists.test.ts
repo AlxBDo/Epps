@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { beforeEachPiniaPlugin, createAppAndPinia } from './utils/beforeEach'
-import { useListsStore, type ListsStoreMethods } from '../stores/experiments/lists'
+import { createAppAndPinia } from './utils/beforeEach'
+import { useListsStore, type ListsState, type ListsStoreMethods } from '../stores/experiments/lists'
 
-import type { CollectionState, EppsStore } from '../types'
-import { List } from '../models/liste'
+import type { EppsStore } from '../types'
 
 
 const lists = [
@@ -15,33 +14,33 @@ const lists = [
 ]
 
 describe('ListsStore extends collectionStore', () => {
-    let listsStore: EppsStore<ListsStoreMethods, CollectionState<List>>
+    let listsStore: EppsStore<ListsStoreMethods, ListsState>
 
     beforeEach(() => {
         createAppAndPinia()
 
         if (!listsStore) {
-            listsStore = useListsStore('lists-testing') as EppsStore<ListsStoreMethods, CollectionState<List>>
+            listsStore = useListsStore('lists-testing') as EppsStore<ListsStoreMethods, ListsState>
         }
     })
 
     it('Has addItem method', () => {
         listsStore.addItem(lists[0])
 
-        expect(listsStore.getItems()).toHaveLength(1)
+        expect(listsStore.getLists()).toHaveLength(1)
     })
 
     it('Has access to collectionStore state', () => {
-        expect(listsStore.items[0].name).toBe(lists[0].name)
-        expect(listsStore.items[0].type).toBe(lists[0].type)
-        expect(listsStore.items[0].id).toBe(lists[0].id)
+        expect(listsStore.lists[0].name).toBe(lists[0].name)
+        expect(listsStore.lists[0].type).toBe(lists[0].type)
+        expect(listsStore.lists[0].id).toBe(lists[0].id)
     })
 
     it('Has setItem method', () => {
         listsStore.setItems(lists)
 
-        expect(listsStore.items).toHaveLength(lists.length)
-        expect(listsStore.items[2]).toStrictEqual(lists[2])
+        expect(listsStore.lists).toHaveLength(lists.length)
+        expect(listsStore.lists[2]).toStrictEqual(lists[2])
     })
 
     it('Has getItem method and get a list by criteria', () => {
@@ -49,10 +48,10 @@ describe('ListsStore extends collectionStore', () => {
         expect(listsStore.getItem({ name: 'list1' })).toStrictEqual(lists[0])
     })
 
-    it('Has getItems method and get all or search specifics items', () => {
-        expect(listsStore.getItems()).toHaveLength(lists.length)
-        expect(listsStore.getItems({ id: 2 })).toStrictEqual([lists[1]])
-        expect(listsStore.getItems({ type: '0' })).toStrictEqual([lists[0], lists[3]])
+    it('Has getLists method and get all or search specifics lists', () => {
+        expect(listsStore.getLists()).toHaveLength(lists.length)
+        expect(listsStore.getLists({ id: 2 })).toStrictEqual([lists[1]])
+        expect(listsStore.getLists({ type: '0' })).toStrictEqual([lists[0], lists[3]])
     })
 
     it('Can use parent store method in child store method', () => {
@@ -65,7 +64,7 @@ describe('ListsStore extends collectionStore', () => {
         const updatedItem = { ...lists[0], name: 'updatedList1' }
         listsStore.updateItem(updatedItem)
 
-        expect(listsStore.getItems({ id: 1 })).toStrictEqual([updatedItem])
+        expect(listsStore.getLists({ id: 1 })).toStrictEqual([updatedItem])
     })
 
 
@@ -79,7 +78,7 @@ describe('ListsStore extends collectionStore', () => {
     it('Has removeItem method', () => {
         listsStore.removeItem({ id: 1 })
 
-        expect(listsStore.items).toHaveLength(3)
+        expect(listsStore.lists).toHaveLength(3)
         expect(listsStore.getItem({ id: 1 })).toBeUndefined()
     })
 })

@@ -1,7 +1,6 @@
 import { ref } from "vue"
 import { defineEppsStore } from "../utils/store"
 import { ResourceIdStore, useResourceIdStore } from "./resourceId"
-import { Epps } from "../plugins/epps"
 import ParentStore from "../plugins/parentStore"
 import type { ResourceId } from "../types/resourceId"
 
@@ -15,12 +14,6 @@ export interface WebUserState extends ResourceId {
     password?: string
     username?: string
 }
-
-
-const epps = new Epps({
-    actionsToExtends: ['setData'],
-    parentsStores: [new ParentStore('resourceId', useResourceIdStore)]
-})
 
 
 export const useWebUserStore = (id?: string) => defineEppsStore<WebUserStore, WebUserState>(
@@ -47,5 +40,8 @@ export const useWebUserStore = (id?: string) => defineEppsStore<WebUserStore, We
             username
         }
     },
-    epps
+    {
+        actionsToExtends: ['setData'],
+        parentsStores: [new ParentStore('resourceId', useResourceIdStore)]
+    }
 )()
