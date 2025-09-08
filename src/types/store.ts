@@ -3,6 +3,7 @@ import type { _StoreWithGetters, PiniaCustomProperties, PiniaCustomStateProperti
 import type { Ref } from "vue";
 import ParentStore from "../plugins/parentStore";
 import { Comparison } from "./comparison";
+import { ParentStoreInterface } from "./epps";
 
 
 export type AugmentOptionApiStore<TStore, TState> = Store & TStore & TState & OptionApiStore<TState> & PiniaCustomProperties & PiniaCustomStateProperties & _StoreWithGetters<TState>
@@ -83,7 +84,7 @@ type PartialPersistedStore<TStore, TState> = Partial<TStore>
 export interface ExtendedStoreOptions {
     actionsToExtends?: string[]
     actionsToRename?: Record<string, string>
-    parentsStores?: ParentStore[]
+    parentsStores?: ParentStoreInterface[]
 }
 
 export interface ExtendedState extends PersistedStoreOptions {

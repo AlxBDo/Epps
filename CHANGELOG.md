@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0-beta.0] - 2025-09-07
+
+The Epps class is no longer used to define store options or to access parent stores.
+Options are declared as the third parameter of the defineEppsStore function.
+Access to stores is no longer permitted. You can access the extended store, containing the properties and methods of parent stores, using the getEppsStore function.
+
+- removed Epps class
+- added getEppsStore function
+
 ## [0.3.4] - 2025-08-28
 
 You can define a custom database for a Store using the persist.dbName parameter of the Epps class.
