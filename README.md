@@ -121,7 +121,7 @@ export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMet
 )();
 ```
 
-#### Version >= 0.3.0
+#### Version 0.3.X
 
 ```typeScript
 import { ref } from "vue";
@@ -146,6 +146,30 @@ export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMet
     }), 
     epps
 )();
+```
+
+#### Version >= 0.4.0
+
+```typeScript
+import { ref } from "vue";
+import { defineEppsStore, getExtendedStore, useCollectionStore, type CollectionState, type CollectionStoreMethods } from 'epps';
+import type { List, ListsState, ListsStoreMethods } from "../types/list";
+
+export const useListsStore = (id?: string) => defineEppsStore<ListsStoreMethods, ListsState>(
+    id ?? 'lists',
+    () => ({
+      newList: (list: List) => {
+        const store = getExtendedStore<ListsStoreMethods, ListsState>()
+        store.addItem({ ...list, id: store.lists.length + 1})
+      }
+    }),
+    {
+        actionsToRename: { getItems: 'getLists' },
+        parentsStores: [new ParentStore('listsCollection', useCollectionStore)],
+        persist: { watchMutation: true },
+        propertiesToRename: { items: 'lists' }
+    }
+)()
 ```
 
 In this example:

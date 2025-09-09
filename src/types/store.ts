@@ -85,6 +85,7 @@ export interface ExtendedStoreOptions {
     actionsToExtends?: string[]
     actionsToRename?: Record<string, string>
     parentsStores?: ParentStoreInterface[]
+    propertiesToRename?: Record<string, string>
 }
 
 export interface ExtendedState extends PersistedStoreOptions {
