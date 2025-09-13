@@ -91,15 +91,57 @@ export default defineNuxtPlugin({
 
 The `useListsStore` store demonstrates how to create a collection-based store using the `useCollectionStore` store, which is integrated into the Epps plugin. This allows you to manage collections of items in your project seamlessly.
 
-#### Version <= 0.2.8
+#### Version >= 0.4.0
 
 ```typeScript
 import { ref } from "vue";
-import { defineEppsStore, extendedState, getParentStoreMethod, useCollectionStore } from 'epps';
+import { defineEppsStore, getExtendedStore, useCollectionStore } from 'epps';
 import type { CollectionState, CollectionStoreMethods } from "epps";
-import type { List } from "../models/list";
+import type { List, ListsState, ListsStoreMethods } from "../types/list";
 
-const defaultStoreId: string = 'lists';
+export const useListsStore = (id?: string) => defineEppsStore<ListsStoreMethods, ListsState>(
+    id ?? 'lists',
+    () => ({
+      newList: (list: List) => {
+        const store = getExtendedStore<ListsStoreMethods, ListsState>()
+        store.addItem({ ...list, id: store.lists.length + 1})
+      }
+    }),
+    {
+        actionsToRename: { getItems: 'getLists' },
+        parentsStores: [new ParentStore('listsCollection', useCollectionStore)],
+        persist: { watchMutation: true },
+        propertiesToRename: { items: 'lists' }
+    }
+)()
+```
+
+#### Version 0.3.X
+
+```typeScript
+...
+
+const epps = new Epps({
+    parentsStores: [ new ParentStore('listsCollection', useCollectionStore) ], 
+    persist: { persist: true } // Store persisted manually. Use “watchMutation” to persist each time the State is modified.
+})
+
+export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(
+    id ?? defaultStoreId,
+    () => ({
+        getLists: () => {
+          const collectionStore = epps.getStore<CollectionStoreMethods, CollectionState<List>>(0, id ?? defaultStoreId)
+          return collectionStore()?.getItems()
+        }
+    }), 
+    epps
+)();
+```
+
+#### Version <= 0.2.8
+
+```typeScript
+...
 
 export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(
     id ?? defaultStoreId,
@@ -119,57 +161,6 @@ export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMet
         }
     }
 )();
-```
-
-#### Version 0.3.X
-
-```typeScript
-import { ref } from "vue";
-import { defineEppsStore, Epps, useCollectionStore } from 'epps';
-import type { CollectionState, CollectionStoreMethods } from "epps";
-import type { List } from "../models/list";
-
-const defaultStoreId: string = 'lists';
-
-const epps = new Epps({
-    parentsStores: [ new ParentStore('listsCollection', useCollectionStore) ], 
-    persist: { persist: true } // Store persisted manually. Use “watchMutation” to persist each time the State is modified.
-})
-
-export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(
-    id ?? defaultStoreId,
-    () => ({
-        getLists: () => {
-          const collectionStore = epps.getStore<CollectionStoreMethods, CollectionState<List>>(0, id ?? defaultStoreId)
-          return collectionStore()?.getItems()
-        }
-    }), 
-    epps
-)();
-```
-
-#### Version >= 0.4.0
-
-```typeScript
-import { ref } from "vue";
-import { defineEppsStore, getExtendedStore, useCollectionStore, type CollectionState, type CollectionStoreMethods } from 'epps';
-import type { List, ListsState, ListsStoreMethods } from "../types/list";
-
-export const useListsStore = (id?: string) => defineEppsStore<ListsStoreMethods, ListsState>(
-    id ?? 'lists',
-    () => ({
-      newList: (list: List) => {
-        const store = getExtendedStore<ListsStoreMethods, ListsState>()
-        store.addItem({ ...list, id: store.lists.length + 1})
-      }
-    }),
-    {
-        actionsToRename: { getItems: 'getLists' },
-        parentsStores: [new ParentStore('listsCollection', useCollectionStore)],
-        persist: { watchMutation: true },
-        propertiesToRename: { items: 'lists' }
-    }
-)()
 ```
 
 In this example:
