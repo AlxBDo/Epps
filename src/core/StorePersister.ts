@@ -330,7 +330,11 @@ export default class StorePersister extends Store {
             ])
 
             if (mutation.type !== 'patch object' && this.getWatchMutation()) {
-                this.persist()
+                this.persist().then(() => {
+                    if (this.store.mutationCallback) {
+                        this.store.mutationCallback(this.state, mutation)
+                    }
+                })
             }
         })
     }

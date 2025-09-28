@@ -26,6 +26,8 @@ export type {
     PersistedStore
 } from "./store";
 
+export type { Comparison } from './comparison'
+
 export type { ErrorsState, ErrorsStore } from '../stores/errors'
 
 export type { ResourceIdStore } from '../stores/resourceId'

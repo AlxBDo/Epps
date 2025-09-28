@@ -1,6 +1,6 @@
+import type { ActionFlows, MutationCallback, ParentStoreInterface } from "../types/epps"
 import type { AnyObject, EppsStore } from "../types"
 import type { EppsStoreOptions, PersistedStoreOptions } from "../types/store"
-import { ParentStoreInterface } from "../types/epps"
 
 
 export interface EppsContructor extends Omit<EppsStoreOptions, 'parentsStores'> {
@@ -10,22 +10,30 @@ export interface EppsContructor extends Omit<EppsStoreOptions, 'parentsStores'> 
 
 
 export class Epps {
+    private _actionFlows?: ActionFlows
     private _actionsToExtends?: string[]
     private _actionsToRename?: Record<string, string>
     private _childId?: string
+    private _mutationCallback?: MutationCallback
     private _persist?: PersistedStoreOptions
     private _parentsStores?: ParentStoreInterface[]
     private _parentsStoresBuilded?: EppsStore<AnyObject, AnyObject>[]
     private _propertiesToRename?: Record<string, string>
 
     constructor(options: EppsContructor) {
+        this._actionFlows = options.actionFlows
         this._actionsToExtends = options.actionsToExtends
         this._actionsToRename = options.actionsToRename
+        this._mutationCallback = options.mutationCallback
         this._parentsStores = options.parentsStores
         this._persist = options.persist
         this._propertiesToRename = options.propertiesToRename
     }
 
+
+    get actionFlows(): ActionFlows | undefined {
+        return this._actionFlows
+    }
 
     get actionsToExtends(): string[] | undefined {
         return this._actionsToExtends
@@ -37,6 +45,10 @@ export class Epps {
 
     get childId(): string | undefined {
         return this._childId
+    }
+
+    set actionFlows(actionFlows: ActionFlows) {
+        this._actionFlows = actionFlows
     }
 
     set childId(value: string | undefined) {

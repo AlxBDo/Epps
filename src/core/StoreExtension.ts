@@ -5,6 +5,7 @@ import Store from "./Store";
 
 import type { AnyObject } from "../types";
 import type { Store as PiniaStore } from "pinia";
+import ActionsStoreFlow from "./ActionsStoreFlow";
 
 
 export default class StoreExtension extends Store {
@@ -114,6 +115,9 @@ export default class StoreExtension extends Store {
      * Extends to store stores list in parentsStores property
      */
     private extendsStore(): void {
+        const flows = (this.options as Epps)?.actionFlows;
+        (new ActionsStoreFlow(this.store, flows)).onAction();
+
         if (this.parentsStores) {
             const storeToExtend = this.parentsStores
 
@@ -122,7 +126,8 @@ export default class StoreExtension extends Store {
             (storeToExtend as PiniaStore[]).forEach((ste: PiniaStore) => {
                 if (ste?.$state) {
                     this.duplicateStore(ste)
-                    this.extendsState(ste)
+                    this.extendsState(ste);
+                    (new ActionsStoreFlow(ste, flows, this.store)).onAction();
                 }
             })
         }

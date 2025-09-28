@@ -1,9 +1,8 @@
 import type { AnyObject, SearchCollectionCriteria } from ".";
-import type { _StoreWithGetters, PiniaCustomProperties, PiniaCustomStateProperties, Store, StoreDefinition, SubscriptionCallback, SubscriptionCallbackMutationPatchFunction, SubscriptionCallbackMutationPatchObject } from "pinia";
+import type { _StoreWithGetters, PiniaCustomProperties, PiniaCustomStateProperties, StateTree, Store, StoreDefinition, SubscriptionCallback, SubscriptionCallbackMutationPatchFunction, SubscriptionCallbackMutationPatchObject } from "pinia";
 import type { Ref } from "vue";
-import ParentStore from "../plugins/parentStore";
 import { Comparison } from "./comparison";
-import { ParentStoreInterface } from "./epps";
+import { ActionFlows, ParentStoreInterface } from "./epps";
 
 
 export type AugmentOptionApiStore<TStore, TState> = Store & TStore & TState & OptionApiStore<TState> & PiniaCustomProperties & PiniaCustomStateProperties & _StoreWithGetters<TState>
@@ -85,6 +84,9 @@ export interface ExtendedStoreOptions {
     actionsToExtends?: string[]
     actionsToRename?: Record<string, string>
     parentsStores?: ParentStoreInterface[]
+    mutationCallback?: (
+        mutation: SubscriptionCallbackMutationPatchFunction | SubscriptionCallbackMutationPatchObject<StateTree>
+    ) => void
     propertiesToRename?: Record<string, string>
 }
 
@@ -117,5 +119,6 @@ export type EppsStore<TStore, TState> = ExtendedStore<TStore, TState>
     & StoreDefinition<string, AnyObject & TState & PersistedState, AnyObject, TStore & PersistedStore>
 
 export interface EppsStoreOptions extends ExtendedStoreOptions {
+    actionFlows?: ActionFlows
     persist?: PersistedStoreOptions
 }

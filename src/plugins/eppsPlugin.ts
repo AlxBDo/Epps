@@ -63,10 +63,14 @@ ${store.$id} use state to define epps store options.`,
     }
 
     private getStoreDb(storeOptions: AnyObject): Persister | undefined {
-        const eppsOptions = this.getEppsOptions(storeOptions)
-        if (eppsOptions?.persist?.dbName) {
-            return new Persister({ name: eppsOptions.persist.dbName as string, keyPath: 'storeName' })
-        }
+        try {
+            if (!window) { return }
+
+            const eppsOptions = this.getEppsOptions(storeOptions)
+            if (eppsOptions?.persist?.dbName) {
+                return new Persister({ name: eppsOptions.persist.dbName as string, keyPath: 'storeName' })
+            }
+        } catch (e) { }
     }
 
     plugin({ store, options }: PiniaPluginContext) {

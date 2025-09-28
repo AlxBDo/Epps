@@ -86,7 +86,7 @@ export default class Store {
     }
 
     getOption(optionName: keyof EppsStoreOptions | keyof EppsStoreOptions['persist']) {
-        return this.options && this.options[optionName]
+        return this.options && (this.options as EppsStoreOptions)[optionName]
     }
 
     getStatePropertyValue(propertyName: string) {

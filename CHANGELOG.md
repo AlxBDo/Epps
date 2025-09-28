@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.4.0-beta.0] - 2025-09-07
+## [0.4.2]- beta features - 2025-09-13
+
+Create action flows: execute a function before or after an action is performed in your store.
+
+- added actionFlows options
+
+## [0.4.0]- Major change - 2025-09-13
 
 The Epps class is no longer used to define store options or to access parent stores.
 Options are declared as the third parameter of the defineEppsStore function.
@@ -8,6 +14,8 @@ Access to stores is no longer permitted. You can access the extended store, cont
 
 - removed Epps class
 - added getEppsStore function
+- added actionsToRename options
+- added propertiesToRename options
 
 ## [0.3.4] - 2025-08-28
 
