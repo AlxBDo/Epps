@@ -1,16 +1,20 @@
 # Changelog
 
-## [0.4.3]- beta actionFlows options - 2025-09-13
+## [0.4.4] - 2025-10-03
+
+Simplification of Epps store usage: removal of type definitions.
+
+## [0.4.3] - 2025-10-03
 
 Actions flow history improvment
 
-## [0.4.2]- beta features - 2025-09-13
+## [0.4.2] - beta feature - 2025-09-13
 
 Create action flows: execute a function before or after an action is performed in your store.
 
 - added actionFlows options
 
-## [0.4.0]- Major change - 2025-09-13
+## [0.4.0] - Major change - 2025-09-13
 
 The Epps class is no longer used to define store options or to access parent stores.
 Options are declared as the third parameter of the defineEppsStore function.

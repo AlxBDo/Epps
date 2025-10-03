@@ -1,6 +1,6 @@
 import { defineStore, DefineStoreOptions, StateTree } from "pinia"
 import type { Item } from "../models/item"
-import type { AnyObject } from "../types"
+import type { AnyObject, EppsStore } from "../types"
 import type { DefineEppsStore, EppsStoreOptions, PersistedState } from "../types/store"
 import { Epps } from "../plugins/epps"
 
@@ -54,7 +54,7 @@ export function defineEppsStoreSetup<Sto, Sta>(
     storeDefinition: () => AnyObject,
     options?: EppsStoreOptions
 ): DefineEppsStore<Sto, Sta> {
-    return defineStore(id, storeDefinition, options)
+    return defineStore(id, storeDefinition, options) as unknown as DefineEppsStore<Sto, Sta>
 }
 
 export function defineEppsStoreOptionApi<Sto, Sta>(
@@ -66,5 +66,5 @@ export function defineEppsStoreOptionApi<Sto, Sta>(
         storeDefinition = { ...storeDefinition, ...(options ?? {}) } as Omit<DefineStoreOptions<string, StateTree & Sta, AnyObject, Partial<Sto>>, 'id'>
     }
 
-    return defineStore(id, storeDefinition)
+    return defineStore(id, storeDefinition) as unknown as DefineEppsStore<Sto, Sta>
 }

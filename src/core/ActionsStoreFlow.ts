@@ -19,7 +19,7 @@ export default class ActionsStoreFlow {
     private addFlowOnAction(name: string, args: any[] | object): void {
         const actionName = this.getOnActionFlowName(name, args)
         this._flowsOnAction[actionName] = true
-        setTimeout(() => { this._flowsOnAction[actionName] = false })
+        setTimeout(() => { this._flowsOnAction[actionName] = false }, 250)
     }
 
     private getOnActionFlowName(name: string, args: any[] | object): string {

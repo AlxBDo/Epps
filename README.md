@@ -100,7 +100,7 @@ import type { CollectionState, CollectionStoreMethods } from "epps";
 import type { List, ListsState, ListsStoreMethods } from "../types/list";
 
 export const useListsStore = (id?: string) => defineEppsStore<ListsStoreMethods, ListsState>(
-    id ?? 'lists',
+    id ?? 'listsStore',
     () => ({
       newList: (list: List) => {
         const store = getExtendedStore<ListsStoreMethods, ListsState>()
@@ -127,7 +127,7 @@ const epps = new Epps({
 })
 
 export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(
-    id ?? defaultStoreId,
+    id ?? 'listsStore',
     () => ({
         getLists: () => {
           const collectionStore = epps.getStore<CollectionStoreMethods, CollectionState<List>>(0, id ?? defaultStoreId)
@@ -138,36 +138,9 @@ export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMet
 )();
 ```
 
-#### Version <= 0.2.8
-
-```typeScript
-...
-
-export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(
-    id ?? defaultStoreId,
-    () => {
-        const { parentsStores } = extendedState(
-            [useCollectionStore('listsCollection')],
-            { persist: { persist: ref(true) } } // Store persisted manually. Use “watchMutation” to persist each time the State is modified.
-        )
-
-        function getLists() {
-          return getParentStoreMethod('getItems', 0, parentsStores)()
-        }
-
-        return {
-          getLists,
-          parentsStores
-        }
-    }
-)();
-```
-
 In this example:
 - `useCollectionStore` is a utility provided by the Epps plugin to manage collections of items.
 - The `useListsStore` store extends `useCollectionStore` to manage a collection of lists with persistence enabled.
-
-For more details on `useCollectionStore` and its integration, refer to the plugin's GitHub repository: [https://github.com/AlxBDo/Epps/tree/main/src/stores](https://github.com/AlxBDo/Epps/tree/main/src/stores).
 
 ### Usage in a Component
 
@@ -176,13 +149,10 @@ To use the `useListsStore` store in a Vue component, you can import and use it a
 ```vue
 <script setup>
 import { useListsStore } from '../stores/lists'
-import type { CollectionStoreMethods, CollectionState } from 'epps'
 import type { List } from "../models/liste"
 
-const listsStore = useListsStore() as EppsStore<CollectionStoreMethods, CollectionState<List>>
-
+const listsStore = useListsStore()
 listsStore.remember()
-
 </script>
 
 <template>
@@ -198,8 +168,6 @@ listsStore.remember()
 ```
 
 This example shows how to add a new list and retrieve all lists from the `useListsStore` store. The `useCollectionStore` integration simplifies collection management in your project.
-
-> **Warning**: In a Nuxt application, it is not recommended to call a method from a store modified by the plugin directly from a page. Instead, prefer calling the method within a component. If you must call the method from a page, ensure its existence before invoking it: `myStore.myMethod && myStore.myMethod()`.
 
 ## For more details
 

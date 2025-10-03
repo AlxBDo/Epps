@@ -108,7 +108,7 @@ export type ExtendedStore<TStore, TState> = TStore & TState & CustomStore & {
  * EPPS
  */
 
-export type DefineEppsStore<TStore, TState> = (args?: any) => PartialPersistedStore<TStore, TState> & CustomStore
+export type DefineEppsStore<TStore, TState> = (args?: any) => EppsStore<TStore, TState> & CustomStore
 
 export type DefineEppsStoreOptionApi<TStore, TState> = (args?: any) => PartialPersistedStore<TStore, OptionApiStore<TState>>
     & CustomStore
