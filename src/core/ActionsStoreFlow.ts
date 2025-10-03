@@ -1,6 +1,7 @@
 import { Store } from "pinia";
 import { AnyObject } from "../types";
 import { ActionFlows } from "../types/epps";
+import { isEmpty } from "../utils/validation";
 
 export default class ActionsStoreFlow {
     private _childStore?: AnyObject
@@ -15,15 +16,20 @@ export default class ActionsStoreFlow {
     }
 
 
-    private addFlowOnAction(name: string): void {
-        this._flowsOnAction[name] = true
-        setTimeout(() => { this._flowsOnAction[name] = false }, 500)
+    private addFlowOnAction(name: string, args: any[] | object): void {
+        const actionName = this.getOnActionFlowName(name, args)
+        this._flowsOnAction[actionName] = true
+        setTimeout(() => { this._flowsOnAction[actionName] = false })
+    }
+
+    private getOnActionFlowName(name: string, args: any[] | object): string {
+        return name + JSON.stringify(args)
     }
 
     private invokeFlow(args: any[] | object, name: string, flow?: Function | string, result?: any): boolean {
         if (!flow) { return false }
 
-        if (result) {
+        if (!isEmpty(result)) {
             args = { args, result }
         }
 
@@ -37,6 +43,8 @@ export default class ActionsStoreFlow {
             }
         }
 
+        this.addFlowOnAction(name, args)
+
         return true
     }
 
@@ -44,9 +52,7 @@ export default class ActionsStoreFlow {
         if (!this._flows) return
 
         (this._store as Store).$onAction(({ after, args, name }) => {
-            if (!(this._flows as AnyObject)[name] || this._flowsOnAction[name]) { return }
-
-            this.addFlowOnAction(name)
+            if (!(this._flows as AnyObject)[name] || this._flowsOnAction[this.getOnActionFlowName(name, args)]) { return }
 
             const { after: afterAction, before } = (this._flows as AnyObject)[name]
 

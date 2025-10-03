@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.3]- beta actionFlows options - 2025-09-13
+
+Actions flow history improvment
+
 ## [0.4.2]- beta features - 2025-09-13
 
 Create action flows: execute a function before or after an action is performed in your store.
