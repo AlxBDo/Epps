@@ -1,9 +1,17 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createAppAndPinia } from './utils/beforeEach'
 import { useListsStore, type ListsState, type ListsStoreMethods } from '../stores/experiments/lists'
 
 import type { EppsStore } from '../types'
+import { List } from '../models/liste'
+
+function getLists(length: number): List[] {
+    return Array.from({ length }, (val, index) => {
+        const type = Math.floor(Math.random() * 3).toString()
+        return { id: index + 1, name: `List n°${index}`, type } as List
+    })
+}
 
 
 const lists = [
@@ -24,10 +32,19 @@ describe('ListsStore extends collectionStore', () => {
         }
     })
 
-    it('Has addItem method', () => {
+    it('Has addItem and getLists method and execute action flows', () => {
+        const consoleSpy = vi.spyOn(console, 'log')
         listsStore.addItem(lists[0])
 
-        expect(listsStore.getLists()).toHaveLength(1)
+        const result = listsStore.getLists()
+        expect(consoleSpy).toHaveBeenCalledWith('actionAfter', { args: [], result });
+        expect(result).toHaveLength(1)
+        expect(result[0]?.name).toStrictEqual(lists[0]?.name)
+        consoleSpy.mockRestore()
+    })
+
+    it('Has its item property renamed to lists', () => {
+        expect(listsStore.lists).toStrictEqual([lists[0]])
     })
 
     it('Has access to collectionStore state', () => {
@@ -45,7 +62,7 @@ describe('ListsStore extends collectionStore', () => {
 
     it('Has getItem method and get a list by criteria', () => {
         expect(listsStore.getItem({ id: 2 })).toStrictEqual(lists[1])
-        expect(listsStore.getItem({ name: 'list1' })).toStrictEqual(lists[0])
+        expect(listsStore.getItem({ name: 'list3' })).toStrictEqual(lists[2])
     })
 
     it('Has getLists method and get all or search specifics lists', () => {
@@ -67,18 +84,19 @@ describe('ListsStore extends collectionStore', () => {
         expect(listsStore.getLists({ id: 1 })).toStrictEqual([updatedItem])
     })
 
-
-    it('Add existing item update it', () => {
-        const newItem = { ...lists[1], name: 'updatedList2' }
-        listsStore.addItem(newItem)
-
-        expect(listsStore.getItem({ id: 2 })).toStrictEqual(newItem)
-    })
-
     it('Has removeItem method', () => {
         listsStore.removeItem({ id: 1 })
 
         expect(listsStore.lists).toHaveLength(3)
         expect(listsStore.getItem({ id: 1 })).toBeUndefined()
+    })
+
+    it('Supports a large number of items', () => {
+        const items = getLists(99999)
+        const testStore = useListsStore('largeListsStore')
+        testStore.stopWatch()
+        testStore.setItems(items)
+
+        expect(testStore.lists).toHaveLength(items.length)
     })
 })

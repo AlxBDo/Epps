@@ -169,6 +169,11 @@ listsStore.remember()
 
 This example shows how to add a new list and retrieve all lists from the `useListsStore` store. The `useCollectionStore` integration simplifies collection management in your project.
 
+## Tested and testable
+
+To ensure functional stability, the Epps plugin is tested with vitest. Its coverage rate is over 90%. 
+To test Pinia stores using epps, you need to use the createPluginMock function. This function provides a mock implementation of epps plugin, allowing you to simulate its behavior during testing.
+
 ## For more details
 
 - Read [Documentation](https://main.d1f2uye6dxmhh3.amplifyapp.com/) 

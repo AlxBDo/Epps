@@ -38,7 +38,7 @@ export default class ActionsStoreFlow {
         } else if (typeof flow === 'string') {
             if (this._childStore && typeof this._childStore[flow] === 'function') {
                 this._childStore[flow](args)
-            } else if (typeof this._store[flow]) {
+            } else if (typeof this._store[flow] === 'function') {
                 this._store[flow](args)
             }
         }
@@ -56,9 +56,7 @@ export default class ActionsStoreFlow {
 
             const { after: afterAction, before } = (this._flows as AnyObject)[name]
 
-            if (this.invokeFlow(args, name, before)) {
-                this._store[name](...args)
-            }
+            this.invokeFlow(args, name, before)
 
             after((result) => this.invokeFlow(args, name, afterAction, result))
         })
