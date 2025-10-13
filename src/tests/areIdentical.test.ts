@@ -51,7 +51,7 @@ describe('areIdentical', () => {
     })
 
     it('Complex objects are identical if excludedKeys contains different property', async () => {
-        expect(areIdentical(complexObject1, complexObject2, ['property2'])).toBeTruthy()
+        expect(areIdentical(complexObject1, complexObject2, new Set(['property2']))).toBeTruthy()
     })
 
     it('Complex objects are identical', async () => {

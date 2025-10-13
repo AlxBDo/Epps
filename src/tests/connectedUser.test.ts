@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { beforeEachPiniaPlugin, createAppAndPinia } from './utils/beforeEach'
+import { createAppAndPinia } from './utils/beforeEach'
 import PersisterMock from '../testing/mocks/persister'
 import { useConnectedUserStore } from '../stores/experiments/connectedUser'
 
@@ -36,7 +36,14 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
     it('Has setData method and methods defined in actionsToExtends are extends', async () => {
         connectedUserStore.setData(user)
 
-        expect({ ...connectedUserStore.user, id: connectedUserStore.id, '@id': connectedUserStore['@id'] }).toStrictEqual(user)
+        expect({
+            email: connectedUserStore.email,
+            firstname: connectedUserStore.firstname,
+            id: connectedUserStore.id,
+            lastname: connectedUserStore.lastname,
+            password: connectedUserStore.password,
+            '@id': connectedUserStore['@id']
+        }).toStrictEqual(user)
 
         await connectedUserStore.persistState()
     })
@@ -95,7 +102,14 @@ describe('connectedUserStore extends userStore, contactStore and itemStore', () 
 
         await otherUserStore.remember()
 
-        expect(otherUserStore.user).toStrictEqual({ ...user, lastname: newLastname, '@id': undefined })
+        expect({
+            email: connectedUserStore.email,
+            firstname: connectedUserStore.firstname,
+            id: connectedUserStore.id,
+            lastname: connectedUserStore.lastname,
+            password: connectedUserStore.password,
+            '@id': connectedUserStore['@id']
+        }).toStrictEqual({ ...user, lastname: undefined })
     })
 
     it('$reset method clear all states (child and parents) and persisted data', async () => {

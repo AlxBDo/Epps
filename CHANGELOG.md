@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.7] - 2025-10-13
+
+Improved plugin performance and simplified setting of persistence options.
+
+## [0.4.6] - 2025-10-12
+
+Improved plugin performance.
+
 ## [0.4.4] - 2025-10-03
 
 Simplification of Epps store usage: removal of type definitions.

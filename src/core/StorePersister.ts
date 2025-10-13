@@ -1,5 +1,4 @@
 import { toRaw } from "vue"
-import { areIdentical } from "../utils/validation/object"
 import Crypt from "../services/Crypt"
 import { isEmpty } from "../utils/validation"
 import { eppsLogError } from "../utils/log"
@@ -8,51 +7,56 @@ import Store from "./Store"
 
 import type { Store as PiniaStore, StateTree, SubscriptionCallbackMutation } from "pinia"
 import type { AnyObject } from "../types"
-import type { EppsStoreOptions } from "../types/store"
+import type { EppsStoreOptions, PersistedStoreOptions } from "../types/store"
+
+const statePropertiesNotToPersist: string[] = [
+    '@context',
+    'activeLink',
+    'computed',
+    'dep',
+    'excludedKeys',
+    'fn',
+    'isEncrypted',
+    'isLoading',
+    'subs',
+    'version'
+]
 
 
 export default class StorePersister extends Store {
     protected _crypt?: Crypt
 
+    private _excludedKeys: Set<string>
+
     protected _persister?: Persister
 
-    private _statePropertiesNotToPersist: string[] = [
-        '@context',
-        'actionsToExtends',
-        'activeLink',
-        'computed',
-        'dep',
-        'excludedKeys',
-        'fn',
-        'isEncrypted',
-        'isLoading',
-        'persist',
-        'persistedPropertiesToEncrypt',
-        'subs',
-        'version',
-        'watchMutation'
-    ]
+    private _propertiesToEncrypt: Set<string>
+
+    private _watchedStore: Set<string>
 
     constructor(
         store: PiniaStore,
         options: EppsStoreOptions,
         persister: Persister,
-        watchedStore: string[],
+        watchedStore: Set<string>,
         crypt?: Crypt,
         debug: boolean = false
     ) {
         super(store, options, debug)
 
+        this._excludedKeys = this.initExcludedKeys()
         this._persister = persister
-        this._watchedStore = watchedStore ?? []
+        this._propertiesToEncrypt = new Set<string>(this.getPropertiesToEncrypt())
+        this._watchedStore = watchedStore
 
         if (crypt) {
             this._crypt = crypt
 
             if (this.options?.persist) {
-                this.options.persist.isEncrypted = false
+                (this.options.persist as PersistedStoreOptions).isEncrypted = false
             }
         }
+
         if (this.hasPersistProperty()) {
             this.augmentStore()
             this.remember()
@@ -71,17 +75,13 @@ export default class StorePersister extends Store {
     augmentStore() {
         // Augment state
         if (this.options?.persist) {
-            const { isEncrypted, persist, persistedPropertiesToEncrypt, watchMutation } = this.options.persist
-            if (isEncrypted === undefined) { this.options.persist.isEncrypted = false }
-            if (persist === undefined) { this.options.persist.persist = !!this.options.persist.watchMutation }
-            if (persistedPropertiesToEncrypt === undefined) { this.options.persist.persistedPropertiesToEncrypt = [] }
-            if (watchMutation === undefined) { this.options.persist.watchMutation = false }
-        } else {
-            if (!this.stateHas('persist')) { this.addToState('persist', false) }
-            if (!this.stateHas('persistedPropertiesToEncrypt')) { this.addToState('persistedPropertiesToEncrypt', []) }
-            if (!this.stateHas('watchMutation')) { this.addToState('watchMutation', false) }
-            if (!this.stateHas('isEncrypted')) { this.addToState('isEncrypted', false) }
+            const { persist } = this.options
+            const { isEncrypted, persistedPropertiesToEncrypt, watchMutation } = typeof persist === 'object' ? persist : {}
+            if (isEncrypted === undefined) { (this.options.persist as PersistedStoreOptions).isEncrypted = false }
+            if (persistedPropertiesToEncrypt === undefined) { (this.options.persist as PersistedStoreOptions).persistedPropertiesToEncrypt = [] }
+            if (watchMutation === undefined) { (this.options.persist as PersistedStoreOptions).watchMutation = false }
         }
+
         if (!this.stateHas('isLoading')) { this.addToState('isLoading', false) }
 
 
@@ -92,7 +92,7 @@ export default class StorePersister extends Store {
         this.store.watch = () => {
             if (this.toBeWatched()) {
                 if (this.options?.persist) {
-                    this.options.persist.watchMutation = true
+                    (this.options.persist as PersistedStoreOptions).watchMutation = true
                 } else {
                     this.addToState('watchMutation', true)
                 }
@@ -103,6 +103,14 @@ export default class StorePersister extends Store {
         this.store.stopWatch = () => this.stopWatch()
     }
 
+    private async cryptProperty(crypt: Crypt, value: string, decrypt: boolean = false): Promise<string> {
+        if (decrypt) {
+            return await crypt.decrypt(value)
+        } else {
+            return await crypt.encrypt(value)
+        }
+    }
+
     async cryptState(state: StateTree, decrypt: boolean = false): Promise<StateTree> {
         return await new Promise(async (resolve) => {
             const Crypt = this._crypt as Crypt
@@ -111,38 +119,20 @@ export default class StorePersister extends Store {
 
             this.debugLog(`cryptState - ${this.getStoreName()} ${decrypt ? 'decrypt' : 'crypt'}`, [
                 'can',
-                Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0
+                this._propertiesToEncrypt.size > 0
                 && isEncrypted === decrypt && !!Crypt,
-                [
-                    Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0,
-                    Crypt
-                ],
+                Crypt,
                 state
             ])
 
-            if (
-                Array.isArray(persistedPropertiesToEncrypt) && persistedPropertiesToEncrypt.length > 0
-                && Crypt
-            ) {
+            if (this._propertiesToEncrypt.size > 0 && Crypt) {
                 const encryptedState = {} as StateTree
 
                 for (const property of persistedPropertiesToEncrypt) {
                     const value = this.getValue(state[property])
 
                     if (value) {
-                        if (decrypt) {
-
-                            // TODO - remove soon 
-                            // Need for Crypt changing : remove crypto-js dependence
-                            if ((value as string).indexOf(':') < 1) {
-                                this.store.removePersistedState()
-                                return resolve({})
-                            }
-
-                            encryptedState[property] = await Crypt.decrypt(value)
-                        } else {
-                            encryptedState[property] = await Crypt.encrypt(value)
-                        }
+                        encryptedState[property] = await this.cryptProperty(Crypt, value, decrypt)
                     }
                 }
 
@@ -155,9 +145,7 @@ export default class StorePersister extends Store {
                     state = { ...state, ...encryptedState }
 
                     if (this.options?.persist) {
-                        this.options.persist.isEncrypted = !decrypt
-                    } else {
-                        state.isEncrypted = !decrypt
+                        (this.options.persist as PersistedStoreOptions).isEncrypted = !decrypt
                     }
                 }
             }
@@ -167,13 +155,12 @@ export default class StorePersister extends Store {
     }
 
     private isEncrypted(state?: AnyObject) {
-        return (this.options?.persist && this.options.persist.isEncrypted)
+        return (this.options?.persist && (this.options.persist as PersistedStoreOptions).isEncrypted)
             ?? this.getValue(state ? state.isEncrypted : this.state.isEncrypted)
     }
 
-    private getPropertiesToEncrypt() {
-        return (this.options?.persist && this.options.persist?.persistedPropertiesToEncrypt)
-            ?? this.state.hasOwnProperty('persistedPropertiesToEncrypt')
+    private getPropertiesToEncrypt(): string[] {
+        return ((this.options?.persist && (this.options.persist as PersistedStoreOptions)?.persistedPropertiesToEncrypt) ?? []) as string[]
     }
 
     async getPersistedState(decrypt: boolean = true): Promise<StateTree | undefined> {
@@ -195,92 +182,64 @@ export default class StorePersister extends Store {
         }
     }
 
-    getStatePropertyToNotPersist(): string[] {
-        return [
-            ...this._statePropertiesNotToPersist,
-            ...(
-                (this.options?.persist && this.options.persist.excludedKeys)
-                ?? this.getStatePropertyValue('excludedKeys')
-                ?? []
-            )
-        ]
-    }
+    private async getStateToPersist() {
+        const excludedKeys = this._excludedKeys
+        const state = this.state
+        const hasPropertiesToEncrypt = this._propertiesToEncrypt.size > 0
+        const crypt = this._crypt as Crypt
 
-    private getWatchMutation() {
-        return (this.options?.persist && this.options.persist.watchMutation) ?? this.getStatePropertyValue('watchMutation')
-    }
-
-    hasPersistProperty(): boolean { return !!(this.options && this.options.persist) || this.state.hasOwnProperty('persist') }
-
-    async persist() {
-        let persistedState = await this.getPersistedState()
-        let state = this.state
-
-        if (this.toBeCrypted()) {
-            await this._crypt?.init()
-            state = await this.cryptState(state)
+        if (hasPropertiesToEncrypt) {
+            await crypt.init()
         }
 
-        const newState = this.populateState(state, persistedState)
+        const newState = {} as StateTree
 
-        this.debugLog(
-            `persistStore persist ${this.getStoreName()}`,
-            [
-                'toBeCrypted',
-                this.toBeCrypted(),
-                'areIdentical',
-                areIdentical(newState, persistedState ?? {}, this.getStatePropertyToNotPersist()),
-                'newState',
-                newState,
-                'persistedState',
-                persistedState,
-                'state',
-                state,
-                'store',
-                this.store,
-                'Crypt',
-                this._crypt
-            ]
-        )
+        for (const key of Object.keys(state)) {
+            if (!this.hasDeniedFirstChar(key[0]) && !excludedKeys.has(key)) {
 
-        if (isEmpty(newState) || (this.stateIsEmpty && this.stateIsEmpty(newState))) { return }
+                const stateValue = state[key]
 
-        if (!persistedState || !areIdentical(newState, persistedState, this.getStatePropertyToNotPersist())) {
-            (this._persister as Persister).setItem(this.getStoreName(), newState)
-        }
-    }
-
-    populateState(state: StateTree, persistedState?: StateTree) {
-        const excludedKeys = this.getStatePropertyToNotPersist()
-
-        const deniedFirstChar = ['_', '$']
-
-        return Object.keys(state).reduce((acc: StateTree, curr: string) => {
-
-            if (!deniedFirstChar.includes(curr[0]) && !excludedKeys.includes(curr)) {
-                const stateValue = this.getValue(state[curr])
-                const persistedStateValue = persistedState && this.getValue(persistedState[curr])
-
-                if (isEmpty(stateValue) && persistedStateValue) {
-                    acc[curr] = persistedStateValue
-                } else {
-                    if (Array.isArray(stateValue)) {
-                        acc[curr] = stateValue.map(
-                            (item: any) => typeof item === "object" ? this.populateState(item) : toRaw(item)
-                        )
-                    } else if (typeof stateValue === 'object') {
-                        acc[curr] = this.populateState(stateValue, persistedStateValue)
+                if (!isEmpty(stateValue)) {
+                    if (hasPropertiesToEncrypt && this._propertiesToEncrypt.has(key)) {
+                        newState[key] = await this.cryptProperty(crypt, stateValue, false)
                     } else {
-                        acc[curr] = toRaw(stateValue ?? persistedStateValue)
+                        newState[key] = toRaw(stateValue)
                     }
                 }
             }
-            return acc
-        }, {} as StateTree)
+
+        }
+
+        return newState
+    }
+
+    private getWatchMutation() {
+        return this.options?.persist && (this.options.persist as PersistedStoreOptions).watchMutation
+    }
+
+    hasPersistProperty(): boolean { return !!(this.options && this.options.persist) }
+
+    private initExcludedKeys(): Set<string> {
+        return new Set<string>([
+            ...statePropertiesNotToPersist,
+            ...(
+                (this.options?.persist && (this.options.persist as PersistedStoreOptions).excludedKeys)
+                ?? this.getStatePropertyValue('excludedKeys')
+                ?? []
+            )
+        ])
+    }
+
+    async persist() {
+        const state = await this.getStateToPersist()
+
+        if (!isEmpty(state)) {
+            (this._persister as Persister).setItem(this.getStoreName(), state)
+        }
     }
 
     propertyShouldBePersisted(property: string): boolean {
-        return !this.getStatePropertyToNotPersist().includes(property)
+        return !this._excludedKeys.has(property)
     }
 
     private async remember() {
@@ -299,7 +258,7 @@ export default class StorePersister extends Store {
     }
 
     shouldBePersisted(): boolean {
-        return this.hasPersistProperty() && (this.options?.persist?.persist ?? this.getStatePropertyValue('persist'))
+        return this.hasPersistProperty()
     }
 
     private stateIsEmpty(state: AnyObject): boolean {
@@ -307,10 +266,8 @@ export default class StorePersister extends Store {
     }
 
     private stopWatch() {
-        if (this.options?.persist && this.options.persist?.watchMutation) {
-            this.options.persist.watchMutation = false
-        } else if (this.getStatePropertyValue('watchMutation')) {
-            this.addToState('watchMutation', false)
+        if (this.options?.persist && (this.options.persist as PersistedStoreOptions)?.watchMutation) {
+            (this.options.persist as PersistedStoreOptions).watchMutation = false
         }
     }
 
@@ -321,7 +278,7 @@ export default class StorePersister extends Store {
             return
         }
 
-        (this._watchedStore as string[]).push(this.getStoreName())
+        this._watchedStore.add(this.getStoreName())
 
         this.store.$subscribe((mutation: SubscriptionCallbackMutation<StateTree>) => {
             this.debugLog(`store.$subscribe ${this.getStoreName()}`, [
@@ -345,6 +302,6 @@ export default class StorePersister extends Store {
 
     toBeWatched(): boolean {
         return this.shouldBePersisted()
-            && !(this._watchedStore as string[]).includes(this.getStoreName())
+            && !this._watchedStore.has(this.getStoreName())
     }
 }

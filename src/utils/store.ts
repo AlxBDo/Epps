@@ -1,7 +1,7 @@
 import { defineStore, DefineStoreOptions, StateTree } from "pinia"
 import type { Item } from "../models/item"
-import type { AnyObject, EppsStore } from "../types"
-import type { DefineEppsStore, EppsStoreOptions, PersistedState } from "../types/store"
+import type { AnyObject } from "../types"
+import type { DefineEppsStore, EppsStoreOptions } from "../types/store"
 import { Epps } from "../plugins/epps"
 
 
@@ -9,19 +9,6 @@ export const itemState: Item = {
     '@id': undefined,
     id: undefined
 }
-
-export const persistedState = (
-    persist: boolean = true,
-    persistedPropertiesToEncrypt?: string[],
-    excludedKeys?: string[],
-    isEncrypted = false
-
-): PersistedState => ({
-    excludedKeys,
-    isEncrypted,
-    persist,
-    persistedPropertiesToEncrypt
-})
 
 export interface DefineEppsStoreOtions extends EppsStoreOptions {
     eppsOptions?: Epps

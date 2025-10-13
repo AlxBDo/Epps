@@ -6,7 +6,7 @@ import { isEmpty } from "../utils/validation";
 export default class ActionsStoreFlow {
     private _childStore?: AnyObject
     private _store: AnyObject
-    private _flowsOnAction: Record<string, boolean> = {}
+    private _flowsOnAction: Map<string, boolean> = new Map<string, boolean>()
     private _flows?: ActionFlows
 
     constructor(store: AnyObject, flows?: ActionFlows, childStore?: AnyObject) {
@@ -18,8 +18,8 @@ export default class ActionsStoreFlow {
 
     private addFlowOnAction(name: string, args: any[] | object): void {
         const actionName = this.getOnActionFlowName(name, args)
-        this._flowsOnAction[actionName] = true
-        setTimeout(() => { this._flowsOnAction[actionName] = false }, 250)
+        this._flowsOnAction.set(actionName, true)
+        setTimeout(() => { this._flowsOnAction.set(actionName, false) }, 250)
     }
 
     private getOnActionFlowName(name: string, args: any[] | object): string {
@@ -52,7 +52,7 @@ export default class ActionsStoreFlow {
         if (!this._flows) return
 
         (this._store as Store).$onAction(({ after, args, name }) => {
-            if (!(this._flows as AnyObject)[name] || this._flowsOnAction[this.getOnActionFlowName(name, args)]) { return }
+            if (!(this._flows as AnyObject)[name] || this._flowsOnAction.get(this.getOnActionFlowName(name, args))) { return }
 
             const { after: afterAction, before } = (this._flows as AnyObject)[name]
 

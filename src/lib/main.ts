@@ -2,7 +2,7 @@ import ParentStore from "../plugins/parentStore"
 
 export { createPlugin } from "../plugins/createPlugin"
 export { createPluginMock } from "../testing/mocks/epps"
-export { defineEppsStore, persistedState } from "../utils/store"
+export { defineEppsStore } from "../utils/store"
 export { defineStoreId } from "../utils/defineStoreId"
 export { Epps } from "../plugins/epps"
 export { EppsPlugin } from "../plugins/eppsPlugin"

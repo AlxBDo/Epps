@@ -12,7 +12,6 @@ export type {
     CollectionState,
     CollectionStoreMethods,
     DefineExtendedStore,
-    PersistedState,
     PersistedStore
 } from "./store";
 

@@ -96,7 +96,6 @@ The `useListsStore` store demonstrates how to create a collection-based store us
 ```typeScript
 import { ref } from "vue";
 import { defineEppsStore, getExtendedStore, useCollectionStore } from 'epps';
-import type { CollectionState, CollectionStoreMethods } from "epps";
 import type { List, ListsState, ListsStoreMethods } from "../types/list";
 
 export const useListsStore = (id?: string) => defineEppsStore<ListsStoreMethods, ListsState>(
@@ -123,7 +122,7 @@ export const useListsStore = (id?: string) => defineEppsStore<ListsStoreMethods,
 
 const epps = new Epps({
     parentsStores: [ new ParentStore('listsCollection', useCollectionStore) ], 
-    persist: { persist: true } // Store persisted manually. Use “watchMutation” to persist each time the State is modified.
+    persist: true // Store persisted manually. Use “watchMutation” to persist each time the State is modified.
 })
 
 export const useListsStore = (id?: string) => defineEppsStore<CollectionStoreMethods, CollectionState<List>>(

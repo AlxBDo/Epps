@@ -22,7 +22,6 @@ export type {
     DefineEppsStore,
     EppsStore,
     ExtendedStore,
-    PersistedState,
     PersistedStore
 } from "./store";
 

@@ -14,7 +14,7 @@ const logStyleOptions = {
  * @param {array} excludedKeys - name of properties not to be compared
  * @returns {boolean} areIdentical
  */
-export const areIdentical = (object1: AnyObject, object2: AnyObject, excludedKeys?: string[]) => {
+export const areIdentical = (object1: AnyObject, object2: AnyObject, excludedKeys?: Set<string>) => {
     const object1Keys = Object.keys(object1)
     const object2Keys = object2 && Object.keys(object2)
 
@@ -22,14 +22,16 @@ export const areIdentical = (object1: AnyObject, object2: AnyObject, excludedKey
         !object2 || !object2Keys || (!excludedKeys && object1Keys.length !== object2Keys.length)
         || (
             excludedKeys &&
-            object1Keys.filter((property: string) => !excludedKeys.includes(property)).length !== object2Keys.filter((property: string) => !excludedKeys.includes(property)).length
+            object1Keys.filter(
+                (property: string) => !excludedKeys.has(property)
+            ).length !== object2Keys.filter((property: string) => !excludedKeys.has(property)).length
         )
     ) {
         return false
     }
 
     return Object.keys(object1).reduce((acc, key) => {
-        if (acc && (!excludedKeys || !excludedKeys.includes(key))) {
+        if (acc && (!excludedKeys || !excludedKeys.has(key))) {
 
             if (!object1[key] || !object2[key]) {
                 acc = object1[key] === object2[key]

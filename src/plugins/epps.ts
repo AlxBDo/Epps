@@ -15,7 +15,7 @@ export class Epps {
     private _actionsToRename?: Record<string, string>
     private _childId?: string
     private _mutationCallback?: MutationCallback
-    private _persist?: PersistedStoreOptions
+    private _persist?: PersistedStoreOptions | boolean
     private _parentsStores?: ParentStoreInterface[]
     private _parentsStoresBuilded?: EppsStore<AnyObject, AnyObject>[]
     private _propertiesToRename?: Record<string, string>
@@ -55,7 +55,7 @@ export class Epps {
         this._childId = value
     }
 
-    get persist(): PersistedStoreOptions | undefined {
+    get persist(): PersistedStoreOptions | boolean | undefined {
         return this._persist
     }
 
@@ -74,7 +74,7 @@ export class Epps {
     }
 
     hasCustomDb(): boolean {
-        return !!this._persist?.dbName
+        return !!(typeof this._persist === 'object' && this._persist?.dbName)
     }
 
     parentsStores(childId?: string): EppsStore<AnyObject, AnyObject>[] {

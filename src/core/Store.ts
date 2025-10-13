@@ -8,11 +8,14 @@ import type { AnyObject, EppsStore } from "../types"
 import type { EppsStoreOptions, StatePropertyValue } from "../types/store"
 
 
+const deniedFirstChar = new Set<string>(['_', '$'])
+
+
 export default class Store {
     private _debug: boolean = false
+    private _deniedFirstChar = deniedFirstChar
     private _options?: DefineEppsStoreOtions | Epps
     private _store: PiniaStore
-    protected _watchedStore?: string[]
 
     get debug(): boolean { return this._debug }
     set debug(debug: boolean) { this._debug = debug }
@@ -83,6 +86,10 @@ export default class Store {
 
     debugLog(message: string, args: any): void {
         if (this._debug) { eppsLog(message, args) }
+    }
+
+    hasDeniedFirstChar(property: string): boolean {
+        return this._deniedFirstChar.has(property[0])
     }
 
     getOption(optionName: keyof EppsStoreOptions | keyof EppsStoreOptions['persist']) {

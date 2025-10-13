@@ -8,19 +8,24 @@ import type { Store as PiniaStore } from "pinia";
 import ActionsStoreFlow from "./ActionsStoreFlow";
 
 
+const extendedActionsDefault = ['removePersistedState', 'watch', '$reset']
+
+const isProd = import.meta.env.PROD
+
 export default class StoreExtension extends Store {
-    private _extendedActions: string[] = ['removePersistedState', 'watch', '$reset']
+    private _extendedActions: Set<string>
 
 
     constructor(store: PiniaStore, options: EppsStoreOptions, debug: boolean = false) {
         super(store, options, debug)
 
+        this._extendedActions = this.initExtendedActions()
         this.extendsStore()
     }
 
 
-    get extendedActions(): string[] {
-        return [...this._extendedActions, ...(this.options?.actionsToExtends ?? this.getStatePropertyValue('actionsToExtends') ?? [])]
+    get extendedActions(): Set<string> {
+        return this._extendedActions
     }
 
     get actionsToRename(): Record<string, string> | undefined {
@@ -32,11 +37,10 @@ export default class StoreExtension extends Store {
     }
 
     private addToCustomProperties(propertyName: string): void {
-        if (!import.meta.env.PROD) {
+        if (!isProd) {
             this.store._customProperties.add(propertyName)
         }
     }
-
 
     private createComputed(store: AnyObject, key: string) {
         const isObject = typeof store[key] === 'object'
@@ -58,24 +62,24 @@ export default class StoreExtension extends Store {
      * @param {AnyObject} storeToExtend 
      */
     private duplicateStore(storeToExtend: AnyObject): void {
-        const deniedFirstChars = ['$', '_']
-
         Object.keys(storeToExtend).forEach((key: string) => {
-            if (deniedFirstChars.includes(key[0]) && key !== '$reset') { return }
+            if (this.hasDeniedFirstChar(key[0]) && key !== '$reset') { return }
 
             const typeOfProperty = typeof storeToExtend[key]
 
-            if (typeOfProperty === 'function') {
-                if (this.storeHas(key)) {
-                    if (this.extendedActions.includes(key)) { this.extendsAction(storeToExtend, key) }
-                } else {
+            if (this.storeHas(key)) {
+                if (this.extendedActions.has(key) && typeOfProperty === 'function') {
+                    this.extendsAction(storeToExtend, key)
+                }
+            } else {
+                if (typeOfProperty === 'function') {
                     const childStoreActionName = this.getActionNameForChildStore(key)
                     this.store[childStoreActionName] = storeToExtend[key]
                     this.addToCustomProperties(childStoreActionName)
+                } else if (typeOfProperty === 'object' && !Array.isArray(storeToExtend[key])) {
+                    this.store[key] = this.createComputed(storeToExtend, key)
+                    this.addToCustomProperties(key)
                 }
-            } else if (!this.storeHas(key) && (typeOfProperty === 'undefined' || typeOfProperty === 'object')) {
-                this.store[key] = this.createComputed(storeToExtend, key)
-                this.addToCustomProperties(key)
             }
         })
     }
@@ -103,7 +107,7 @@ export default class StoreExtension extends Store {
 
     private extendsState(storeToExtend: AnyObject) {
         Object.keys(storeToExtend.$state).forEach((key: string) => {
-            if (!this.stateHas(key)) {
+            if (!this.stateHas(key) && !this.hasDeniedFirstChar(key[0])) {
                 const childStoreKey = this.getPropertyNameForChildState(key)
                 this.store[childStoreKey] = this.state[childStoreKey] = toRef(storeToExtend.$state, key)
                 this.addToCustomProperties(childStoreKey)
@@ -139,5 +143,9 @@ export default class StoreExtension extends Store {
 
     private getPropertyNameForChildState(property: string): string {
         return (this.propertiesToRename && this.propertiesToRename[property]) ?? property
+    }
+
+    private initExtendedActions(): Set<string> {
+        return new Set<string>([...extendedActionsDefault, ...(this.options?.actionsToExtends ?? [])])
     }
 }

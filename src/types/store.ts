@@ -65,7 +65,6 @@ export interface PersistedStoreOptions {
     dbName?: string
     excludedKeys?: string[] | Ref<string[]>
     isEncrypted?: boolean | Ref<boolean>
-    persist?: boolean | Ref<boolean>
     persistedPropertiesToEncrypt?: string[] | Ref<string[]>
     watchMutation?: boolean | Ref<boolean>
 }
@@ -114,11 +113,10 @@ export type DefineEppsStoreOptionApi<TStore, TState> = (args?: any) => PartialPe
     & CustomStore
 
 export type EppsStore<TStore, TState> = ExtendedStore<TStore, TState>
-    & PersistedState
     & PersistedStore
-    & StoreDefinition<string, AnyObject & TState & PersistedState, AnyObject, TStore & PersistedStore>
+    & StoreDefinition<string, AnyObject & TState, AnyObject, TStore & PersistedStore>
 
 export interface EppsStoreOptions extends ExtendedStoreOptions {
     actionFlows?: ActionFlows
-    persist?: PersistedStoreOptions
+    persist?: PersistedStoreOptions | boolean
 }
